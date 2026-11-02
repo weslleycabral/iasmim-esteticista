@@ -1,4 +1,5 @@
 // Gera /llms.txt e /llms-full.txt a partir dos .md (https://llmstxt.org)
+import { trocarFotos } from './fotos-md';
 import { getCollection, getEntry } from 'astro:content';
 import { negocio, abs, servicoPath, todosServicos, ehPeeling, waLink, precoTexto, VALOR_SOB_CONSULTA, type Servico } from './site';
 import { depoimentos, doServico, gerais, mesBR, type Depoimento } from './depoimentos';
@@ -115,8 +116,10 @@ export async function llmsFullTxt() {
     return `## ${p.data.h1}\n\nURL: ${abs(caminhos[id])}\n\n${p.data.resumo ? p.data.resumo + '\n\n' : ''}${rebaixar(p.body ?? '').trim()}\n${faqMd(p.data.faq)}`;
   };
 
+  // fotos em HTML nos .md: /fotos/… → arquivo otimizado em /_astro/ (ver fotos-md.ts)
+  const corpos = new Map(await Promise.all(servicos.map(async (s) => [s.id, await trocarFotos(s.body ?? '')] as const)));
   const blocoServico = (s: (typeof servicos)[number]) =>
-    `## ${s.data.h1}\n\nURL: ${abs(servicoPath(s.id))}\n\n${s.data.resumo}\n\n- Indicado para: ${s.data.indicacoes.join('; ') || '—'}\n- Outros nomes: ${s.data.outrosNomes.join(', ') || '—'}\n- Onde fazer: ${negocio.nome}, ${negocio.endereco.linha}\n- Agendamento: WhatsApp ${negocio.telefone}\n- Valor: ${precoTexto(s) ?? VALOR_SOB_CONSULTA}\n- Avaliação: ${negocio.avaliacao.valor}, descontada do procedimento\n\n${htmlParaMd(rebaixar(s.body ?? '')).trim()}\n${faqMd(s.data.faq)}`;
+    `## ${s.data.h1}\n\nURL: ${abs(servicoPath(s.id))}\n\n${s.data.resumo}\n\n- Indicado para: ${s.data.indicacoes.join('; ') || '—'}\n- Outros nomes: ${s.data.outrosNomes.join(', ') || '—'}\n- Onde fazer: ${negocio.nome}, ${negocio.endereco.linha}\n- Agendamento: WhatsApp ${negocio.telefone}\n- Valor: ${precoTexto(s) ?? VALOR_SOB_CONSULTA}\n- Avaliação: ${negocio.avaliacao.valor}, descontada do procedimento\n\n${htmlParaMd(rebaixar(corpos.get(s.id) ?? '')).trim()}\n${faqMd(s.data.faq)}`;
 
   return `# ${negocio.nome} — conteúdo completo
 

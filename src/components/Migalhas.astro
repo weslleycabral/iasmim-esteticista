@@ -1,40 +1,20 @@
 ---
+// Migalhas visíveis na linha editorial do canvas: "Início · Sobre · Matéria de capa, p. 04".
+// Use os MESMOS itens que você passa em <Base migalhas={…}> (que gera o BreadcrumbList do JSON-LD).
+// O último item é a página atual (aria-current). "extra" é o fólio opcional, em cinza, no fim.
+// Ex.: <Migalhas itens={migalhas} extra="Matéria de capa, p. 04" />
 import type { Migalha } from '../lib/schema';
-interface Props { itens: Migalha[] }
-const { itens } = Astro.props;
+interface Props { itens: Migalha[]; extra?: string; class?: string }
+const { itens, extra, class: classe } = Astro.props;
 ---
-<nav class="migalhas" aria-label="Você está em">
-  <ol>
+<nav aria-label="Você está em">
+  <ol class:list={['crumb lab', classe]}>
     {itens.map((m, i) => (
       <li>
+        {i > 0 && <span class="sep" aria-hidden="true">·</span>}
         {i < itens.length - 1 ? <a href={m.path}>{m.nome}</a> : <span aria-current="page">{m.nome}</span>}
       </li>
     ))}
+    {extra && <li class="extra"><span class="sep" aria-hidden="true">·</span><span>{extra}</span></li>}
   </ol>
 </nav>
-<style>
-  .migalhas {
-    font-size: 0.9rem;
-    color: var(--muted);
-    padding-top: 1.25rem;
-  }
-  ol {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.2rem;
-  }
-  li {
-    margin: 0;
-  }
-  li + li::before {
-    content: '›';
-    margin: 0 0.4rem 0 0.2rem;
-    color: var(--muted);
-  }
-  a {
-    color: var(--muted);
-  }
-</style>

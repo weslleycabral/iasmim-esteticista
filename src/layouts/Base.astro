@@ -1,16 +1,16 @@
 ---
 import '../styles/global.css';
+import { Font } from 'astro:assets';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import BarraWhatsApp from '../components/BarraWhatsApp.astro';
-import Migalhas from '../components/Migalhas.astro';
+import Fab from '../components/Fab.astro';
 import { negocio, abs, todosServicos } from '../lib/site';
 import { website, negocioLd, pessoa, breadcrumbLd, webpageLd, type Migalha } from '../lib/schema';
 
 interface Props {
   title: string;
   description: string;
-  migalhas?: Migalha[]; // sem migalhas = página inicial
+  migalhas?: Migalha[]; // sem migalhas = página inicial. Só o JSON-LD: a migalha visível é <Migalhas> na página
   ld?: (Record<string, unknown> | null)[]; // nós JSON-LD específicos da página
   mensagemWa?: string;
   rotuloWa?: string;
@@ -20,6 +20,7 @@ interface Props {
   ogImagem?: string;
   ogTipo?: string;
   noindex?: boolean;
+  moldura?: boolean; // false = sem masthead, rodapé e botão flutuante (página /bio/)
 }
 
 const {
@@ -35,6 +36,7 @@ const {
   ogImagem = '/og-iasmim-esteticista.png',
   ogTipo = 'website',
   noindex = false,
+  moldura = true,
 } = Astro.props;
 
 const canonical = abs(Astro.url.pathname);
@@ -61,7 +63,11 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': graf
     <meta name="description" content={description} />
     {!noindex && <link rel="canonical" href={canonical} />}
     <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1'} />
-    <meta name="theme-color" content="#fbf8f4" />
+    <meta name="theme-color" content="#efe9df" />
+    <!-- estado oculto dos reveals só com JS; se o script do site não rodar em 4 s, mostra tudo -->
+    <script is:inline>document.documentElement.classList.add('js');setTimeout(function(){if(!window.iasmimPronto)document.documentElement.classList.remove('js')},4000)</script>
+    <Font cssVariable="--font-gloock" preload />
+    <Font cssVariable="--font-archivo" preload />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link rel="alternate" type="text/plain" href="/llms.txt" title="Resumo do site para assistentes de IA" />
@@ -88,14 +94,16 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': graf
 
     <script type="application/ld+json" set:html={jsonLd} />
   </head>
-  <body>
+  <body id="topo">
     <a class="skip" href="#conteudo">Pular para o conteúdo</a>
-    <Header />
+    {moldura && <Header mensagemWa={mensagemWa} />}
     <main id="conteudo">
-      {migalhas.length > 0 && <div class="wrap"><Migalhas itens={migalhas} /></div>}
       <slot />
     </main>
-    <Footer />
-    <BarraWhatsApp mensagem={mensagemWa} rotulo={rotuloWa} />
+    {moldura && <Footer mensagemWa={mensagemWa} />}
+    {moldura && <Fab mensagem={mensagemWa} rotulo={rotuloWa} />}
+    <script>
+      import '../scripts/site.ts';
+    </script>
   </body>
 </html>

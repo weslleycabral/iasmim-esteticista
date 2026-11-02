@@ -1,24 +1,26 @@
 ---
-interface Props { itens: { pergunta: string; resposta: string }[]; titulo: string; id?: string }
-const { itens, titulo, id = 'perguntas' } = Astro.props;
+// Perguntas e respostas em <details> no estilo do canvas (.faq). As mesmas perguntas precisam ir
+// para o JSON-LD da página: <Base ld={[faqLd(abs(caminho), itens)]}> (o check-dist confere que
+// toda página com .faq visível tem FAQPage).
+// titulo/id: opcionais, para quem quer um <h2> logo acima (as páginas novas costumam pôr o título fora).
+interface Props {
+  itens: { pergunta: string; resposta: string }[];
+  titulo?: string;
+  id?: string;
+  class?: string;
+}
+const { itens, titulo, id = 'perguntas', class: classe } = Astro.props;
 ---
 {itens.length > 0 && (
-  <section class="faq" aria-labelledby={id}>
-    <h2 id={id}>{titulo}</h2>
-    {itens.map((f) => (
-      <div class="faq-item">
-        <h3>{f.pergunta}</h3>
-        <p>{f.resposta}</p>
-      </div>
-    ))}
-  </section>
+  <>
+    {titulo && <h2 class="disp h3" id={id} style="margin-bottom: 24px">{titulo}</h2>}
+    <div class:list={['faq', classe]}>
+      {itens.map((f) => (
+        <details>
+          <summary class="disp">{f.pergunta}</summary>
+          <p class="body">{f.resposta}</p>
+        </details>
+      ))}
+    </div>
+  </>
 )}
-<style>
-  .faq-item {
-    border-top: 1px solid var(--line);
-    padding-top: 0.2rem;
-  }
-  .faq-item h3 {
-    margin-top: 1.2rem;
-  }
-</style>

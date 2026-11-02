@@ -1,15 +1,20 @@
 // Confere o site gerado em dist/: SEO básico, JSON-LD, links internos, NAP, llms.txt e sitemap.
-// Uso: npm run build && node scripts/check-dist.mjs
+// Uso: npm run build && node scripts/check-dist.mjs [pasta]   (pasta padrão: dist/)
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, relative, resolve } from 'node:path';
 
-const DIST = new URL('../dist/', import.meta.url).pathname;
+const DIST = process.argv[2] ? resolve(process.argv[2]) + '/' : new URL('../dist/', import.meta.url).pathname;
 const SITE = 'https://iasmimesteticista.com.br';
+const negocio = JSON.parse(readFileSync(new URL('../src/data/negocio.json', import.meta.url), 'utf8'));
+const e = negocio.endereco;
+// NAP idêntico ao do Google: sai do negocio.json, nos mesmos formatos que o site usa
 const NAP = {
-  nome: 'Iasmim Esteticista',
-  endereco: 'R. José Pereira Cansanção, 19 - Salesianos, Juazeiro do Norte - CE, 63050-012, Brasil',
-  telefone: '(88) 99989-0590',
+  nome: negocio.nome,
+  endereco: e.linha, // formato do Google (llms.txt, JSON-LD)
+  telefone: negocio.telefone,
 };
+// rodapé: formato editorial da linha 3C (mesmo texto de enderecoTexto em src/lib/site.ts)
+const NAP_RODAPE = { ...NAP, endereco: `${e.rua} — ${e.bairro}, ${e.cidade} (${e.uf}), ${e.cep}` };
 
 const erros = [];
 const avisos = [];
@@ -118,7 +123,7 @@ for (const arq of paginas) {
   // NAP idêntico no rodapé
   const rodape = html.match(/<footer[\s\S]*?<\/footer>/)?.[0] ?? '';
   const tRodape = texto(rodape);
-  for (const [k, v] of Object.entries(NAP)) if (!tRodape.includes(v)) erro(rel, `rodapé sem NAP (${k}): "${v}"`);
+  for (const [k, v] of Object.entries(NAP_RODAPE)) if (!tRodape.includes(v)) erro(rel, `rodapé sem NAP (${k}): "${v}"`);
 
   // CTA do WhatsApp
   if (!/href="https:\/\/wa\.me\/5588999890590\?text=/.test(html)) erro(rel, 'sem link de WhatsApp com mensagem');

@@ -5,6 +5,7 @@
     "mes: mês da avaliação (AAAA-MM). nota: estrelas (1 a 5).",
     "servico: nome do arquivo do serviço citado, sem .md (ex. \"limpeza-de-pele\" ou \"peeling/peeling-para-melasma\"), ou null. O depoimento aparece também na página desse serviço.",
     "destaque: true para aparecer na página inicial (use de 6 a 8).",
+    "capa: true para ser uma das 3 citações grandes da home (seção Cartas). trecho (opcional): parte do texto, copiada exatamente, para a citação da home; o site marca o corte com …",
     "link: endereço da avaliação no Google (opcional).",
     "Não use avaliações escritas por quem ainda não foi atendida (ex. o lote de maio de 2023)."
   ],
@@ -25,6 +26,8 @@
       "texto": "Fiz uma limpeza de pele com a Iasmin e adorei. Sentindo minha pele revitalizada... hidratada, lisinha e saudável!! A extração de cravos dela é diferenciada, e isso faz toda a diferença na limpeza de pele! …",
       "servico": "limpeza-de-pele",
       "destaque": true,
+      "capa": true,
+      "trecho": "A extração de cravos dela é diferenciada, e isso faz toda a diferença na limpeza de pele!",
       "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT205VE4ydE9OWFUwVDFndGRHVlJNWEpLVHpJNFJHYxAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOm9TN2tONXU0T1gtdGVRMXJKTzI4RGc%7C%7C?hl=pt-BR"
     },
     {
@@ -61,6 +64,8 @@
       "texto": "Já sou paciente de Iasmim há 2 ano e adoro o trabalho dela. O espaço sempre bem organizado, o atendimento bem feito, ela explica tudo direitinho no pós e dá a assistência necessária. Nota 10!",
       "servico": null,
       "destaque": true,
+      "capa": true,
+      "trecho": "O espaço sempre bem organizado, o atendimento bem feito, ela explica tudo direitinho no pós e dá a assistência necessária.",
       "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChdDSUhNMG9nS0VJQ0FnSUNuNzRtQ3N3RRAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CIHM0ogKEICAgICn74mCswE%7C%7C?hl=pt-BR"
     },
     {
@@ -70,6 +75,7 @@
       "texto": "Excelente profissional, acolhedora e competente. Entende nossa queixa e sabe resolver",
       "servico": null,
       "destaque": true,
+      "capa": true,
       "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChdDSUhNMG9nS0VJQ0FnTUNRMmJDQXRnRRAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CIHM0ogKEICAgMCQ2bCAtgE%7C%7C?hl=pt-BR"
     },
     {

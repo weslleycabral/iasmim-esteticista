@@ -1,7 +1,9 @@
 ---
 import { render } from 'astro:content';
+import { trocarFotos } from '../../lib/fotos-md';
 import Base from '../../layouts/Base.astro';
-import Foto from '../../components/Foto.astro';
+import '../../styles/legado.css'; // visual provisório: tirar ao refazer a página na linha 3C
+import Foto from '../../components/FotoLegado.astro';
 import Faq from '../../components/Faq.astro';
 import Agendar from '../../components/Agendar.astro';
 import CardServico from '../../components/CardServico.astro';
@@ -21,6 +23,8 @@ interface Props { servico: Servico; todos: Servico[] }
 const { servico, todos } = Astro.props;
 const d = servico.data;
 const { Content } = await render(servico);
+// provisório: fotos em HTML no .md apontam para /fotos/ (ver src/lib/fotos-md.ts)
+const htmlComFotos = servico.body?.includes('/fotos/') ? await trocarFotos(servico.rendered?.html ?? '') : null;
 const url = abs(servicoPath(servico.id));
 const porId = new Map(todos.map((s) => [s.id, s]));
 
@@ -99,7 +103,7 @@ const MAX_DEPOIMENTOS = 6;
         )}
 
         <div class="prosa">
-          <Content />
+          {htmlComFotos ? <Fragment set:html={htmlComFotos} /> : <Content />}
         </div>
 
         {depoimentos.length > 0 && (

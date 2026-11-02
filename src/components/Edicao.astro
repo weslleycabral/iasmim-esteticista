@@ -1,0 +1,14 @@
+---
+// Número da edição = total de avaliações no Google (src/data/negocio.json → avaliacoes.total).
+// Odômetro acessível: o número real fica em .odo-n (lido pelo leitor de tela); as faixas 0–9 por
+// algarismo são aria-hidden. O src/scripts/site.ts gira os algarismos quando o número sobe desde a
+// última visita (localStorage "iasmim-edicao"). Sem JS, mostra o número atual parado.
+// Uso: Edição Nº <Edicao />   ·   <Edicao /> clientes avaliaram…
+import { negocio } from '../lib/site';
+const total = negocio.avaliacoes.total;
+const algarismos = String(total).split('').map(Number);
+const celulas = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+---
+<span class="odo" data-odo={total}><span class="odo-n">{total}</span><span class="odo-w" aria-hidden="true">{algarismos.map((d) => (
+  <span class="odo-d"><span class="odo-s" style={`transform:translateY(-${d * 100}%)`}>{celulas.map((c) => <span class="odo-c">{c}</span>)}</span></span>
+))}</span></span>

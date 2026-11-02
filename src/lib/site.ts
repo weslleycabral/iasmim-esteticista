@@ -59,3 +59,26 @@ export const dataISO = (d: Date) => d.toISOString().slice(0, 10);
 
 export const dataBR = (d: Date) =>
   d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+const e = negocio.endereco;
+/** Endereço no formato editorial do site (rodapé, contato):
+ *  "R. José Pereira Cansanção, 19 — Salesianos, Juazeiro do Norte (CE), 63050-012".
+ *  O scripts/check-dist.mjs confere este texto em todo rodapé. */
+export const enderecoTexto = `${e.rua} — ${e.bairro}, ${e.cidade} (${e.uf}), ${e.cep}`;
+
+const hora = (h: string) => h.replace(/^0/, '').replace(/:00$/, 'h').replace(':', 'h');
+const segASab = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+/** "Segunda a sábado, 10h às 17h, somente com horário marcado" (sai de negocio.horario) */
+export const horarioTexto =
+  negocio.horario.dias.length === 6 && segASab.every((d) => negocio.horario.dias.includes(d))
+    ? `Segunda a sábado, ${hora(negocio.horario.abre)} às ${hora(negocio.horario.fecha)}, somente com horário marcado`
+    : negocio.horario.texto;
+
+/** "Juazeiro do Norte, Crato e Barbalha" */
+export const cidadesTexto = (() => {
+  const n = negocio.areaAtendida.map((c) => c.nome);
+  return n.length > 1 ? `${n.slice(0, -1).join(', ')} e ${n.at(-1)}` : n.join('');
+})();
+
+/** "tel:+5588999890590" */
+export const telLink = `tel:${negocio.telefoneE164.replace(/\s/g, '')}`;

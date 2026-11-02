@@ -1,0 +1,8 @@
+---
+// Botão flutuante de WhatsApp (só aparece abaixo de 760px). Colocado pelo Base.astro.
+import Icone from './Icone.astro';
+import { waLink } from '../lib/site';
+interface Props { mensagem?: string; rotulo?: string }
+const { mensagem, rotulo = 'Agendar pelo WhatsApp' } = Astro.props;
+---
+<a class="fab lab" href={waLink(mensagem)} aria-label={rotulo}><Icone nome="whatsapp" />WhatsApp</a>

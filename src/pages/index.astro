@@ -1,114 +1,373 @@
 ---
-import { getEntry, render } from 'astro:content';
+// Home — fiel a design/paginas-3c/Main.dc.html ("Edição 229"). Copy do canvas; o que existe nos dados
+// (preços, NAP, horário, avaliações, serviços, FAQ, depoimentos) sai de negocio.json e das coleções.
+import { getEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Foto from '../components/Foto.astro';
 import Faq from '../components/Faq.astro';
-import CardServico from '../components/CardServico.astro';
-import IconWa from '../components/IconWa.astro';
-import Depoimentos from '../components/Depoimentos.astro';
-import { negocio, waLink, mapsLink, servicosPrincipais, peelings, abs } from '../lib/site';
+import Edicao from '../components/Edicao.astro';
+import Botao from '../components/Botao.astro';
+import {
+  negocio, waLink, msgServico, mapsRotaLink, servicosPrincipais, peelings, servicoPath, reais, abs,
+  enderecoTexto, horarioTexto, cidadesTexto, type Servico,
+} from '../lib/site';
 import { faqLd, ID } from '../lib/schema';
-import { destaques } from '../lib/depoimentos';
+import { capa, citacao, mesCurto } from '../lib/depoimentos';
+
+import capa1 from '../assets/fotos/iasmim-estudio-6870.webp';
+import capa2 from '../assets/fotos/iasmim-estudio-6871.webp';
+import capa3 from '../assets/fotos/iasmim-estudio-6876.webp';
+import melasmaAntes from '../assets/fotos/peeling-melasma-antes-1.webp';
+import melasmaDepois from '../assets/fotos/peeling-melasma-depois-1.webp';
+import mapa from '../assets/mapa/mapa-juazeiro-salesianos.webp';
 
 const pagina = await getEntry('paginas', 'inicio');
 if (!pagina) throw new Error('Falta src/content/paginas/inicio.md');
-const { Content } = await render(pagina);
 const d = pagina.data;
+
 const principais = await servicosPrincipais();
-const listaPeelings = await peelings();
+const limpeza = principais.find((s) => s.id === 'limpeza-de-pele');
+if (!limpeza?.data.preco) throw new Error('A home precisa do preço da limpeza de pele (limpeza-de-pele.md)');
+const precoLimpeza = reais(limpeza.data.preco.valor);
+const avaliacao = negocio.avaliacao.valor; // "R$ 100"
+const nota = negocio.avaliacoes.nota; // "5,0"
+
+// menor preço "a partir de" entre os peelings (melasma e manchas marrons)
+const precosPeeling = (await peelings()).filter((s) => s.data.preco?.aPartirDe).map((s) => s.data.preco!.valor);
+const peelingDesde = precosPeeling.length ? reais(Math.min(...precosPeeling)) : null;
+
+// Copy editorial do canvas por serviço (sumário e "Em pauta"). A ordem e a existência vêm da coleção.
+type Editorial = { ttl: string; sub: string; ancora: string; pg: string; texto?: string; mais?: string };
+const editorial: Record<string, Editorial> = {
+  'limpeza-de-pele': { ttl: 'Limpeza de Pele Premium', sub: precoLimpeza, ancora: 'servicos', pg: 'p. 08' },
+  peeling: {
+    ttl: 'Peelings', sub: 'acne, melasma, manchas, cicatrizes', ancora: 'peelings', pg: 'p. 10',
+    texto: `Seis fórmulas, uma para cada queixa: secativo de acne, melasma, manchas marrons, cicatriz de acne, Mar Morto e ATA.${peelingDesde ? ` Melasma e manchas marrons a partir de ${peelingDesde}; os demais, valor na avaliação.` : ' Valor na avaliação.'}`,
+    mais: 'Ver os seis peelings',
+  },
+  microagulhamento: {
+    ttl: 'Microagulhamento', sub: 'Dermapen com drug delivery', ancora: 'microagulhamento', pg: 'p. 12',
+    texto: 'Caneta Dermapen com drug delivery de ácido hialurônico, para cicatrizes de acne, poros dilatados, linhas finas e textura. Cerca de 40 minutos. Valor na avaliação.',
+    mais: 'Ler sobre o microagulhamento',
+  },
+  botox: {
+    ttl: 'Botox', sub: 'rugas de expressão', ancora: 'botox', pg: 'p. 14',
+    texto: 'Toxina botulínica para as rugas de expressão da testa, entre as sobrancelhas e ao redor dos olhos, buscando um resultado natural. Retorno de revisão em 15 dias incluso. Valor na avaliação.',
+    mais: 'Ler sobre o botox',
+  },
+  'preenchimento-labial': {
+    ttl: 'Preenchimento labial', sub: 'volume e contorno', ancora: 'labios', pg: 'p. 15',
+    texto: 'Ácido hialurônico para dar volume, definir o contorno e hidratar os lábios, com o resultado planejado na avaliação. Valor na avaliação.',
+    mais: 'Ler sobre o preenchimento',
+  },
+  'herus-hifu': {
+    ttl: 'Herus HIFU', sub: 'flacidez, sem cortes', ancora: 'hifu', pg: 'p. 16',
+    texto: 'Ultrassom micro e macrofocado que estimula colágeno contra a flacidez dos olhos, do terço inferior do rosto, da papada e do pescoço, sem cortes. Sessão de 1h30 a 2h. Valor por área, na avaliação.',
+    mais: 'Ler sobre o HIFU',
+  },
+  'remocao-de-sinais-e-verrugas-com-jato-de-plasma': {
+    ttl: 'Sinais e verrugas', sub: 'jato de plasma', ancora: 'plasma', pg: 'p. 18',
+    texto: 'Jato de plasma e eletrocautério para sinais, verrugas, melanose solar, milium e as “carninhas”, com anestesia local só no ponto. Valor na avaliação.',
+    mais: 'Ler sobre a remoção',
+  },
+};
+// serviço novo sem copy editorial: entra com o nome e o resumo do .md, apontando para a página dele
+const ed = (s: Servico): Editorial =>
+  editorial[s.id] ?? { ttl: s.data.nome, sub: s.data.categoria.toLowerCase(), ancora: '', pg: '', texto: s.data.resumo, mais: `Ler sobre ${s.data.nome.toLowerCase()}` };
+const sumario = principais.map((s) => ({ s, e: ed(s) }));
+const pauta = sumario.filter(({ s }) => s.id !== 'limpeza-de-pele');
+
+// FAQ da home: perguntas do canvas, com o texto de perguntas-frequentes.md (mesmo texto no JSON-LD)
+const faqPagina = await getEntry('paginas', 'perguntas-frequentes');
+const perguntasHome = [
+  'A avaliação é cobrada? Dá para fazer o procedimento no mesmo dia?',
+  'Com quanto tempo de antecedência preciso agendar?',
+  'Atende homens e adolescentes?',
+  'Qual tratamento é melhor para manchas no rosto?',
+  'Posso fazer tratamentos estéticos grávida?',
+];
+const faq = perguntasHome.map((p) => {
+  const item = faqPagina?.data.faq.find((f) => f.pergunta === p);
+  if (!item) throw new Error(`Home: pergunta "${p}" não está em perguntas-frequentes.md`);
+  return item;
+});
+
+const cartas = capa();
+const cargo = negocio.cargo.charAt(0).toLowerCase() + negocio.cargo.slice(1);
+const posHoras = negocio.formacao[1]?.cargaHoraria;
+const horarioCurto = horarioTexto.replace(/, somente com horário marcado$/, '');
+const msgAnna = 'Olá, Iasmim! Quero saber sobre os produtos Anna Pegova.';
 ---
-<Base title={d.title} description={d.description} ld={[faqLd(abs('/'), d.faq)]} atualizado={d.atualizado} sobre={ID.negocio}>
-  <section class="wrap hero">
-    <div>
-      <p class="eyebrow">Estética facial · Salesianos · Juazeiro do Norte – CE</p>
-      <h1>{d.h1}</h1>
-      {d.resumo && <p class="lead">{d.resumo}</p>}
-      <p class="selo">★ {negocio.avaliacoes.nota} no Google · {negocio.avaliacoes.total} avaliações</p>
-      <p class="hero-acoes">
-        <a class="btn btn-wa" href={waLink()}><IconWa /> Agendar pelo WhatsApp</a>
-        <a class="btn btn-sec" href="/servicos/">Ver serviços</a>
-      </p>
+<Base title={d.title} description={d.description} ld={[faqLd(abs('/'), faq)]} atualizado={d.atualizado} sobre={ID.negocio}>
+  <section class="wrap hero" aria-label="Sumário da edição">
+    <div class="hero-l">
+      <div class="cover">
+        <Foto src={capa1} class="ph ph1" alt="Capa: Iasmim Mayara em retrato de estúdio" prioridade
+          sizes="(min-width: 1000px) clamp(280px, 30vw, 440px), (min-width: 760px) 220px, 150px" widths={[300, 440, 660, 880]} />
+        <Foto src={capa2} class="ph ph2" alt="Capa: Iasmim Mayara, esteticista, de pé no estúdio"
+          sizes="(min-width: 1000px) clamp(280px, 30vw, 440px), (min-width: 760px) 220px, 150px" widths={[300, 440, 660, 880]} />
+        <Foto src={capa3} class="ph ph3" alt="Capa: retrato de Iasmim Mayara em luz suave"
+          sizes="(min-width: 1000px) clamp(280px, 30vw, 440px), (min-width: 760px) 220px, 150px" widths={[300, 440, 660, 880]} />
+        <div class="cover-sh"></div>
+        <span class="disp cover-mast" aria-hidden="true">IASMIM</span>
+        <span class="lab cover-kick">Estética facial · Juazeiro do Norte</span>
+        <span class="disp cover-no" aria-hidden="true"><Edicao /></span>
+      </div>
+      <div class="edition ch">
+        <span class="lab gold">Edição</span>
+        <span class="disp no">Nº <Edicao /></span>
+        <span class="edition-t">{nota} no Google, em <Edicao /> avaliações. {negocio.endereco.cidade} ({negocio.endereco.uf}).</span>
+      </div>
+      <p class="cap ch">Na capa: {negocio.profissional}, {cargo}, pós-graduada em Harmonização Facial.</p>
     </div>
-    <Foto src={d.imagem?.src} alt={d.imagem?.alt ?? 'Iasmim Esteticista'} formato="retrato" prioridade />
+
+    <div class="hero-r">
+      <p class="lab gold eyebrow ch">Esteticista em {negocio.endereco.cidade} ({negocio.endereco.uf})</p>
+      <h1 class="disp h1 title">Estética facial, um rosto de cada vez.</h1>
+      <p class="dek ch">Cada atendimento é feito pela própria {negocio.profissional}, da avaliação ao procedimento. Somente com horário marcado, no bairro {negocio.endereco.bairro}.</p>
+      <div class="sum-head">
+        <h2 class="disp sum-title" id="sumario">Sumário</h2>
+        <span class="lab gold ch" style="padding-bottom: 10px">Tratamentos</span>
+      </div>
+      <nav class="list" aria-labelledby="sumario">
+        {sumario.map(({ s, e }, i) => (
+          <a class="row" href={e.ancora ? `#${e.ancora}` : servicoPath(s.id)}>
+            <span class="disp num">{String(i + 1).padStart(2, '0')}</span>
+            <span class="lead"><span class="disp ttl">{e.ttl}</span><span class="sub">{e.sub}</span><span class="dots"></span></span>
+            <span class="lab pg">{e.pg}</span>
+          </a>
+        ))}
+      </nav>
+      <div class="also ch">
+        <span>Nesta edição:</span>
+        <a href="#sobre">Matéria de capa</a>
+        <a href="#resultados">Resultado</a>
+        <a href="#cartas">Cartas</a>
+        <a href="#anna-pegova">Anna Pegova</a>
+        <a href="#localizacao">Onde fica</a>
+      </div>
+      <p class="fine ch">O número desta edição é o número de avaliações no Google: <Edicao />, com nota {nota}. Avaliação {avaliacao}, descontada do procedimento.</p>
+    </div>
   </section>
 
-  <section class="secao secao-suave" aria-labelledby="servicos">
-    <div class="wrap">
-      <h2 id="servicos">Quais serviços a Iasmim Esteticista oferece em Juazeiro do Norte?</h2>
-      <ul class="grid-cards">
-        {principais.map((s) => <CardServico servico={s} />)}
-      </ul>
-      <h3>Peelings disponíveis</h3>
-      <ul class="pilulas">
-        {listaPeelings.map((s) => <li><a href={`/servicos/${s.id}/`}>{s.data.nome}</a></li>)}
-      </ul>
-      <p>Também revendemos a <a href="/produtos/anna-pegova/">linha completa Anna Pegova</a> — somos a única revendedora em Juazeiro do Norte.</p>
+  <article id="sobre" class="rule-t" aria-labelledby="t-sobre">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 04</span><span class="lab">Matéria de capa</span></div>
+      <div class="c6 col" style="gap: 28px">
+        <h2 class="disp h2 mk" id="t-sobre">{negocio.profissional}</h2>
+        <p class="lede rv">Tecnóloga em Estética e Cosmetologia, com pós-graduação em Harmonização Facial. Atende pessoalmente cada cliente, da avaliação ao procedimento e às orientações para casa.</p>
+        <p class="body rv">O trabalho é voltado para a pele do rosto: acne, manchas, cicatrizes, sinais de envelhecimento e flacidez. Tudo começa com uma conversa sobre o histórico da pele, medicamentos, alergias e o resultado que você espera. Sem fila e sem pressa: somente com horário marcado, no bairro {negocio.endereco.bairro}, em {negocio.endereco.cidade}.</p>
+        <dl class="facts rv">
+          <dt class="lab">Formação</dt><dd>{negocio.formacao[0].titulo}</dd>
+          <dt class="lab">Especialização</dt><dd>Pós-graduação em Harmonização Facial{posHoras && `, ${posHoras}`}</dd>
+          <dt class="lab">Atendimento</dt><dd>Individual, feito pela própria Iasmim, com hora marcada</dd>
+        </dl>
+        <a class="ul rv" href="/sobre/" style="align-self: start; font-size: 15px">Ler a matéria completa</a>
+      </div>
+      <div class="c4 portrait mk">
+        <Foto src={capa3} alt="Iasmim Mayara em retrato de estúdio, olhando para a câmera"
+          sizes="(min-width: 1440px) 420px, (min-width: 760px) 30vw, calc(100vw - 32px)" />
+      </div>
+    </div>
+  </article>
+
+  <article id="servicos" class="dark" aria-labelledby="t-limpeza">
+    <div class="wrap sec art mid">
+      <div class="c5 portrait mk" style="aspect-ratio: 4 / 5">
+        <Foto src={capa2} alt="Iasmim Mayara de pé no estúdio de atendimento" style="object-position: 50% 20%"
+          sizes="(min-width: 1440px) 530px, (min-width: 760px) 38vw, calc(100vw - 32px)" />
+      </div>
+      <div class="s7 col" style="gap: 24px">
+        <span class="lab gold rv">p. 08 · Em destaque</span>
+        <h2 class="disp h2 mk" id="t-limpeza">Limpeza de Pele Premium</h2>
+        <p class="lede rv">Três etapas em uma sessão: peeling de diamante, extração de cravos e milium e mega hidratação. De 1h a 1h30.</p>
+        <p class="body rv">Para quem tem cravos, oleosidade e poros obstruídos. A pele sai mais lisa, uniforme e pronta para absorver os cosméticos da rotina.</p>
+        <div class="price rv"><span class="disp val">{precoLimpeza}</span><span class="mute" style="font-size: 13px">Avaliação de {avaliacao} descontada do valor.</span></div>
+        <div class="cta-row rv">
+          <Botao href={waLink(msgServico(limpeza))} icone="whatsapp">Marcar pelo WhatsApp</Botao>
+          <a class="ul" href={servicoPath(limpeza.id)} style="font-size: 15px">Ler sobre a limpeza</a>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <section id="pauta" aria-labelledby="t-pauta">
+    <div class="wrap sec">
+      <div class="pauta-head rv"><h2 class="disp h2" id="t-pauta" style="font-size: clamp(40px, 5vw, 72px)">Em pauta</h2><span class="lab gold">p. 10 — 18</span></div>
+      <div class="pauta">
+        {pauta.map(({ s, e }) => (
+          <div class="item rv" id={e.ancora || undefined}>
+            {e.pg && <span class="lab gold">{e.pg}</span>}
+            <h3 class="disp h3">{e.ttl}</h3>
+            <p class="body">{e.texto}</p>
+            <a class="more" href={servicoPath(s.id)}>{e.mais}</a>
+          </div>
+        ))}
+      </div>
     </div>
   </section>
 
-  <section class="secao" aria-labelledby="depoimentos">
-    <div class="wrap">
-      <h2 id="depoimentos">O que as clientes dizem da Iasmim Esteticista?</h2>
-      <p class="selo">★ {negocio.avaliacoes.nota} no Google · {negocio.avaliacoes.total} avaliações</p>
-      <Depoimentos itens={destaques()} />
-      <p><a href="/depoimentos/">Ver todos os depoimentos</a> · <a href={negocio.googleAvaliacoes}>Ler as {negocio.avaliacoes.total} avaliações no Google</a></p>
+  <article id="resultados" class="rule-t" aria-labelledby="t-resultado">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 20</span><span class="lab">Resultado</span></div>
+      <div class="c4 col" style="gap: 24px">
+        <h2 class="disp h2 mk" id="t-resultado" style="font-size: clamp(36px, 4.4vw, 64px)">Melasma, antes e depois</h2>
+        <p class="body rv">Caso tratado com peeling para melasma: um blend clareador de gluconolactona e ácido tranexâmico, que uniformiza o tom da pele de forma gradual, sem agredir.</p>
+        <p class="fine rv">Foto publicada com autorização da paciente. Resultados variam de pessoa para pessoa.</p>
+        <a class="ul rv" href={servicoPath('peeling/peeling-para-melasma')} style="align-self: start; font-size: 15px">Ler sobre o peeling para melasma</a>
+      </div>
+      <div class="c6 ba">
+        <figure class="mk">
+          <div class="pic"><Foto src={melasmaAntes} alt="Rosto antes do tratamento de melasma, com manchas escuras nas maçãs"
+            sizes="(min-width: 1440px) 310px, (min-width: 760px) 22vw, calc(50vw - 22px)" widths={[240, 320, 480, 640, 900]} /></div>
+          <figcaption><span class="lab">Antes</span><span class="lab gold">p. 20</span></figcaption>
+        </figure>
+        <figure class="mk">
+          <div class="pic"><Foto src={melasmaDepois} alt="Rosto depois do tratamento de melasma, com o tom mais uniforme"
+            sizes="(min-width: 1440px) 310px, (min-width: 760px) 22vw, calc(50vw - 22px)" widths={[240, 320, 480, 640, 900]} /></div>
+          <figcaption><span class="lab">Depois</span><span class="lab gold">p. 21</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </article>
+
+  <section id="cartas" class="rule-t" aria-labelledby="t-cartas">
+    <div class="wrap sec">
+      <div class="art end">
+        <div class="c2 folio rv"><span class="lab gold">p. 24</span><span class="lab">Cartas</span></div>
+        <span class="disp big c5 rv" aria-hidden="true">{nota}</span>
+        <div class="c5 rv col" style="gap: 20px">
+          <h2 class="disp" id="t-cartas" style="font-size: clamp(28px, 2.8vw, 40px); line-height: 1.1"><Edicao /> clientes avaliaram no Google. A nota é {nota}.</h2>
+          <a class="ul" href={negocio.googleAvaliacoes} style="align-self: start; font-size: 15px">Ler todas as avaliações</a>
+        </div>
+      </div>
+      <div class="quotes">
+        {cartas.map((c) => (
+          <figure class="q rv">
+            <blockquote class="disp" cite={c.link}>{citacao(c)}</blockquote>
+            <figcaption class="lab mute">{c.nome} · Google, {mesCurto(c.mes)}</figcaption>
+          </figure>
+        ))}
+      </div>
     </div>
   </section>
 
-  <div class="wrap">
-    <div class="texto prosa">
-      <Content />
+  <article id="anna-pegova" class="exp" aria-labelledby="t-ap">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 26</span><span class="lab">Na prateleira</span></div>
+      <div class="c7 col" style="gap: 24px">
+        <h2 class="disp h2 mk" id="t-ap" style="font-size: clamp(36px, 4.4vw, 64px)">Anna Pegova, para continuar em casa</h2>
+        <p class="lede rv">Revendedora autorizada desde 2025 e a única da linha completa em {negocio.endereco.cidade}.</p>
+        <p class="body rv">O resultado de uma limpeza, de um peeling ou do microagulhamento depende do que acontece entre as sessões. A Iasmim monta a rotina com você: qual produto para o seu tipo de pele, em que ordem, de manhã e à noite. Vende também para quem ainda não é cliente, e quem mora em Crato, Barbalha e cidades vizinhas recebe pelos Correios.</p>
+        <div class="cta-row rv">
+          <Botao href={waLink(msgAnna)} icone="whatsapp">Pedir pelo WhatsApp</Botao>
+          <a class="ul" href="/produtos/anna-pegova/" style="font-size: 15px">Ver a linha</a>
+        </div>
+      </div>
     </div>
-    <div class="texto">
-      <Faq itens={d.faq} titulo="Perguntas frequentes" />
-      <p><a href="/perguntas-frequentes/">Ver todas as perguntas frequentes</a> · <a href={mapsLink}>Abrir no Google Maps</a></p>
+  </article>
+
+  <section id="como-funciona" class="rule-t" aria-labelledby="t-como">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 28</span><span class="lab">Como funciona</span></div>
+      <div class="s3 col" style="gap: clamp(32px, 4vw, 48px)">
+        <h2 class="disp h2 mk" id="t-como" style="font-size: clamp(36px, 4.4vw, 64px)">Três passos até a cadeira</h2>
+        <div class="steps">
+          <div class="step rv"><span class="disp n" aria-hidden="true">1</span><h3 class="disp h3">Avaliação</h3><p class="body">{avaliacao}, antes de qualquer procedimento. Se você faz o tratamento, no mesmo dia ou depois, o valor é descontado.</p></div>
+          <div class="step rv"><span class="disp n" aria-hidden="true">2</span><h3 class="disp h3">Agenda</h3><p class="body">Marque pelo WhatsApp com 1 a 2 dias de antecedência. A agenda de sábado costuma fechar até sexta-feira.</p></div>
+          <div class="step rv"><span class="disp n" aria-hidden="true">3</span><h3 class="disp h3">Pagamento</h3><p class="body">Pix, dinheiro ou cartão, com parcelamento sem juros conforme o valor.</p></div>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
+
+  <section id="localizacao" class="rule-t" aria-labelledby="t-onde">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 30</span><span class="lab">Onde fica</span></div>
+      <div class="c6 map mk">
+        <Foto src={mapa} alt={`Mapa do bairro ${negocio.endereco.bairro}, em ${negocio.endereco.cidade}, com o estúdio marcado no centro`}
+          sizes="(min-width: 1440px) 640px, (min-width: 760px) 46vw, calc(100vw - 32px)" />
+        <div class="pin" aria-hidden="true"><span class="pulse"></span><span class="pulse pulse2"></span><span class="dot"></span></div>
+        <span class="lab tag" aria-hidden="true">{negocio.nome}</span>
+        <span class="credit">© OpenStreetMap</span>
+      </div>
+      <div class="c4 col" style="gap: 24px">
+        <h2 class="disp h2 mk" id="t-onde" style="font-size: clamp(36px, 4vw, 56px)">{negocio.endereco.bairro}, {negocio.endereco.cidade}</h2>
+        <dl class="addr rv">
+          <dt class="lab">Endereço</dt><dd>{enderecoTexto}</dd>
+          <dt class="lab">Referência</dt><dd>{negocio.referencia}</dd>
+          <dt class="lab">Horário</dt><dd>{horarioTexto}</dd>
+          <dt class="lab">Atende</dt><dd>{cidadesTexto}</dd>
+        </dl>
+        <div class="cta-row rv">
+          <Botao href={mapsRotaLink} ghost>Como chegar</Botao>
+          <Botao href={waLink()} icone="whatsapp">Agendar pelo WhatsApp</Botao>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="perguntas" class="rule-t" aria-labelledby="t-faq">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 32</span><span class="lab">Perguntas</span></div>
+      <div class="s3 col" style="gap: clamp(28px, 3vw, 40px)">
+        <h2 class="disp h2 mk" id="t-faq" style="font-size: clamp(36px, 4.4vw, 64px)">Antes de marcar</h2>
+        <Faq itens={faq} class="rv" />
+        <a class="ul rv" href="/perguntas-frequentes/" style="align-self: start; font-size: 15px">Todas as perguntas</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark" aria-labelledby="t-cta">
+    <div class="wrap sec art end">
+      <div class="c7 cta-final">
+        <span class="lab gold rv">Para fechar a edição</span>
+        <h2 class="disp h2 mk" id="t-cta">Comece pela avaliação.</h2>
+        <p class="lede rv" style="max-width: 46ch">Mande uma mensagem contando o que incomoda: cravos, espinhas, manchas, cicatrizes, rugas, flacidez ou uma lesão na pele. A Iasmim indica o caminho.</p>
+      </div>
+      <div class="c5 rv col" style="gap: 16px; align-items: start">
+        <Botao href={waLink()} icone="whatsapp">Agendar pelo WhatsApp</Botao>
+        <span class="mute" style="font-size: 13px">{negocio.telefone} · {horarioCurto.charAt(0).toLowerCase() + horarioCurto.slice(1)}</span>
+      </div>
+    </div>
+  </section>
 </Base>
+
 <style>
-  .hero {
-    display: grid;
-    gap: 2rem;
-    padding-block: 2.5rem 3rem;
-    align-items: center;
+  /* só da home: abertura com capa + sumário, destaque com preço, "Em pauta" */
+  .col { display: flex; flex-direction: column }
+  .hero { overflow-x: clip; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; padding-top: clamp(24px, 3.3vw, 48px); padding-bottom: clamp(48px, 4vw, 56px) }
+  .hero-l { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 18px; align-items: end }
+  .edition { display: flex; flex-direction: column; gap: 8px }
+  .edition .no { font-size: 52px; line-height: .9 }
+  .edition-t { font-size: 14px; line-height: 1.45; color: var(--ink2) }
+  .cap { grid-column: 1 / -1; font-size: 13px; line-height: 1.5; color: var(--mute) }
+  .hero-r { display: flex; flex-direction: column; gap: 22px; min-width: 0 }
+  .eyebrow { display: none }
+  .sum-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 0 16px; margin-top: 8px }
+  .sum-title { font-size: clamp(56px, 8vw, 116px); line-height: .88; letter-spacing: -.02em; animation: mask 1.4s var(--ease) .55s both }
+  .also { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; font-size: 14px; color: var(--mute) }
+  .also a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); border-bottom: 1px solid var(--rule) }
+  .also a:hover { border-color: var(--ink) }
+
+  .price { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; border-top: 1px solid #5e574d; padding-top: 20px }
+  .price .val { font-size: clamp(40px, 4vw, 56px); line-height: 1; color: var(--goldl) }
+
+  .pauta-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; border-bottom: 1px solid var(--ink); padding-bottom: 20px }
+  .pauta { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 40px clamp(32px, 4vw, 56px); margin-top: clamp(36px, 4vw, 56px) }
+  .item { display: flex; flex-direction: column; gap: 10px; min-width: 0 }
+  .item .more { align-self: start; font-size: 14px; color: var(--ink); border-bottom: 1px solid var(--rule); display: inline-flex; align-items: center; min-height: 44px }
+  .item .more:hover { border-color: var(--ink) }
+
+  @media (min-width: 760px) {
+    .hero-l { grid-template-columns: 220px minmax(0, 1fr); gap: 28px }
+    .edition .no { font-size: 72px }
+    .hero-r { gap: 24px }
   }
-  @media (min-width: 56rem) {
-    .hero {
-      grid-template-columns: 1.4fr 1fr;
-      gap: 4rem;
-    }
-  }
-  .selo {
-    color: var(--muted);
-    font-weight: 600;
-  }
-  .hero-acoes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-top: 1.5rem;
-  }
-  .pilulas {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  .pilulas li {
-    margin: 0;
-  }
-  .pilulas a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.75rem;
-    padding: 0.4rem 1rem;
-    border: 1px solid var(--line);
-    background: var(--surface);
-    border-radius: 999px;
-    text-decoration: none;
-  }
-  .pilulas a:hover {
-    border-color: var(--accent);
+  @media (min-width: 1000px) {
+    .hero { grid-template-columns: clamp(280px, 30vw, 440px) minmax(0, 1fr); gap: clamp(40px, 6.6vw, 96px) }
+    .hero-l { grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start }
+    .edition { display: none }
+    .eyebrow { display: block }
   }
 </style>
