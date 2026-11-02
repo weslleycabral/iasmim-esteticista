@@ -1,20 +1,25 @@
 ---
-import { getEntry, render } from 'astro:content';
+// Anna Pegova — fiel a design/paginas-3c/anna-pegova-desktop.dc.html ("Na prateleira").
+// Sem foto de produto: o rótulo tipográfico ocupa o lugar. Perguntas de anna-pegova.md (mesmo texto
+// no FAQPage). O pedido monta a mensagem do WhatsApp com JS mínimo; sem JS, os botões de escolha
+// somem e o link leva a mensagem padrão.
+import { getEntry } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
-import '../../../styles/legado.css'; // visual provisório: tirar ao refazer a página na linha 3C
-import Foto from '../../../components/FotoLegado.astro';
+import Foto from '../../../components/Foto.astro';
 import Faq from '../../../components/Faq.astro';
-import IconWa from '../../../components/IconWa.astro';
-import Agendar from '../../../components/Agendar.astro';
-import { waLink, abs } from '../../../lib/site';
+import Botao from '../../../components/Botao.astro';
+import Migalhas from '../../../components/Migalhas.astro';
+import { negocio, waLink, servicoPath, horarioTexto, abs } from '../../../lib/site';
 import { ID, faqLd, areaServed } from '../../../lib/schema';
+
+import retrato from '../../../assets/fotos/iasmim-estudio-6870.webp';
 
 const pagina = await getEntry('paginas', 'anna-pegova');
 if (!pagina) throw new Error('Falta src/content/paginas/anna-pegova.md');
-const { Content } = await render(pagina);
 const d = pagina.data;
 const url = abs('/produtos/anna-pegova/');
 const mensagem = 'Olá, Iasmim! Quero saber sobre os produtos Anna Pegova.';
+const migalhas = [{ nome: 'Início', path: '/' }, { nome: 'Produtos Anna Pegova', path: '/produtos/anna-pegova/' }];
 
 const marca = { '@type': 'Brand', '@id': ID.annaPegova, name: 'Anna Pegova' };
 // Sem preço e sem "offers" de propósito: os valores são informados pelo WhatsApp.
@@ -37,45 +42,249 @@ const revenda = {
   areaServed,
   isRelatedTo: { '@id': `${url}#produtos` },
 };
+
+const peles = ['oleosa', 'seca', 'mista', 'sensível', 'com acne'];
+const metas = ['controlar a oleosidade', 'hidratar', 'clarear', 'cuidar dos sinais do tempo'];
+const horarioCurto = horarioTexto.replace(/, somente com horário marcado$/, '');
+const contato = `${negocio.telefone} · ${horarioCurto.charAt(0).toLowerCase() + horarioCurto.slice(1)}`;
+const cidade = negocio.endereco.cidade;
 ---
 <Base
   title={d.title}
   description={d.description}
-  migalhas={[{ nome: 'Início', path: '/' }, { nome: 'Produtos Anna Pegova', path: '/produtos/anna-pegova/' }]}
+  migalhas={migalhas}
   ld={[marca, produto, revenda, faqLd(url, d.faq)]}
   mensagemWa={mensagem}
   rotuloWa="Pedir produtos Anna Pegova"
   atualizado={d.atualizado}
   sobre={`${url}#produtos`}
 >
-  <div class="wrap">
-    <header class="hero">
-      <div>
-        <p class="eyebrow">Única revendedora em Juazeiro do Norte</p>
-        <h1>{d.h1}</h1>
-        {d.resumo && <p class="lead">{d.resumo}</p>}
-        <p><a class="btn btn-wa" href={waLink(mensagem)}><IconWa /> Consultar produtos pelo WhatsApp</a></p>
+  <section class="wrap hero" aria-label={`Anna Pegova em ${cidade}`}>
+    <div class="hero-t">
+      <Migalhas itens={[migalhas[0], { nome: 'Na prateleira', path: migalhas[1].path }]} />
+      <h1 class="disp h1 title">Anna Pegova, em {cidade}.</h1>
+      <p class="dek e2">A {negocio.nome} é revendedora autorizada Anna Pegova desde 2025 e a única da linha completa na cidade. Toda a linha de skincare para a rotina em casa, com a orientação da esteticista {negocio.profissional}, inclusive para quem ainda não é cliente.</p>
+      <div class="cta-row e3">
+        <Botao href="#pedido" icone="whatsapp">Pedir indicação pelo WhatsApp</Botao>
+        <a class="ul" href="#rotina" style="font-size: 15px">Como a rotina funciona</a>
       </div>
-      <Foto src={d.imagem?.src} alt={d.imagem?.alt ?? 'Produtos Anna Pegova'} prioridade />
-    </header>
-    <div class="texto">
-      <div class="prosa"><Content /></div>
-      <Faq itens={d.faq} titulo="Perguntas frequentes sobre Anna Pegova em Juazeiro do Norte" />
-      <Agendar mensagem={mensagem} titulo="Como comprar Anna Pegova em Juazeiro do Norte?" valor="Valores dos produtos pelo WhatsApp; envio pelos Correios para cidades vizinhas." />
+      <p class="fine e3">Valores pelo WhatsApp {negocio.telefone}. Envio pelos Correios para Crato, Barbalha e cidades vizinhas.</p>
     </div>
-  </div>
+    <div class="rotulo" role="img" aria-label="Anna Pegova, linha completa de skincare, revenda autorizada desde 2025">
+      <span class="lab sub" aria-hidden="true"><span>Linha completa</span><span class="mute">Skincare</span></span>
+      <span class="disp mark" aria-hidden="true"><span>Anna</span><span>Pegova</span></span>
+      <span class="lab sub" aria-hidden="true"><span>Revenda autorizada</span><span class="gold">Desde 2025</span></span>
+    </div>
+  </section>
+
+  <article id="esteticista" class="rule-t" aria-labelledby="t-por">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 26</span><span class="lab">Na prateleira</span></div>
+      <div class="c6 col" style="gap: 28px">
+        <h2 class="disp h2 mk" id="t-por" style="font-size: clamp(36px, 4.4vw, 64px)">Por que comprar com a esteticista</h2>
+        <p class="lede rv">Escolher cosmético sozinha, pela embalagem ou por indicação de internet, é um dos motivos mais comuns de irritação, espinhas e resultados que não aparecem.</p>
+        <p class="body rv">Comprando com a Iasmim, o produto chega com a orientação de quem conhece a sua pele. Quem ainda não é cliente também pode comprar, desde que saiba do que a própria pele precisa; na dúvida, ela orienta pelo WhatsApp.</p>
+        <dl class="facts rv">
+          <dt class="lab">Tipo de pele</dt><dd>Qual produto combina com a sua: oleosa, seca, mista, sensível ou com acne</dd>
+          <dt class="lab">Ordem e hora</dt><dd>Em que sequência usar cada produto, de manhã e à noite</dd>
+          <dt class="lab">O que evitar</dt><dd>Antes e depois de peelings e microagulhamento</dd>
+          <dt class="lab">Rotina</dt><dd>Simples, sem excesso de passos</dd>
+        </dl>
+      </div>
+      <div class="c4 portrait mk">
+        <Foto src={retrato} alt={`${negocio.profissional} em retrato de estúdio`}
+          sizes="(min-width: 1440px) 420px, (min-width: 760px) 30vw, calc(100vw - 32px)" />
+      </div>
+    </div>
+  </article>
+
+  <section id="rotina" class="dark" aria-labelledby="t-rotina">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 27</span><span class="lab">A rotina</span></div>
+      <div class="s3 col" style="gap: clamp(32px, 4vw, 48px)">
+        <h2 class="disp h2 mk" id="t-rotina" style="font-size: clamp(36px, 4.4vw, 64px)">O resultado continua em casa.</h2>
+        <p class="lede rv" style="max-width: 56ch">Limpeza de pele, peelings e microagulhamento duram mais quando a pele recebe os cuidados certos entre uma sessão e outra. Os produtos Anna Pegova entram justamente nessa rotina de manutenção, indicada na avaliação.</p>
+        <div class="rotina">
+          <div class="passo rv"><span class="lab gold">Todo dia</span><h3 class="disp h3">Limpeza</h3><p class="body">Adequada ao seu tipo de pele.</p></div>
+          <div class="passo rv"><span class="lab gold">Todo dia</span><h3 class="disp h3">Hidratação</h3><p class="body">Na medida da sua pele, sem pesar.</p></div>
+          <div class="passo rv"><span class="lab gold">Conforme a queixa</span><h3 class="disp h3">Ativos</h3><p class="body">Para controlar a oleosidade, hidratar, clarear ou cuidar dos sinais do tempo.</p></div>
+          <div class="passo rv"><span class="lab gold">Principalmente</span><h3 class="disp h3">Protetor solar</h3><p class="body">Todos os dias. É o que sustenta qualquer resultado.</p></div>
+        </div>
+        <div class="links-in rv">
+          <a class="ul" href={servicoPath('limpeza-de-pele')}>Limpeza de pele</a>
+          <a class="ul" href={servicoPath('peeling')}>Peelings</a>
+          <a class="ul" href={servicoPath('microagulhamento')}>Microagulhamento</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pedido" class="exp" aria-labelledby="t-pedido">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 28</span><span class="lab">Pedido</span></div>
+      <div class="s3 col pedido" style="gap: clamp(32px, 4vw, 48px)" data-wa={waLink('')} data-base={mensagem.replace(/\.$/, '')}>
+        <h2 class="disp h2 mk" id="t-pedido" style="font-size: clamp(36px, 4.4vw, 64px)">Peça a indicação certa.</h2>
+        <p class="body rv" style="max-width: 60ch">Escolha o que descreve a sua pele e o que você quer tratar. A mensagem se monta sozinha e segue pelo WhatsApp; a Iasmim responde com o produto indicado, a disponibilidade e o valor.</p>
+        <div class="grp rv">
+          <span class="lab gold" id="l-pele">Minha pele é</span>
+          <div class="chips" role="group" aria-labelledby="l-pele" data-grupo="pele">
+            {peles.map((p) => <button type="button" class="chip" aria-pressed="false" data-valor={p}>{p}</button>)}
+          </div>
+        </div>
+        <div class="grp rv">
+          <span class="lab gold" id="l-meta">Quero</span>
+          <div class="chips" role="group" aria-labelledby="l-meta" data-grupo="meta">
+            {metas.map((m) => <button type="button" class="chip" aria-pressed="false" data-valor={m}>{m}</button>)}
+          </div>
+        </div>
+        <div class="msg rv">
+          <span class="lab">Sua mensagem</span>
+          <p class="disp msg-q" aria-live="polite">{mensagem}</p>
+          <div class="cta-row">
+            <Botao href={waLink(mensagem)} icone="whatsapp" class="enviar">Enviar pelo WhatsApp</Botao>
+            <span class="fine">{contato}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="como-pedir" class="rule-t" aria-labelledby="t-como">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 29</span><span class="lab">Como pedir</span></div>
+      <div class="s3 col" style="gap: clamp(32px, 4vw, 48px)">
+        <h2 class="disp h2 mk" id="t-como" style="font-size: clamp(36px, 4.4vw, 64px)">Três passos até o produto</h2>
+        <div class="steps">
+          <div class="step rv"><span class="disp n" aria-hidden="true">1</span><h3 class="disp h3">Mensagem</h3><p class="body">Pelo WhatsApp {negocio.telefone}, diga o produto que procura ou o que quer tratar.</p></div>
+          <div class="step rv"><span class="disp n" aria-hidden="true">2</span><h3 class="disp h3">Indicação</h3><p class="body">A Iasmim confirma a disponibilidade, o valor e, se for o caso, indica o produto mais adequado.</p></div>
+          <div class="step rv"><span class="disp n" aria-hidden="true">3</span><h3 class="disp h3">Entrega</h3><p class="body">Combine pelo WhatsApp como receber o pedido. Para cidades vizinhas, o envio é pelos Correios.</p></div>
+        </div>
+        <dl class="envio rv">
+          <dt class="lab">{cidade}</dt><dd>Combine o recebimento pelo WhatsApp.</dd>
+          <dt class="lab">Crato e Barbalha</dt><dd>Envio pelos Correios, assim como para as outras cidades vizinhas.</dd>
+          <dt class="lab">Valores</dt><dd>Informados pelo WhatsApp {negocio.telefone}.</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section id="perguntas" class="rule-t" aria-labelledby="t-faq">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 30</span><span class="lab">Perguntas</span></div>
+      <div class="s3 col" style="gap: clamp(28px, 3vw, 40px)">
+        <h2 class="disp h2 mk" id="t-faq" style="font-size: clamp(36px, 4.4vw, 64px)">Sobre a Anna Pegova</h2>
+        <Faq itens={d.faq} class="rv" />
+        <a class="ul rv" href="/perguntas-frequentes/" style="align-self: start; font-size: 15px">Todas as perguntas</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark" aria-labelledby="t-cta">
+    <div class="wrap sec art end">
+      <div class="c7 cta-final">
+        <span class="lab gold rv">Para fechar a edição</span>
+        <h2 class="disp h2 mk" id="t-cta">Pergunte qual é o seu.</h2>
+        <p class="lede rv" style="max-width: 46ch">Diga como é a sua pele e o que quer tratar. A Iasmim indica o produto, confirma o valor e combina a entrega.</p>
+      </div>
+      <div class="c5 rv col" style="gap: 16px; align-items: start">
+        <Botao href={waLink(mensagem)} icone="whatsapp">Pedir pelo WhatsApp</Botao>
+        <span class="mute" style="font-size: 13px">{contato}</span>
+      </div>
+    </div>
+  </section>
 </Base>
-<style>
-  .hero {
-    display: grid;
-    gap: 2rem;
-    padding-block: 1.25rem 2rem;
-    align-items: center;
+
+<script>
+  // Pedido: cada grupo escolhe no máximo uma opção (tocar de novo desmarca); a mensagem e o link do
+  // WhatsApp se atualizam. Mesma regra de texto do canvas.
+  const caixa = document.querySelector<HTMLElement>('.pedido');
+  if (caixa) {
+    const escolha: Record<string, string> = { pele: '', meta: '' };
+    const texto = caixa.querySelector<HTMLElement>('.msg-q');
+    const enviar = caixa.querySelector<HTMLAnchorElement>('.enviar');
+    const wa = caixa.dataset.wa ?? '';
+    const base = caixa.dataset.base ?? '';
+    const atualizar = () => {
+      let m = base;
+      if (escolha.pele) m += ` para pele ${escolha.pele}`;
+      if (escolha.meta) m += `${escolha.pele ? ', para ' : ' para '}${escolha.meta}`;
+      m += '.';
+      if (texto) texto.textContent = m;
+      if (enviar) enviar.href = wa + encodeURIComponent(m);
+    };
+    caixa.querySelectorAll<HTMLElement>('[data-grupo]').forEach((grupo) => {
+      const nome = grupo.dataset.grupo!;
+      grupo.addEventListener('click', (ev) => {
+        const b = (ev.target as HTMLElement).closest<HTMLButtonElement>('button[data-valor]');
+        if (!b) return;
+        const v = b.dataset.valor!;
+        escolha[nome] = escolha[nome] === v ? '' : v;
+        grupo.querySelectorAll<HTMLButtonElement>('button[data-valor]').forEach((x) => {
+          const on = x.dataset.valor === escolha[nome];
+          x.classList.toggle('on', on);
+          x.setAttribute('aria-pressed', String(on));
+        });
+        atualizar();
+      });
+    });
   }
-  @media (min-width: 56rem) {
-    .hero {
-      grid-template-columns: 1.3fr 1fr;
-      gap: 3rem;
-    }
+</script>
+
+<style>
+  .col { display: flex; flex-direction: column }
+
+  /* abertura — a prateleira, sem foto: o nome da linha em tipografia */
+  .hero { overflow-x: clip; display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(36px, 5vw, 72px); padding-top: clamp(28px, 3.5vw, 56px); padding-bottom: clamp(48px, 5vw, 80px); align-items: center }
+  .hero-t { display: flex; flex-direction: column; gap: 22px; min-width: 0 }
+  .hero-t :global(.crumb) { padding-top: 0 }
+  .hero .cta-row { gap: 12px 24px }
+  .title { animation-delay: .2s }
+  .e2 { animation: enter 1s var(--ease) .7s both }
+  .e3 { animation: enter 1s var(--ease) .9s both }
+  .rotulo { position: relative; width: 100%; max-width: 440px; aspect-ratio: 3 / 4; background: var(--paper2); border: 1px solid var(--ink); padding: 10% 8%; display: flex; flex-direction: column; justify-content: space-between; align-items: center; text-align: center; container-type: inline-size; transform: rotate(1.2deg); box-shadow: 0 30px 60px -30px rgba(29, 26, 22, .5); justify-self: center; animation: tilt 1.6s var(--ease) .4s both }
+  .rotulo::before { content: ""; position: absolute; inset: 10px; border: 1px solid var(--ink); pointer-events: none }
+  .rotulo .mark { display: flex; flex-direction: column; line-height: .92; letter-spacing: .02em }
+  .rotulo .mark span { font-size: 15cqw }
+  .rotulo .mark span:last-child { color: var(--gold) }
+  .rotulo .sub { display: flex; flex-direction: column; gap: 6px; align-items: center }
+  @keyframes tilt { from { opacity: 0; transform: translateY(40px) rotate(3deg) } to { opacity: 1; transform: rotate(1.2deg) } }
+
+  /* a rotina */
+  .rotina { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 32px clamp(28px, 3.4vw, 48px) }
+  .passo { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid #5e574d; padding-top: 18px; min-width: 0 }
+  .links-in { display: flex; flex-wrap: wrap; gap: 4px 24px }
+  .links-in a { font-size: 15px }
+
+  /* pedido — a conversa começa aqui */
+  .grp { display: flex; flex-direction: column; gap: 14px }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px }
+  .chip { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border: 1px solid var(--ink); border-radius: 0; background: transparent; color: inherit; font: inherit; font-size: 15px; cursor: pointer; transition: background .4s var(--ease), color .4s var(--ease) }
+  .chip:hover { background: rgba(29, 26, 22, .06) }
+  .chip.on { background: var(--ink); color: var(--paper) }
+  /* sem JS não há como montar a mensagem: os botões de escolha somem e fica a mensagem padrão */
+  :global(html:not(.js)) .grp { display: none }
+  .msg { border-top: 1px solid var(--ink); padding-top: 20px; display: flex; flex-direction: column; gap: 18px }
+  .msg-q { font-size: clamp(22px, 2.2vw, 32px); line-height: 1.25 }
+  .msg-q::before { content: "\201C"; color: var(--gold) }
+  .msg-q::after { content: "\201D"; color: var(--gold) }
+
+  /* como pedir */
+  .envio { display: grid; grid-template-columns: minmax(120px, 180px) minmax(0, 1fr); gap: 14px 20px; font-size: 16px; line-height: 1.5; border-top: 1px solid var(--ink); padding-top: 20px }
+  .envio dt { padding-top: 3px; color: var(--gold) }
+
+  @media (min-width: 760px) {
+    .hero-t { gap: 26px }
+  }
+  @media (min-width: 1000px) {
+    .hero { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(40px, 6.6vw, 96px) }
+    .rotulo { justify-self: end }
+  }
+  @media (max-width: 759.98px) {
+    .rotulo { box-shadow: 0 18px 36px -18px rgba(29, 26, 22, .6) }
+  }
+  /* telas estreitas: "microagulhamento" não cabe ao lado do rótulo de 120px */
+  .facts dd { overflow-wrap: break-word; min-width: 0 }
+  @media (max-width: 400px) {
+    .facts { grid-template-columns: minmax(0, 96px) minmax(0, 1fr) }
   }
 </style>

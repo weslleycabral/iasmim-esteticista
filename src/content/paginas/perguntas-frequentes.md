@@ -27,6 +27,8 @@ faq:
     resposta: A Iasmim Esteticista aplica botox (toxina botulínica) para rugas de expressão no bairro Salesianos, em Juazeiro do Norte. Iasmim Mayara tem pós-graduação em Harmonização Facial, com disciplina de Toxina Botulínica. O agendamento é pelo WhatsApp (88) 99989-0590.
   - pergunta: Onde tirar verruga ou sinal em Juazeiro do Norte?
     resposta: A Iasmim Esteticista faz remoção de sinais (nevos), verrugas, melanose solar e milium com jato de plasma e eletrocautério em Juazeiro do Norte, no bairro Salesianos. É feita anestesia local no ponto de cada lesão, então o desconforto é mínimo, e a casquinha cai em cerca de uma semana. A lesão é avaliada antes para definir a técnica.
+  - pergunta: Qualquer sinal ou pinta pode ser removido?
+    resposta: A Iasmim Esteticista remove sinais (nevos) e pintas benignos com jato de plasma ou eletrocautério no bairro Salesianos, em Juazeiro do Norte. Antes, cada lesão é avaliada; sinais que mudaram de cor, tamanho ou formato, sangram ou coçam devem ser vistos por um dermatologista antes de qualquer remoção.
   - pergunta: Vocês vendem produtos para usar em casa?
     resposta: Sim. A Iasmim Esteticista é revendedora autorizada Anna Pegova desde 2025 e a única revendedora da linha completa em Juazeiro do Norte. Vende toda a linha de skincare para a rotina em casa, inclusive para quem não é cliente, e envia pelos Correios para cidades vizinhas.
   - pergunta: A Iasmim faz outros procedimentos além dos que estão no site?

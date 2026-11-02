@@ -15,6 +15,7 @@ indicacoes:
   - espinhas inflamadas (acne ativa)
   - pele muito oleosa
   - crises de acne recorrentes
+sessoes: Por sessão; quando precisa de mais de uma, a cada 15 dias
 ordem: 21
 relacionados:
   - limpeza-de-pele

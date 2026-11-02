@@ -1,10 +1,55 @@
 ---
+// 404 — fiel a design/paginas-3c/404-desktop.dc.html ("Errata"). noindex, sem canonical.
 import Base from '../layouts/Base.astro';
-import '../styles/legado.css'; // visual provisório: tirar ao refazer a página na linha 3C
+import Edicao from '../components/Edicao.astro';
+import Botao from '../components/Botao.astro';
+import { waLink, servicosPrincipais } from '../lib/site';
+
+const extenso = ['nenhum', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove', 'dez', 'onze', 'doze'];
+const n = (await servicosPrincipais()).length;
+const tratamentos = `${extenso[n] ?? n} ${n === 1 ? 'tratamento' : 'tratamentos'} para o rosto`;
 ---
-<Base noindex title="Página não encontrada | Iasmim Esteticista" description="A página que você procurou não existe. Veja os serviços da Iasmim Esteticista em Juazeiro do Norte (CE) ou fale pelo WhatsApp.">
-  <div class="wrap texto" style="padding-block: 3rem">
-    <h1>Página não encontrada</h1>
-    <p>O endereço pode ter mudado. Veja <a href="/servicos/">todos os serviços</a>, as <a href="/perguntas-frequentes/">perguntas frequentes</a> ou volte para a <a href="/">página inicial</a>.</p>
-  </div>
+<Base
+  noindex
+  title="Página não encontrada | Iasmim Esteticista"
+  description="A página que você procurou não existe. Veja os serviços da Iasmim Esteticista em Juazeiro do Norte (CE) ou fale pelo WhatsApp."
+>
+  <section class="wrap err art end" aria-labelledby="t-404">
+    <div class="c2 folio"><span class="lab gold">Edição <Edicao /> · Errata</span><span class="lab">Página não encontrada</span></div>
+    <span class="disp err-no c4" aria-hidden="true">404</span>
+    <div class="c6 err-col">
+      <h1 class="disp err-h1" id="t-404">Esta página saiu da edição.</h1>
+      <p class="body" style="max-width: 48ch">O endereço pode ter mudado, ou nunca existiu nesta revista. O resto continua no lugar: volte ao sumário, veja os tratamentos ou tire a dúvida direto com a Iasmim.</p>
+      <div class="cta-row">
+        <Botao href={waLink()} icone="whatsapp">Falar pelo WhatsApp</Botao>
+        <a class="ul" href="/" style="font-size: 15px">Voltar ao início</a>
+      </div>
+      <span class="lab gold sub-lab" style="margin-top: 8px">Para seguir lendo</span>
+      <nav class="list" aria-label="Saídas desta página">
+        <a class="row" href="/"><span class="disp num">01</span><span class="lead"><span class="disp ttl">Sumário da edição</span><span class="sub">a Edição Nº <Edicao /> inteira</span><span class="dots"></span></span><span class="lab pg">p. 01</span></a>
+        <a class="row" href="/servicos/"><span class="disp num">02</span><span class="lead"><span class="disp ttl">Serviços</span><span class="sub">{tratamentos}</span><span class="dots"></span></span><span class="lab pg">p. 08</span></a>
+        <a class="row" href="/perguntas-frequentes/"><span class="disp num">03</span><span class="lead"><span class="disp ttl">Perguntas frequentes</span><span class="sub">o que saber antes de marcar</span><span class="dots"></span></span><span class="lab pg">p. 32</span></a>
+      </nav>
+    </div>
+  </section>
 </Base>
+
+<style>
+  /* errata — a página que saiu da edição */
+  .err { padding-top: clamp(48px, 6vw, 96px); padding-bottom: clamp(64px, 8.3vw, 120px) }
+  .err-no { font-size: clamp(110px, 14vw, 200px); line-height: .8; letter-spacing: -.03em; color: var(--ink); animation: mask 1.4s var(--ease) .2s both }
+  .err-h1 { font-size: clamp(34px, 3.4vw, 50px); line-height: 1.06; letter-spacing: -.015em; animation: mask 1.4s var(--ease) .45s both }
+  .err-col { display: flex; flex-direction: column; gap: clamp(24px, 2.6vw, 36px) }
+  .err .list { border-top: 1px solid var(--ink) }
+  .err .row { border-top: 0; border-bottom: 1px solid var(--rule) }
+  .folio, .body, .cta-row, .sub-lab { animation: enter 1s var(--ease) .8s both }
+  .list .row:nth-child(1) { animation-delay: 1s }
+  .list .row:nth-child(2) { animation-delay: 1.12s }
+  .list .row:nth-child(3) { animation-delay: 1.24s }
+  @media (min-width: 1000px) {
+    .err .row .sub, .err .row .ttl { white-space: normal }
+  }
+  @media (max-width: 759.98px) {
+    .err-no { font-size: clamp(120px, 32vw, 150px) }
+  }
+</style>

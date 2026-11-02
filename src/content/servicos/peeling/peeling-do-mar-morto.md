@@ -17,7 +17,7 @@ indicacoes:
   - pele opaca, sem viço
   - manchas superficiais e marcas de acne
   - linhas finas
-ordem: 24
+ordem: 26
 relacionados:
   - limpeza-de-pele
   - peeling/peeling-para-manchas-marrons

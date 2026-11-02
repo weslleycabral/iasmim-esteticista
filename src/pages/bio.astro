@@ -1,0 +1,145 @@
+---
+// /bio/ — link da bio do Instagram. Fiel a design/paginas-3c/bio-desktop.dc.html ("capa de bolso"):
+// uma coluna, igual no celular e no desktop, sem masthead, rodapé e botão flutuante (moldura={false}).
+// NAP, horário, avaliações e avaliação (R$ 100) saem de negocio.json.
+import Base from '../layouts/Base.astro';
+import Foto from '../components/Foto.astro';
+import Edicao from '../components/Edicao.astro';
+import Botao from '../components/Botao.astro';
+import { negocio, waLink, mapsRotaLink, enderecoTexto, horarioTexto } from '../lib/site';
+import { ID } from '../lib/schema';
+
+import capa1 from '../assets/fotos/iasmim-estudio-6870.webp';
+import capa2 from '../assets/fotos/iasmim-estudio-6871.webp';
+import capa3 from '../assets/fotos/iasmim-estudio-6876.webp';
+
+const title = 'Links da Iasmim Esteticista | Juazeiro do Norte (CE)';
+const description = 'Agende pelo WhatsApp ou Instagram, veja os serviços, o resultado do melasma e como chegar à Iasmim Esteticista, em Juazeiro do Norte (CE).';
+const atualizado = new Date('2026-11-02');
+
+const nota = negocio.avaliacoes.nota;
+const cargo = negocio.cargo.charAt(0).toLowerCase() + negocio.cargo.slice(1);
+const msg = 'Olá, Iasmim! Vim pelo Instagram e quero agendar um horário.';
+const wa = waLink(msg);
+const sizes = '(min-width: 760px) 132px, 120px';
+const widths = [120, 132, 240, 264, 400];
+---
+<Base
+  title={title}
+  description={description}
+  migalhas={[{ nome: 'Início', path: '/' }, { nome: 'Links da bio', path: '/bio/' }]}
+  atualizado={atualizado}
+  sobre={ID.negocio}
+  mensagemWa={msg}
+  moldura={false}
+>
+  <div class="bio">
+    <header class="bio-top">
+      <a class="disp brand" href="/" aria-label={`${negocio.nome}, site completo`}>IASMIM</a>
+      <span class="lab">Edição Nº <Edicao /> · Links</span>
+    </header>
+
+    <div class="pocket">
+      <div class="cover">
+        <Foto src={capa1} class="ph ph1" alt="Capa: Iasmim Mayara em retrato de estúdio" prioridade sizes={sizes} widths={widths} />
+        <Foto src={capa2} class="ph ph2" alt="Capa: Iasmim Mayara, esteticista, de pé no estúdio" sizes={sizes} widths={widths} />
+        <Foto src={capa3} class="ph ph3" alt="Capa: retrato de Iasmim Mayara em luz suave" sizes={sizes} widths={widths} />
+        <div class="cover-sh"></div>
+        <span class="disp cover-mast" aria-hidden="true">IASMIM</span>
+        <span class="lab cover-kick">Estética facial · {negocio.endereco.cidade}</span>
+        <span class="disp cover-no" aria-hidden="true"><Edicao /></span>
+      </div>
+      <div class="edition">
+        <span class="lab gold">Nota no Google</span>
+        <span class="disp no">{nota}</span>
+        <span class="tot">em <Edicao /> avaliações</span>
+        <p class="fine">{negocio.profissional}, {cargo}, pós-graduada em Harmonização Facial.</p>
+      </div>
+    </div>
+
+    <div class="col" style="gap: 12px">
+      <h1 class="disp bio-h1">Estética facial, um rosto de cada vez.</h1>
+      <p class="bio-dek">Cada atendimento é feito pela própria Iasmim, somente com horário marcado, no bairro {negocio.endereco.bairro}. Escolha por onde começar.</p>
+    </div>
+
+    <div class="col" style="gap: 12px">
+      <Botao href={wa} icone="whatsapp" class="grande">Agendar pelo WhatsApp</Botao>
+      <Botao href={negocio.instagram} icone="instagram" ghost externo class="grande">Agendar pelo Instagram</Botao>
+    </div>
+
+    <nav class="links" aria-label="Links da bio">
+      <a href="/servicos/"><span class="lead"><span class="disp ttl">Serviços</span><span class="sub">Limpeza de pele, peelings, microagulhamento, botox, lábios, HIFU, sinais</span></span><span class="lab pg">p. 08</span></a>
+      <a href="/#resultados"><span class="lead"><span class="disp ttl">Resultado do melasma</span><span class="sub">Antes e depois, com autorização da paciente</span></span><span class="lab pg">p. 20</span></a>
+      <a href="/produtos/anna-pegova/"><span class="lead"><span class="disp ttl">Anna Pegova</span><span class="sub">Revenda autorizada, para continuar em casa</span></span><span class="lab pg">p. 26</span></a>
+      <a href={mapsRotaLink}><span class="lead"><span class="disp ttl">Como chegar</span><span class="sub">{negocio.endereco.bairro}, perto da Igreja dos Salesianos</span></span><span class="lab pg">Maps</span></a>
+      <a href={negocio.googleAvaliacoes}><span class="lead"><span class="disp ttl">Avaliações no Google</span><span class="sub"><Edicao /> clientes, nota {nota}</span></span><span class="lab pg">Google</span></a>
+      <a href="/"><span class="lead"><span class="disp ttl">Site completo</span><span class="sub">A Edição Nº <Edicao /> inteira</span></span><span class="lab pg">p. 01</span></a>
+    </nav>
+
+    <footer class="bio-foot" aria-label="Endereço e horário">
+      <dl class="pair">
+        <dt class="lab">Endereço</dt><dd translate="no">{enderecoTexto}</dd>
+        <dt class="lab">Horário</dt><dd>{horarioTexto}</dd>
+        <dt class="lab">Avaliação</dt><dd>{negocio.avaliacao.valor}, descontada do procedimento</dd>
+      </dl>
+      <div class="social">
+        <a class="ul" href={wa}>{negocio.telefone}</a>
+        <a class="ul" href={negocio.instagram} rel="me">{negocio.instagramUsuario}</a>
+      </div>
+      <div class="bio-col"><span class="disp" style="font-size: 22px; letter-spacing: .04em" aria-hidden="true">IASMIM</span><span class="lab mute">Edição Nº <Edicao /> · {negocio.nome}</span></div>
+    </footer>
+  </div>
+</Base>
+
+<style>
+  /* bio — capa de bolso: uma coluna, a mesma no celular e no desktop */
+  .col { display: flex; flex-direction: column }
+  .bio { overflow-x: clip; max-width: 520px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); padding-top: clamp(24px, 4vw, 56px); padding-bottom: clamp(40px, 5vw, 72px); display: flex; flex-direction: column; gap: 26px }
+  .bio-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border-bottom: 1px solid var(--ink); padding-bottom: 12px }
+  .bio-top .brand { font-size: 30px; margin-right: 0; min-height: 44px; display: inline-flex; align-items: center }
+  .bio-top .lab { color: var(--mute); text-align: right }
+  .pocket { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 20px; align-items: end }
+  .pocket .cover { box-shadow: 0 18px 36px -18px rgba(29, 26, 22, .6) }
+  .pocket .edition { display: flex; flex-direction: column; gap: 4px; min-width: 0 }
+  .pocket .no { font-size: 64px; line-height: .9 }
+  .pocket .tot { font-size: 14px; color: var(--ink2); line-height: 1.4 }
+  .pocket .fine { margin-top: 10px }
+  .bio-h1 { font-size: clamp(30px, 8.5vw, 38px); line-height: 1.05; letter-spacing: -.01em }
+  .bio-dek { font-size: clamp(16px, 1.2vw, 17px); line-height: 1.65; color: var(--ink2) }
+  .btn.grande { min-height: 56px; width: 100%; font-size: 13px }
+  .links { display: flex; flex-direction: column; border-top: 1px solid var(--ink) }
+  .links a { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; align-items: baseline; min-height: 60px; padding: 12px 0; border-bottom: 1px solid var(--rule); transition: padding .6s var(--ease), background .6s var(--ease) }
+  .links a:hover { padding-left: 10px; background: var(--paper2) }
+  .links .lead { display: flex; flex-direction: column; gap: 2px; min-width: 0 }
+  .links .ttl { font-size: 22px; line-height: 1.1 }
+  .links .sub { font-size: 13px; color: var(--mute); line-height: 1.4 }
+  .links .pg { color: var(--gold); white-space: nowrap }
+  .bio-foot { display: flex; flex-direction: column; gap: 12px; font-size: 14px; line-height: 1.5; color: var(--ink2); border-top: 1px solid var(--ink); padding-top: 16px }
+  .bio-foot .pair { display: grid; grid-template-columns: minmax(72px, 88px) minmax(0, 1fr); gap: 4px 14px }
+  .bio-foot dt { color: var(--gold); padding-top: 3px }
+  .bio-foot .social { display: flex; flex-wrap: wrap; gap: 4px 20px }
+  .bio-foot .ul { font-size: 14px; color: var(--ink) }
+  .bio-col { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 4px }
+
+  /* entrada por tempo */
+  .bio-top { animation: enter 1s var(--ease) both }
+  .pocket .edition { animation: enter 1s var(--ease) .5s both }
+  .bio-h1 { animation: mask 1.4s var(--ease) .35s both }
+  .bio-dek { animation: enter 1s var(--ease) .8s both }
+  .btn.grande { animation: enter 1s var(--ease) .9s both }
+  .btn.ghost.grande { animation-delay: 1.05s }
+  .links a { animation: slide 1.1s var(--ease) both }
+  .links a:nth-child(1) { animation-delay: 1s }
+  .links a:nth-child(2) { animation-delay: 1.1s }
+  .links a:nth-child(3) { animation-delay: 1.2s }
+  .links a:nth-child(4) { animation-delay: 1.3s }
+  .links a:nth-child(5) { animation-delay: 1.4s }
+  .links a:nth-child(6) { animation-delay: 1.5s }
+  .bio-foot { animation: enter 1s var(--ease) 1.7s both }
+
+  @media (max-width: 759.98px) {
+    .pocket { grid-template-columns: 120px minmax(0, 1fr); gap: 16px }
+    .pocket .no { font-size: 56px }
+    .links .ttl { font-size: 21px }
+  }
+</style>

@@ -13,7 +13,7 @@ indicacoes:
   - cicatrizes de acne superficiais e moderadas
   - textura irregular depois da acne
   - marcas e manchas pós-espinha
-ordem: 23
+ordem: 24
 relacionados:
   - microagulhamento
   - peeling/peeling-ata

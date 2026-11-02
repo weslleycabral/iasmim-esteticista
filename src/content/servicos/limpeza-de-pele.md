@@ -17,6 +17,7 @@ indicacoes:
   - pele oleosa ou mista
   - acne leve, sem inflamação intensa
   - pele opaca, sem viço
+duracao: 1h a 1h30
 ordem: 10
 preco:
   valor: 249.9

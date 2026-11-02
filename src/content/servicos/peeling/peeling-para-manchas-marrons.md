@@ -14,7 +14,7 @@ indicacoes:
   - sardas
   - marcas escuras deixadas por espinhas
   - tom de pele desigual
-ordem: 26
+ordem: 23
 preco:
   valor: 480
   aPartirDe: true

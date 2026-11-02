@@ -17,6 +17,7 @@ indicacoes:
   - pescoço
   - perda de firmeza com a idade
   - prevenção do envelhecimento
+duracao: 1h30 a 2h, conforme as áreas
 ordem: 50
 relacionados:
   - botox

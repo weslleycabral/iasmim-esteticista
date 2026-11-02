@@ -1,90 +1,223 @@
 ---
-import { getEntry, render } from 'astro:content';
+// Contato — fiel a design/paginas-3c/contato-desktop.dc.html ("cartão de visita da redação").
+// NAP, horário, Plus Code, avaliação, pagamento e público saem de negocio.json; FAQ de contato.md.
+import { getEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import '../styles/legado.css'; // visual provisório: tirar ao refazer a página na linha 3C
-import IconWa from '../components/IconWa.astro';
+import Foto from '../components/Foto.astro';
 import Faq from '../components/Faq.astro';
-import { negocio, waLink, mapsLink, mapsRotaLink, abs } from '../lib/site';
+import Edicao from '../components/Edicao.astro';
+import Botao from '../components/Botao.astro';
+import Migalhas from '../components/Migalhas.astro';
+import { negocio, waLink, mapsRotaLink, abs, enderecoTexto, horarioTexto, cidadesTexto } from '../lib/site';
 import { ID, faqLd } from '../lib/schema';
+
+import mapa from '../assets/mapa/mapa-juazeiro-salesianos.webp';
 
 const pagina = await getEntry('paginas', 'contato');
 if (!pagina) throw new Error('Falta src/content/paginas/contato.md');
-const { Content } = await render(pagina);
 const d = pagina.data;
+
+const migalhas = [{ nome: 'Início', path: '/' }, { nome: 'Contato', path: '/contato/' }];
+const e = negocio.endereco;
+const msg = 'Olá, Iasmim! Quero agendar um horário.';
+const wa = waLink(msg);
+const horarioCurto = horarioTexto.replace(/, somente com horário marcado$/, ''); // "Segunda a sábado, 10h às 17h"
+const minusc = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
+const plusCurto = negocio.geo.plusCode.replace(/, Ceará$/, ''); // "QMRG+GF Juazeiro do Norte"
+const enderecoCopia = e.linha.replace(/, Brasil$/, '');
 ---
 <Base
   title={d.title}
   description={d.description}
-  migalhas={[{ nome: 'Início', path: '/' }, { nome: 'Contato', path: '/contato/' }]}
+  migalhas={migalhas}
   ld={[faqLd(abs('/contato/'), d.faq)]}
   atualizado={d.atualizado}
   sobre={ID.negocio}
   tipoPagina="ContactPage"
+  mensagemWa={msg}
 >
-  <div class="wrap">
-    <div class="texto">
-      <h1>{d.h1}</h1>
-      {d.resumo && <p class="lead">{d.resumo}</p>}
+  <section class="wrap hero" aria-label="Contato">
+    <div class="hero-t">
+      <div class="e1"><Migalhas itens={migalhas} /></div>
+      <h1 class="disp h1 title">Fale com a Iasmim.</h1>
+      <p class="dek e2">Uma mensagem no WhatsApp é o começo de tudo: você conta o que incomoda, a Iasmim responde com os horários livres e o valor. Atendimento somente com horário marcado, no bairro {e.bairro}, em {e.cidade}.</p>
+      <a class="disp tel e2" href={wa} aria-label={`WhatsApp ${negocio.telefone}`}>{negocio.telefone}</a>
+      <div class="cta-row e3">
+        <Botao href={wa} icone="whatsapp">Chamar no WhatsApp</Botao>
+        <a class="ul" href={negocio.instagram} rel="me" style="font-size: 15px">{negocio.instagramUsuario}</a>
+      </div>
+      <p class="fine e4">{horarioCurto}. Sem fila e sem atendimento por ordem de chegada.</p>
     </div>
+    <div class="vcard" role="group" aria-label="Cartão de visita">
+      <span class="lab vno" aria-hidden="true">Nº <Edicao /></span>
+      <span class="disp vb" aria-hidden="true">IASMIM</span>
+      <span class="lab">Esteticista · Estética facial</span>
+      <dl class="vl">
+        <dt class="lab">Endereço</dt><dd><span>{e.rua}</span><span>{e.bairro}, {e.cidade} ({e.uf})</span><span>{e.cep}</span></dd>
+        <dt class="lab">WhatsApp</dt><dd><span>{negocio.telefone}</span></dd>
+        <dt class="lab">Horário</dt><dd><span>{horarioCurto}</span><span class="mute">Somente com horário marcado</span></dd>
+        <dt class="lab">Instagram</dt><dd><span>{negocio.instagramUsuario}</span></dd>
+      </dl>
+    </div>
+  </section>
 
-    <div class="contato-grid">
-      <section class="caixa" aria-labelledby="endereco">
-        <h2 id="endereco">Endereço</h2>
-        <address>
-          <strong>{negocio.nome}</strong><br />
-          {negocio.endereco.linha}
-        </address>
-        <p>Plus Code: {negocio.geo.plusCode}</p>
-        <p class="acoes">
-          <a class="btn btn-sec" href={mapsLink}>Abrir no Google Maps</a>
-          <a class="btn btn-sec" href={mapsRotaLink}>Traçar rota</a>
-        </p>
-      </section>
-      <section class="caixa" aria-labelledby="agendamento">
-        <h2 id="agendamento">Agendamento</h2>
-        <p>WhatsApp e telefone: <a href={`tel:${negocio.telefoneE164.replace(/\s/g, '')}`}>{negocio.telefone}</a></p>
-        <p>Instagram: <a href={negocio.instagram}>{negocio.instagramUsuario}</a></p>
-        <p class="acoes"><a class="btn btn-wa" href={waLink()}><IconWa /> Chamar no WhatsApp</a></p>
-      </section>
-      <section class="caixa" aria-labelledby="horario">
-        <h2 id="horario">Horário de atendimento</h2>
-        <p>{negocio.horario.texto}</p>
-        <p>Domingo: fechado.</p>
-      </section>
+  <section id="localizacao" class="rule-t" aria-labelledby="t-onde">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 30</span><span class="lab">Onde fica</span></div>
+      <div class="c6 map mk">
+        <Foto src={mapa} alt={`Mapa do bairro ${e.bairro}, em ${e.cidade}, com o estúdio marcado no centro`}
+          sizes="(min-width: 1440px) 640px, (min-width: 760px) 46vw, calc(100vw - 32px)" />
+        <div class="pin" aria-hidden="true"><span class="pulse"></span><span class="pulse pulse2"></span><span class="dot"></span></div>
+        <span class="lab tag" aria-hidden="true">{negocio.nome}</span>
+        <span class="credit">© OpenStreetMap</span>
+      </div>
+      <div class="c4 col" style="gap: 24px">
+        <h2 class="disp h2 mk" id="t-onde" style="font-size: clamp(36px, 4vw, 56px)">{e.bairro}, {e.cidade}</h2>
+        <dl class="addr rv">
+          <dt class="lab">Endereço</dt><dd>{enderecoTexto}</dd>
+          <dt class="lab">Referência</dt><dd>{negocio.referencia}</dd>
+          <dt class="lab">Horário</dt><dd>{horarioTexto}. Domingo, fechado.</dd>
+          <dt class="lab">Atende</dt><dd>{cidadesTexto}</dd>
+        </dl>
+        <div class="cta-row rv">
+          <Botao href={mapsRotaLink} ghost>Como chegar</Botao>
+          <button type="button" class="ul copiar" data-copiar={enderecoCopia} data-feito="Endereço copiado">Copiar endereço</button>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <div class="texto prosa">
-      <Content />
+  <section id="como-chegar" class="rule-t" aria-labelledby="t-chegar">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 31</span><span class="lab">Como chegar</span></div>
+      <div class="s3 col" style="gap: clamp(32px, 4vw, 48px)">
+        <h2 class="disp h2 mk" id="t-chegar" style="font-size: clamp(36px, 4.4vw, 64px)">Três jeitos de encontrar a porta</h2>
+        <div class="ways">
+          <div class="way rv"><span class="lab gold">Pela referência</span><h3 class="disp h3">Igreja dos Salesianos</h3><p class="body">O estúdio fica a poucos passos da igreja, na {e.rua}. Não há estacionamento próprio; as ruas ao lado costumam ter vaga.</p></div>
+          <div class="way rv"><span class="lab gold">Pelo aplicativo</span><h3 class="disp h3">Busque “{negocio.nome}”</h3><p class="body">O Google Maps encontra o estúdio pelo nome. Se o seu aplicativo não achar o número da casa, use o Plus Code, que aponta para o ponto exato:</p><span class="disp plus" translate="no">{plusCurto}</span></div>
+          <div class="way rv"><span class="lab gold">De fora da cidade</span><h3 class="disp h3">Vindo de Crato ou Barbalha</h3><p class="body">Siga para {e.cidade} e, já na cidade, procure pelo bairro {e.bairro} no aplicativo de mapa. Clientes de todo o Cariri são bem-vindas.</p></div>
+        </div>
+        <div class="cta-row rv">
+          <Botao href={mapsRotaLink}>Abrir a rota no Google Maps</Botao>
+          <button type="button" class="ul copiar" data-copiar={negocio.geo.plusCode} data-feito="Plus Code copiado">Copiar o Plus Code</button>
+        </div>
+      </div>
     </div>
-    <div class="texto">
-      <Faq itens={d.faq} titulo="Dúvidas sobre atendimento e localização" />
+  </section>
+
+  <section id="ficha" class="exp" aria-labelledby="t-ficha">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 32</span><span class="lab">Ficha</span></div>
+      <div class="s3 col" style="gap: clamp(32px, 4vw, 48px)">
+        <h2 class="disp h2 mk" id="t-ficha" style="font-size: clamp(36px, 4.4vw, 64px)">O que saber antes de marcar</h2>
+        <div class="ficha rv">
+          <dl>
+            <dt class="lab">Agenda</dt><dd>Pelo WhatsApp {negocio.telefone}, com 1 a 2 dias de antecedência. A agenda de sábado costuma fechar até sexta-feira.</dd>
+            <dt class="lab">Horário</dt><dd>Segunda a sábado, das 10h às 17h, conforme a disponibilidade. Somente com horário marcado.</dd>
+            <dt class="lab">Avaliação</dt><dd>{negocio.avaliacao.valor}, obrigatória antes de qualquer procedimento. Se você faz o tratamento, no mesmo dia ou depois, o valor é descontado.</dd>
+          </dl>
+          <dl>
+            <dt class="lab">Pagamento</dt><dd>Pix, dinheiro ou cartão, com parcelamento sem juros conforme o valor. Pix e dinheiro costumam ter desconto.</dd>
+            <dt class="lab">Atende</dt><dd>Mulheres, homens e adolescentes. Menores de 16 anos, com autorização dos pais, de preferência acompanhados.</dd>
+            <dt class="lab">Cidades</dt><dd>{cidadesTexto}. O atendimento é sempre no estúdio, em Juazeiro.</dd>
+          </dl>
+        </div>
+        <p class="fine rv">Ao escrever, diga qual serviço quer ou qual é a queixa: “cravos e oleosidade”, “manchas”, “cicatriz de acne”. A resposta já vem com horários e valor.</p>
+      </div>
     </div>
-  </div>
+  </section>
+
+  <section id="perguntas" class="rule-t" aria-labelledby="t-faq">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 33</span><span class="lab">Perguntas</span></div>
+      <div class="s3 col" style="gap: clamp(28px, 3vw, 40px)">
+        <h2 class="disp h2 mk" id="t-faq" style="font-size: clamp(36px, 4.4vw, 64px)">Atendimento e localização</h2>
+        <Faq itens={d.faq} class="rv" />
+        <a class="ul rv" href="/perguntas-frequentes/" style="align-self: start; font-size: 15px">Todas as perguntas</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark" aria-labelledby="t-cta">
+    <div class="wrap sec art end">
+      <div class="c7 cta-final">
+        <span class="lab gold rv">Para fechar a edição</span>
+        <h2 class="disp h2 mk" id="t-cta">Comece pela conversa.</h2>
+        <p class="lede rv" style="max-width: 46ch">Escreva contando o que incomoda. A Iasmim responde com os horários disponíveis, o valor e o caminho até a cadeira.</p>
+      </div>
+      <div class="c5 rv col" style="gap: 16px; align-items: start">
+        <Botao href={wa} icone="whatsapp">Chamar no WhatsApp</Botao>
+        <span class="mute" style="font-size: 13px">{negocio.telefone} · {minusc(horarioCurto)}</span>
+      </div>
+    </div>
+  </section>
 </Base>
+
+<script>
+  // "Copiar endereço" / "Copiar o Plus Code": copia o texto e troca o rótulo por 2,4 s.
+  for (const bt of document.querySelectorAll<HTMLButtonElement>('button[data-copiar]')) {
+    const rotulo = bt.textContent ?? '';
+    let t = 0;
+    bt.addEventListener('click', () => {
+      if (!navigator.clipboard?.writeText) return;
+      navigator.clipboard.writeText(bt.dataset.copiar ?? '').then(() => {
+        bt.textContent = bt.dataset.feito ?? rotulo;
+        clearTimeout(t);
+        t = window.setTimeout(() => (bt.textContent = rotulo), 2400);
+      }).catch(() => {});
+    });
+  }
+</script>
+
 <style>
-  .contato-grid {
-    display: grid;
-    gap: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
-    margin: 1.5rem 0 1rem;
+  /* só da /contato/: abertura com telefone grande e cartão de visita, como chegar, ficha */
+  .col { display: flex; flex-direction: column }
+  .hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(36px, 5vw, 72px); padding-top: clamp(28px, 3.5vw, 56px); padding-bottom: clamp(48px, 5vw, 80px); align-items: center }
+  .hero-t { display: flex; flex-direction: column; gap: 22px; min-width: 0 }
+  /* a migalha fica dentro da coluna do título: sem o respiro de topo das outras páginas */
+  .e1 :global(.crumb) { padding-top: 0; gap: 4px 10px; animation: none }
+  .e1 :global(.crumb li) { gap: 10px }
+  .h1 { font-size: clamp(44px, 6vw, 88px); line-height: .96; letter-spacing: -.02em }
+  .tel { display: inline-block; font-size: clamp(34px, 4.6vw, 66px); line-height: 1; letter-spacing: -.01em; white-space: nowrap; color: var(--ink); border-bottom: 1px solid var(--ink); padding-bottom: 6px; align-self: start; transition: color .4s var(--ease), border-color .4s var(--ease) }
+  .tel:hover { color: var(--gold); border-color: var(--gold) }
+  .cta-row { gap: 12px 24px }
+  .vcard { position: relative; width: 100%; max-width: 520px; border: 1px solid var(--ink); background: var(--paper2); padding: clamp(24px, 2.6vw, 36px); display: flex; flex-direction: column; gap: 20px; transform: rotate(-1.2deg); box-shadow: 0 30px 60px -30px rgba(29, 26, 22, .5); justify-self: center }
+  .vcard::before { content: ""; position: absolute; inset: 8px; border: 1px solid var(--rule); pointer-events: none }
+  .vcard .vb { font-size: clamp(34px, 3vw, 44px); letter-spacing: .04em; line-height: 1 }
+  .vl { display: grid; grid-template-columns: minmax(88px, 100px) minmax(0, 1fr); gap: 12px 16px; font-size: 15px; line-height: 1.45; border-top: 1px solid var(--ink); padding-top: 18px }
+  .vl dt { padding-top: 2px; color: var(--gold) }
+  .vl dd { display: flex; flex-direction: column; gap: 2px; min-width: 0 }
+  .vno { position: absolute; right: clamp(20px, 2.4vw, 32px); top: clamp(18px, 2.2vw, 30px); color: var(--gold) }
+
+  /* entrada por tempo */
+  .title { animation: mask 1.4s var(--ease) .2s both }
+  .e1 { animation: enter 1s var(--ease) .5s both }
+  .e2 { animation: enter 1s var(--ease) .7s both }
+  .e3 { animation: enter 1s var(--ease) .9s both }
+  .e4 { animation: enter 1s var(--ease) 1.1s both }
+  .vcard { animation: cover 1.6s var(--ease) .4s both }
+
+  /* copiar (só com JS) */
+  button.ul { background: none; border: 0; border-bottom: 1px solid currentColor; border-radius: 0; font: inherit; font-size: 15px; color: inherit; cursor: pointer; padding: 0 }
+  :global(html:not(.js)) .copiar { display: none }
+
+  .ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 32px clamp(32px, 4vw, 56px) }
+  .way { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--ink); padding-top: 18px; min-width: 0 }
+  .plus { font-size: clamp(24px, 2.2vw, 32px); letter-spacing: .02em; line-height: 1.1 }
+
+  .ficha { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 0 clamp(32px, 4vw, 64px) }
+  .ficha dl { display: grid; grid-template-columns: minmax(110px, 140px) minmax(0, 1fr); gap: 16px 20px; font-size: 16px; line-height: 1.5; align-content: start }
+  .ficha dt { padding-top: 3px; color: var(--gold); border-bottom: 1px solid var(--rule) }
+  .ficha dd { border-bottom: 1px solid var(--rule); padding-bottom: 16px }
+
+  @media (min-width: 760px) {
+    .hero-t { gap: 26px }
   }
-  .caixa {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 0.25rem 1.4rem 0.75rem;
+  @media (min-width: 1000px) {
+    .hero { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(40px, 6.6vw, 96px) }
+    .vcard { justify-self: end }
   }
-  .caixa h2 {
-    margin-top: 1.2rem;
-    font-size: 1.3rem;
-  }
-  address {
-    font-style: normal;
-    margin-bottom: 1rem;
-  }
-  .acoes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem;
+  @media (max-width: 759.98px) {
+    .vcard { box-shadow: 0 18px 36px -18px rgba(29, 26, 22, .6) }
   }
 </style>

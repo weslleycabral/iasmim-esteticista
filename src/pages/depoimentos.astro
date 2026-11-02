@@ -1,21 +1,46 @@
 ---
-import { getEntry, render } from 'astro:content';
+// Depoimentos — fiel a design/paginas-3c/depoimentos-desktop.dc.html ("Cartas à redação").
+// Cartas de src/data/depoimentos.json (texto literal), da mais recente para a mais antiga, com filtro
+// por assunto (script pequeno abaixo; sem JS, todas aparecem e o filtro some).
+import { getEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import '../styles/legado.css'; // visual provisório: tirar ao refazer a página na linha 3C
-import Agendar from '../components/Agendar.astro';
-import Depoimentos from '../components/Depoimentos.astro';
-import { negocio, todosServicos, servicoPath } from '../lib/site';
-import { doServico, gerais } from '../lib/depoimentos';
+import Foto from '../components/Foto.astro';
+import Edicao from '../components/Edicao.astro';
+import Botao from '../components/Botao.astro';
+import { negocio, waLink, todosServicos, servicoPath, horarioTexto } from '../lib/site';
+import { depoimentos, mesCurto } from '../lib/depoimentos';
+
+import melasmaAntes from '../assets/fotos/peeling-melasma-antes-1.webp';
+import melasmaDepois from '../assets/fotos/peeling-melasma-depois-1.webp';
 
 const pagina = await getEntry('paginas', 'depoimentos');
 if (!pagina) throw new Error('Falta src/content/paginas/depoimentos.md');
-const { Content } = await render(pagina);
 const d = pagina.data;
-// Um bloco por serviço citado (na ordem dos serviços), depois os depoimentos gerais
-const porServico = (await todosServicos())
-  .map((s) => ({ servico: s, itens: doServico(s.id) }))
-  .filter((g) => g.itens.length);
-const outros = gerais();
+
+const nota = negocio.avaliacoes.nota;
+const horarioCurto = horarioTexto.replace(/, somente com horário marcado$/, '');
+const frase = (s: string) => s.charAt(0) + s.slice(1).toLowerCase(); // "Limpeza de Pele" → "Limpeza de pele"
+
+// Assuntos: um por serviço citado (na ordem dos serviços) e "Atendimento" para os gerais
+const servicos = await todosServicos();
+const GERAL = 'geral';
+const temas = [
+  ...servicos
+    .filter((s) => depoimentos.some((x) => x.servico === s.id))
+    .map((s) => ({ id: s.id, rotulo: frase(s.data.nome), filtro: frase(s.data.nome) })),
+  { id: GERAL, rotulo: 'Atendimento', filtro: 'Atendimento e resultados' },
+];
+const temaDe = (servico: string | null) => temas.find((t) => t.id === (servico ?? GERAL)) ?? temas.at(-1)!;
+
+const cartas = [...depoimentos]
+  .sort((a, b) => b.mes.localeCompare(a.mes))
+  .map((c) => ({ ...c, tema: temaDe(c.servico), grande: c.texto.length < 70 }));
+const filtros = [
+  { id: 'todas', filtro: 'Todas', n: cartas.length },
+  ...temas.map((t) => ({ id: t.id, filtro: t.filtro, n: cartas.filter((c) => c.tema.id === t.id).length })),
+];
+const resumo = (n: number, t: string) => `${n} cartas · ${t === 'Todas' ? 'todas, das mais recentes às mais antigas' : t.toLowerCase()}`;
+const msg = 'Olá, Iasmim! Vi os depoimentos e quero agendar um horário.';
 ---
 <Base
   title={d.title}
@@ -23,42 +48,169 @@ const outros = gerais();
   migalhas={[{ nome: 'Início', path: '/' }, { nome: 'Depoimentos', path: '/depoimentos/' }]}
   atualizado={d.atualizado}
   tipoPagina="CollectionPage"
+  mensagemWa={msg}
 >
-  <div class="wrap">
-    <header class="texto cab">
-      <h1>{d.h1}</h1>
-      {d.resumo && <p class="lead">{d.resumo}</p>}
-      <p class="selo">★ {negocio.avaliacoes.nota} no Google · {negocio.avaliacoes.total} avaliações · <a href={negocio.googleAvaliacoes}>Ler todas no Google</a></p>
-      <div class="prosa"><Content /></div>
-    </header>
-
-    {porServico.map(({ servico, itens }) => (
-      <section aria-labelledby={`sobre-${servico.id.replace(/\//g, '-')}`}>
-        <h2 id={`sobre-${servico.id.replace(/\//g, '-')}`}>O que dizem as clientes que fizeram {servico.data.nome.toLowerCase()}?</h2>
-        <Depoimentos itens={itens} mostrarServico={false} />
-        <p><a href={servicoPath(servico.id)}>Saiba mais sobre {servico.data.nome.toLowerCase()} em Juazeiro do Norte</a></p>
-      </section>
-    ))}
-
-    {outros.length > 0 && (
-      <section aria-labelledby="atendimento">
-        <h2 id="atendimento">O que dizem do atendimento e dos resultados?</h2>
-        <Depoimentos itens={outros} />
-      </section>
-    )}
-
-    <div class="texto">
-      <p>Já foi atendida? <a href={negocio.googleAvaliacoes}>Deixe sua avaliação no Google</a> contando qual procedimento você fez.</p>
-      <Agendar mensagem="Olá, Iasmim! Vi os depoimentos e quero agendar um horário." />
+  <section class="wrap hero" aria-label="Abertura das cartas">
+    <div class="hero-r">
+      <p class="lab gold eyebrow ch">p. 24 · Cartas à redação</p>
+      <h1 class="disp h1 title">Cartas à redação</h1>
+      <p class="dek ch"><Edicao /> clientes avaliaram a {negocio.nome} no Google. Aqui estão {cartas.length} dessas cartas, transcritas sem correções, com o primeiro nome de quem escreveu e o mês da avaliação. Alguns trechos foram resumidos; o corte aparece como “…”.</p>
+      <div class="nota-red ch">
+        <span class="lab gold">Da redação</span>
+        <p class="body">Todos os depoimentos são avaliações públicas do Google. Cada carta tem o link para a avaliação original.</p>
+        <a class="ul" href={negocio.googleAvaliacoes} style="align-self: start; font-size: 15px"><span>Ler todas as <Edicao /> no Google</span></a>
+      </div>
     </div>
-  </div>
+    <div class="score">
+      <span class="disp big" aria-hidden="true">{nota}</span>
+      <span class="stars ch" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></span>
+      <p class="disp of ch"><span class="visually-hidden">Nota {nota} </span><span>em <Edicao /> avaliações</span><span>no Google</span></p>
+    </div>
+  </section>
+
+  <section id="cartas" class="rule-t" aria-labelledby="t-cartas">
+    <div class="wrap" style="padding-top: clamp(32px, 3.3vw, 48px); padding-bottom: clamp(56px, 6vw, 88px)">
+      <div class="tabs-head">
+        <div class="tabs" role="group" aria-label="Filtrar cartas por assunto">
+          {filtros.map((f, i) => (
+            <button type="button" class:list={['tab', { on: i === 0 }]} aria-pressed={i === 0 ? 'true' : 'false'}
+              data-tema={f.id} data-resumo={resumo(f.n, f.filtro)}><span>{f.filtro}</span><span class="n">{f.n}</span></button>
+          ))}
+        </div>
+        <h2 class="lab count mute" id="t-cartas" aria-live="polite">{resumo(cartas.length, 'Todas')}</h2>
+      </div>
+      <div class="cartas">
+        {cartas.map((c) => (
+          <article class:list={['carta rv', { grande: c.grande }]} data-tema={c.tema.id}>
+            <span class="lab gold">{c.tema.rotulo}</span>
+            <blockquote class="disp" cite={c.link}>{c.texto}</blockquote>
+            <div class="sig"><span class="nome">{c.nome}</span><span class="mute">Google, {mesCurto(c.mes)}</span>{c.link && <a class="ler" href={c.link} aria-label={`Ler no Google a avaliação de ${c.nome}`}>Ler no Google</a>}</div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <article id="resultado" class="rule-t" aria-labelledby="t-resultado">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 20</span><span class="lab">Resultado</span></div>
+      <div class="c4 col" style="gap: 24px">
+        <h2 class="disp h2 mk" id="t-resultado" style="font-size: clamp(36px, 4.4vw, 64px)">Uma carta em duas fotos</h2>
+        <p class="body rv">Caso tratado com peeling para melasma: um blend clareador de gluconolactona e ácido tranexâmico, que uniformiza o tom da pele de forma gradual, sem agredir. Há mais de um ano em acompanhamento, hoje a paciente faz só sessões de manutenção.</p>
+        <p class="fine rv">Foto publicada com autorização da paciente. Resultados variam de pessoa para pessoa.</p>
+        <a class="ul rv" href={servicoPath('peeling/peeling-para-melasma')} style="align-self: start; font-size: 15px">Ler sobre o peeling para melasma</a>
+      </div>
+      <div class="c6 ba">
+        <figure class="mk">
+          <div class="pic"><Foto src={melasmaAntes} alt="Rosto antes do tratamento de melasma, com manchas escuras nas maçãs"
+            sizes="(min-width: 1440px) 310px, (min-width: 760px) 22vw, calc(50vw - 22px)" widths={[240, 320, 480, 640, 900]} /></div>
+          <figcaption><span class="lab">Antes</span><span class="lab gold">p. 20</span></figcaption>
+        </figure>
+        <figure class="mk">
+          <div class="pic"><Foto src={melasmaDepois} alt="Rosto depois do tratamento de melasma, com o tom mais uniforme"
+            sizes="(min-width: 1440px) 310px, (min-width: 760px) 22vw, calc(50vw - 22px)" widths={[240, 320, 480, 640, 900]} /></div>
+          <figcaption><span class="lab">Depois</span><span class="lab gold">p. 21</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </article>
+
+  <section class="rule-t" aria-labelledby="t-escreva">
+    <div class="wrap sec art end">
+      <div class="c2 folio rv"><span class="lab gold">p. 25</span><span class="lab">Escreva também</span></div>
+      <div class="c6 rv col" style="gap: 20px">
+        <h2 class="disp h2 mk" id="t-escreva" style="font-size: clamp(32px, 3.6vw, 52px)">Já foi atendida? Conte qual procedimento fez.</h2>
+        <p class="body">Sua avaliação no Google ajuda quem ainda está decidindo. Escreva o que mudou na sua pele e no seu dia a dia.</p>
+      </div>
+      <div class="c4 rv col" style="gap: 12px; align-items: start">
+        <Botao href={negocio.googleAvaliacoes} ghost>Deixar avaliação no Google</Botao>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark" aria-labelledby="t-cta">
+    <div class="wrap sec art end">
+      <div class="c7 cta-final">
+        <span class="lab gold rv">Para fechar a edição</span>
+        <h2 class="disp h2 mk" id="t-cta">Comece pela avaliação.</h2>
+        <p class="lede rv" style="max-width: 46ch">Mande uma mensagem contando o que incomoda: cravos, espinhas, manchas, cicatrizes, rugas, flacidez ou uma lesão na pele. A Iasmim indica o caminho.</p>
+      </div>
+      <div class="c5 rv col" style="gap: 16px; align-items: start">
+        <Botao href={waLink(msg)} icone="whatsapp">Agendar pelo WhatsApp</Botao>
+        <span class="mute" style="font-size: 13px">{negocio.telefone} · {horarioCurto.charAt(0).toLowerCase() + horarioCurto.slice(1)}</span>
+      </div>
+    </div>
+  </section>
 </Base>
+
+<script>
+  // Filtro das cartas por assunto: esconde as de outro assunto e atualiza a contagem (aria-live).
+  const grupo = document.querySelector<HTMLElement>('#cartas .tabs');
+  const contagem = document.getElementById('t-cartas');
+  const cartas = document.querySelectorAll<HTMLElement>('#cartas .carta');
+  grupo?.addEventListener('click', (ev) => {
+    const bt = (ev.target as HTMLElement).closest<HTMLButtonElement>('button[data-tema]');
+    if (!bt) return;
+    const tema = bt.dataset.tema;
+    for (const b of grupo.querySelectorAll<HTMLButtonElement>('button[data-tema]')) {
+      const on = b === bt;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', String(on));
+    }
+    for (const c of cartas) c.hidden = tema !== 'todas' && c.dataset.tema !== tema;
+    if (contagem && bt.dataset.resumo) contagem.textContent = bt.dataset.resumo;
+  });
+</script>
+
 <style>
-  .cab {
-    padding-top: 1.5rem;
+  /* só da /depoimentos/: abertura com a nota, filtro por assunto, cartas */
+  .col { display: flex; flex-direction: column }
+  .hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; padding-top: clamp(24px, 3.3vw, 48px); padding-bottom: clamp(40px, 4vw, 56px) }
+  .hero-r { display: flex; flex-direction: column; gap: 22px; min-width: 0 }
+  .h1 { font-size: clamp(46px, 6.4vw, 96px); line-height: .94; letter-spacing: -.02em }
+  .score { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 24px; align-items: end; border-top: 1px solid var(--ink); padding-top: 16px }
+  .score .big { font-size: clamp(120px, 15vw, 220px); line-height: .8; letter-spacing: -.04em; grid-row: span 2 }
+  .score .of { display: flex; flex-direction: column; font-size: clamp(20px, 1.6vw, 24px); line-height: 1.2; align-self: end }
+  .score .stars { display: flex; gap: 4px; color: var(--gold); align-self: start }
+  .score .stars span { width: 14px; height: 14px; background: currentColor; clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%) }
+  .nota-red { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--ink); padding-top: 16px }
+  .nota-red .body { max-width: 48ch }
+
+  /* entrada por tempo (tempos do canvas desta página) */
+  .title { animation: mask 1.4s var(--ease) .2s both }
+  .score .big { animation: mask 1.6s var(--ease) .5s both }
+  .ch { animation: enter 1s var(--ease) .9s both }
+  .tabs { animation: enter 1s var(--ease) 1.2s both }
+
+  /* filtro por assunto (sem JS não filtra: some) */
+  .tabs-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; border-bottom: 1px solid var(--ink); padding-bottom: 4px }
+  .tabs { display: flex; gap: 4px clamp(16px, 2.4vw, 36px); flex-wrap: wrap }
+  :global(html:not(.js)) .tabs { display: none }
+  .tab { appearance: none; background: none; border: 0; border-bottom: 1px solid transparent; border-radius: 0; margin: 0; padding: 0; font: inherit; color: var(--mute); cursor: pointer; display: inline-flex; align-items: baseline; gap: 10px; min-height: 48px; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; font-variant-numeric: tabular-nums; transition: color .4s var(--ease), border-color .4s var(--ease) }
+  .tab:hover { color: var(--ink) }
+  .tab.on { color: var(--ink); border-bottom-color: var(--ink) }
+  .tab .n { font-family: var(--disp); font-weight: 400; font-size: 16px; letter-spacing: 0; text-transform: none; color: var(--gold) }
+  .tabs-head .count { display: inline-flex; align-items: center; min-height: 48px }
+
+  /* as cartas */
+  .cartas { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 0 clamp(32px, 4vw, 56px); margin-top: 4px }
+  .carta { display: flex; flex-direction: column; gap: 16px; min-width: 0; border-bottom: 1px solid var(--rule); padding: 28px 0 24px }
+  .carta[hidden] { display: none }
+  .carta blockquote { margin: 0; font-size: clamp(19px, 1.55vw, 23px); line-height: 1.32; text-wrap: pretty }
+  .carta blockquote::before { content: "\201C"; color: var(--gold) }
+  .carta blockquote::after { content: "\201D"; color: var(--gold) }
+  .carta.grande blockquote { font-size: clamp(28px, 2.6vw, 40px); line-height: 1.12; letter-spacing: -.01em }
+  .sig { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-top: auto; font-size: 14px }
+  .sig .nome { font-weight: 600 }
+  .sig .ler { margin-left: auto; font-size: 13px; color: var(--mute); min-height: 44px; display: inline-flex; align-items: center; border-bottom: 1px solid var(--rule) }
+  .sig .ler:hover { color: var(--ink); border-color: var(--ink) }
+
+  @media (min-width: 760px) {
+    .hero { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(40px, 6.6vw, 96px); align-items: end }
+    .hero-r { gap: 24px }
   }
-  .selo {
-    color: var(--muted);
-    font-weight: 600;
+  @media (max-width: 759.98px) {
+    .score .big { font-size: clamp(110px, 34vw, 150px) }
+    .carta { padding: 22px 0 18px }
   }
 </style>

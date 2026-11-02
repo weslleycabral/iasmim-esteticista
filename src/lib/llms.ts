@@ -1,6 +1,7 @@
 // Gera /llms.txt e /llms-full.txt a partir dos .md (https://llmstxt.org)
-import { trocarFotos } from './fotos-md';
+import { getImage } from 'astro:assets';
 import { getCollection, getEntry } from 'astro:content';
+import type { ImageMetadata } from 'astro';
 import { negocio, abs, servicoPath, todosServicos, ehPeeling, waLink, precoTexto, VALOR_SOB_CONSULTA, type Servico } from './site';
 import { depoimentos, doServico, gerais, mesBR, type Depoimento } from './depoimentos';
 
@@ -76,13 +77,19 @@ const faqMd = (faq: { pergunta: string; resposta: string }[]) =>
 // Rebaixa os títulos do .md em um nível para caber dentro da seção da página
 const rebaixar = (md: string) => md.replace(/^(#{1,5}) /gm, '#$1 ');
 
-// Fotos em HTML dentro do .md (ex.: antes e depois) viram imagens em Markdown, sem as tags de layout
-const htmlParaMd = (md: string) =>
-  md
-    .replace(/<img [^>]*src="([^"]+)"[^>]*alt="([^"]+)"[^>]*\/?>/g, (_, src, alt) => `\n![${alt}](${abs(src)})\n`)
-    .replace(/<span class="ad-rotulo">[^<]*<\/span>/g, '')
-    .replace(/<figcaption>([^<]*)<\/figcaption>/g, '\n_$1_\n')
-    .replace(/<\/?(div|figure|p)[^>]*>/g, '\n');
+// Caso real em fotos (frontmatter "casos", ex. melasma): vira imagens em Markdown, em WebP de até 900 px
+const NOTA_FOTOS = 'Foto publicada com autorização da paciente. Resultados variam de pessoa para pessoa.';
+async function casosMd(s: Servico) {
+  if (!s.data.casos.length) return '';
+  const img = async (f: { src: ImageMetadata; alt: string; rotulo: string }) => {
+    const o = await getImage({ src: f.src, format: 'webp', width: Math.min(900, f.src.width) });
+    return `![${f.rotulo}: ${f.alt}](${abs(o.src)})`;
+  };
+  const blocos = await Promise.all(
+    s.data.casos.map(async (c) => [await img(c.antes), c.depois ? await img(c.depois) : null, c.legenda ? `_${c.legenda}_` : null].filter(Boolean).join('\n\n')),
+  );
+  return `\n### Fotos do caso\n\n${blocos.join('\n\n')}\n\n${NOTA_FOTOS}${s.data.casosNota ? ` ${s.data.casosNota}` : ''}\n`;
+}
 
 // Depoimentos copiados das avaliações do Google, agrupados pelo serviço citado
 const citacao = (d: Depoimento) =>
@@ -116,10 +123,9 @@ export async function llmsFullTxt() {
     return `## ${p.data.h1}\n\nURL: ${abs(caminhos[id])}\n\n${p.data.resumo ? p.data.resumo + '\n\n' : ''}${rebaixar(p.body ?? '').trim()}\n${faqMd(p.data.faq)}`;
   };
 
-  // fotos em HTML nos .md: /fotos/… → arquivo otimizado em /_astro/ (ver fotos-md.ts)
-  const corpos = new Map(await Promise.all(servicos.map(async (s) => [s.id, await trocarFotos(s.body ?? '')] as const)));
+  const fotosCaso = new Map(await Promise.all(servicos.map(async (s) => [s.id, await casosMd(s)] as const)));
   const blocoServico = (s: (typeof servicos)[number]) =>
-    `## ${s.data.h1}\n\nURL: ${abs(servicoPath(s.id))}\n\n${s.data.resumo}\n\n- Indicado para: ${s.data.indicacoes.join('; ') || '—'}\n- Outros nomes: ${s.data.outrosNomes.join(', ') || '—'}\n- Onde fazer: ${negocio.nome}, ${negocio.endereco.linha}\n- Agendamento: WhatsApp ${negocio.telefone}\n- Valor: ${precoTexto(s) ?? VALOR_SOB_CONSULTA}\n- Avaliação: ${negocio.avaliacao.valor}, descontada do procedimento\n\n${htmlParaMd(rebaixar(corpos.get(s.id) ?? '')).trim()}\n${faqMd(s.data.faq)}`;
+    `## ${s.data.h1}\n\nURL: ${abs(servicoPath(s.id))}\n\n${s.data.resumo}\n\n- Indicado para: ${s.data.indicacoes.join('; ') || '—'}\n- Outros nomes: ${s.data.outrosNomes.join(', ') || '—'}\n- Onde fazer: ${negocio.nome}, ${negocio.endereco.linha}\n- Agendamento: WhatsApp ${negocio.telefone}\n- Valor: ${precoTexto(s) ?? VALOR_SOB_CONSULTA}\n${s.data.duracao ? `- Duração da sessão: ${s.data.duracao}\n` : ''}${s.data.sessoes ? `- Sessões: ${s.data.sessoes}\n` : ''}- Avaliação: ${negocio.avaliacao.valor}, descontada do procedimento\n\n${rebaixar(s.body ?? '').trim()}\n${fotosCaso.get(s.id) ?? ''}${faqMd(s.data.faq)}`;
 
   return `# ${negocio.nome} — conteúdo completo
 

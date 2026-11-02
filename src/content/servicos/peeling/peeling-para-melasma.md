@@ -27,6 +27,27 @@ relacionados:
 imagem:
   src: ""
   alt: Tratamento de melasma com peeling clareador na Iasmim Esteticista, em Juazeiro do Norte
+casos:
+  - antes:
+      src: ../../../assets/fotos/peeling-melasma-antes-1.webp
+      alt: Paciente com melasma acentuado antes do tratamento com peeling na Iasmim Esteticista, em Juazeiro do Norte, com manchas escuras na testa e nas maçãs do rosto
+    depois:
+      src: ../../../assets/fotos/peeling-melasma-depois-1.webp
+      alt: A mesma paciente depois de mais de um ano de acompanhamento com peeling para melasma na Iasmim Esteticista, em Juazeiro do Norte, com as manchas da testa e da maçã do rosto mais claras
+    legenda: "Rosto de perfil para um lado: antes e depois de mais de um ano de acompanhamento."
+  - antes:
+      src: ../../../assets/fotos/peeling-melasma-antes-2.webp
+      alt: Paciente com melasma acentuado antes do tratamento com peeling na Iasmim Esteticista, em Juazeiro do Norte, com manchas escuras na testa e na maçã do rosto
+    depois:
+      src: ../../../assets/fotos/peeling-melasma-depois-2.webp
+      alt: A mesma paciente depois de mais de um ano de acompanhamento com peeling para melasma na Iasmim Esteticista, em Juazeiro do Norte, com as manchas mais claras
+    legenda: "Rosto de perfil para o outro lado: antes e depois de mais de um ano de acompanhamento."
+  - antes:
+      src: ../../../assets/fotos/peeling-melasma-antes-luz-uv.webp
+      alt: Rosto da paciente sob luz ultravioleta (lâmpada de Wood) antes do tratamento, que destaca as manchas de melasma na testa e nas maçãs do rosto
+      rotulo: Antes, luz UV
+    legenda: Antes do tratamento, sob luz ultravioleta (lâmpada de Wood), que mostra as manchas com mais nitidez.
+casosNota: As fotos de antes foram feitas com a paciente deitada e as de depois, sentada, com iluminação diferente.
 atualizado: 2026-11-01
 faq:
   - pergunta: Onde tratar melasma em Juazeiro do Norte?
@@ -92,21 +113,5 @@ O resultado é **clareamento gradual** das manchas ao longo das sessões. O mela
 Uma paciente chegou à Iasmim Esteticista com **melasma muito acentuado**. Ela já tinha tentado vários tratamentos, sem a melhora que esperava.
 
 Há **mais de um ano** ela faz acompanhamento com a Iasmim. As manchas **clarearam e não voltaram como eram antes**, e hoje ela faz **somente sessões de manutenção**, para manter o melasma controlado.
-
-<div class="antes-depois">
-<figure class="ad-par">
-<div class="ad-fotos"><div class="ad-item"><img src="/fotos/peeling-melasma-antes-1.webp" alt="Paciente com melasma acentuado antes do tratamento com peeling na Iasmim Esteticista, em Juazeiro do Norte, com manchas escuras na testa e nas maçãs do rosto" width="900" height="1200" loading="lazy" decoding="async" /><span class="ad-rotulo">Antes</span></div><div class="ad-item"><img src="/fotos/peeling-melasma-depois-1.webp" alt="A mesma paciente depois de mais de um ano de acompanhamento com peeling para melasma na Iasmim Esteticista, em Juazeiro do Norte, com as manchas da testa e da maçã do rosto mais claras" width="900" height="1200" loading="lazy" decoding="async" /><span class="ad-rotulo">Depois</span></div></div>
-<figcaption>Rosto de perfil para um lado: antes e depois de mais de um ano de acompanhamento.</figcaption>
-</figure>
-<figure class="ad-par">
-<div class="ad-fotos"><div class="ad-item"><img src="/fotos/peeling-melasma-antes-2.webp" alt="Paciente com melasma acentuado antes do tratamento com peeling na Iasmim Esteticista, em Juazeiro do Norte, com manchas escuras na testa e na maçã do rosto" width="900" height="1200" loading="lazy" decoding="async" /><span class="ad-rotulo">Antes</span></div><div class="ad-item"><img src="/fotos/peeling-melasma-depois-2.webp" alt="A mesma paciente depois de mais de um ano de acompanhamento com peeling para melasma na Iasmim Esteticista, em Juazeiro do Norte, com as manchas mais claras" width="900" height="1200" loading="lazy" decoding="async" /><span class="ad-rotulo">Depois</span></div></div>
-<figcaption>Rosto de perfil para o outro lado: antes e depois de mais de um ano de acompanhamento.</figcaption>
-</figure>
-<figure class="ad-uv">
-<img src="/fotos/peeling-melasma-antes-luz-uv.webp" alt="Rosto da paciente sob luz ultravioleta (lâmpada de Wood) antes do tratamento, que destaca as manchas de melasma na testa e nas maçãs do rosto" width="900" height="1200" loading="lazy" decoding="async" />
-<figcaption>Antes do tratamento, sob luz ultravioleta (lâmpada de Wood), que mostra as manchas com mais nitidez.</figcaption>
-</figure>
-<p class="ad-nota">Resultados variam de pele para pele. Imagens publicadas com autorização da paciente. As fotos de antes foram feitas com a paciente deitada e as de depois, sentada, com iluminação diferente.</p>
-</div>
 
 Cada pele responde de um jeito, e o melasma pode voltar com sol, calor e hormônios. Este caso mostra um resultado possível, não uma promessa: o plano de tratamento é definido na avaliação.

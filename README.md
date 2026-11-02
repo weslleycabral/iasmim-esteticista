@@ -23,7 +23,7 @@ Precisa de Node 22.23.4 ou mais novo (a Netlify usa Node 24; ver `netlify.toml`)
 | Peelings | `src/content/servicos/peeling/*.md` (`peeling.md` é a página que reúne todos) |
 | Início, Sobre, Contato, Perguntas frequentes, Depoimentos, Anna Pegova | `src/content/paginas/*.md` |
 | Depoimentos de clientes (trechos das avaliações do Google) | `src/data/depoimentos.json` (instruções no topo do arquivo); link das avaliações em `googleAvaliacoes`, no `negocio.json` |
-| Fotos | `public/fotos/` |
+| Fotos | `src/assets/fotos/` (o site gera AVIF e WebP em vários tamanhos) |
 | robots.txt | `public/robots.txt` |
 
 O nome do arquivo vira o endereço: `src/content/servicos/botox.md` → `/servicos/botox/`.
@@ -39,7 +39,8 @@ Abra o .md. A parte entre os `---` do topo são os dados; o resto é o texto da 
 - `outrosNomes`: outros nomes que as pessoas buscam.
 - `indicacoes`: lista curta "indicado para".
 - `relacionados`: outros serviços para indicar no fim da página (use o caminho do arquivo sem `.md`, ex. `peeling/peeling-para-melasma`).
-- `preco`: opcional. `valor` (número, ex. `249.9`), `aPartirDe: true` para "a partir de" e `detalhe` (o que o valor inclui). Aparece no resumo da página, no llms-full.txt e no JSON-LD (Offer). Sem ele, o site mostra "sob consulta pelo WhatsApp".
+- `preco`: opcional. `valor` (número, ex. `249.9`), `aPartirDe: true` para "a partir de" e `detalhe` (o que o valor inclui). Aparece na ficha da página, no llms-full.txt e no JSON-LD (Offer). Sem ele, o site mostra "definido na avaliação" (a avaliação custa R$ 100, descontada do procedimento).
+- `duracao` e `sessoes`: opcionais, só quando o texto diz (ex. `duracao: 1h a 1h30`). Entram na ficha técnica.
 - `mensagemWhatsApp`: opcional; se vazio, o botão manda "Olá, Iasmim! Quero agendar <nome>."
 - `faq`: perguntas e respostas (aparecem na página e no Google).
 - `atualizado`: data da última revisão (AAAA-MM-DD).
@@ -59,19 +60,40 @@ Não marque avaliações com Review/AggregateRating no JSON-LD: o Google não ac
 
 ## Como colocar fotos
 
-1. Salve a foto em `public/fotos/` em `.webp` ou `.jpg`, com uns 1200 px de largura e menos de 200 KB
-   (ex.: `public/fotos/limpeza-de-pele.webp`).
-2. No .md do serviço, preencha o campo `src` dentro de `imagem`:
+1. Salve a foto em `src/assets/fotos/` em `.webp` ou `.jpg`, com uns 1200 px de largura (retrato 3:4 fica melhor no topo do serviço; o site gera as versões menores sozinho).
+2. No .md do serviço, preencha o campo `src` dentro de `imagem` com o caminho **relativo ao .md**:
 
    ```yaml
+   # em src/content/servicos/limpeza-de-pele.md
    imagem:
-     src: /fotos/limpeza-de-pele.webp
+     src: ../../assets/fotos/limpeza-de-pele.webp
      alt: Limpeza de pele sendo realizada na Iasmim Esteticista, em Juazeiro do Norte
    ```
 
+   Nos peelings (uma pasta abaixo) o caminho tem um `../` a mais: `../../../assets/fotos/...`. Se o arquivo não existir, o build avisa e para.
+
 3. Confira se o `alt` descreve o que aparece na foto.
 
-Enquanto `src` estiver vazio, o site mostra um desenho neutro no lugar.
+Enquanto `src` estiver vazio (`""`), a página abre com a placa tipográfica (número e nome da matéria), sem desenho no lugar da foto.
+
+### Fotos de um caso (antes e depois)
+
+No .md do serviço, o campo `casos` é uma lista de pares. `depois` é opcional (ex. foto sob luz UV) e `rotulo` muda a etiqueta ("Antes"/"Depois" por padrão):
+
+```yaml
+casos:
+  - antes:
+      src: ../../../assets/fotos/peeling-melasma-antes-1.webp
+      alt: Paciente com melasma antes do tratamento…
+    depois:
+      src: ../../../assets/fotos/peeling-melasma-depois-1.webp
+      alt: A mesma paciente depois de mais de um ano…
+    legenda: "Rosto de perfil para um lado: antes e depois de mais de um ano de acompanhamento."
+casosNota: As fotos de antes foram feitas com a paciente deitada e as de depois, sentada.
+```
+
+A página mostra as fotos na seção "Resultado", sempre com a nota "Foto publicada com autorização da paciente. Resultados variam de pessoa para pessoa." (mais o `casosNota`, se houver). Só publique com o termo de uso de imagem assinado. Não escreva `<img>` dentro do texto do .md.
+
 A imagem de compartilhamento (WhatsApp, Facebook) é `public/og-iasmim-esteticista.png` (1200×630); troque o arquivo mantendo o nome.
 
 ## Publicar

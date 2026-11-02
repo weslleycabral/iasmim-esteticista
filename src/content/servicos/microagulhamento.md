@@ -17,6 +17,7 @@ indicacoes:
   - poros dilatados e textura irregular
   - linhas finas e perda de viço
   - manchas e melasma (com avaliação)
+duracao: Cerca de 40 minutos
 ordem: 30
 relacionados:
   - peeling/peeling-para-cicatriz-de-acne

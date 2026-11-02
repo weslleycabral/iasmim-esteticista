@@ -15,6 +15,7 @@ indicacoes:
   - rugas entre as sobrancelhas (“ruga do bravo”)
   - pés de galinha
   - prevenção de rugas de expressão
+sessoes: Aplicação em três áreas, com retorno de revisão em 15 dias incluso
 ordem: 40
 relacionados:
   - preenchimento-labial

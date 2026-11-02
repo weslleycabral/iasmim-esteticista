@@ -1,87 +1,283 @@
 ---
-import { getEntry, render } from 'astro:content';
+// Sobre — fiel a design/paginas-3c/sobre-desktop.dc.html ("Matéria de capa"). Copy do canvas; NAP,
+// horário, avaliações, formação (negocio.json), FAQ (sobre.md) e citações (depoimentos.json) saem dos dados.
+import { getEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import '../styles/legado.css'; // visual provisório: tirar ao refazer a página na linha 3C
-import Foto from '../components/FotoLegado.astro';
-import Agendar from '../components/Agendar.astro';
-import Faq from '../components/Faq.astro';
-import { negocio, abs } from '../lib/site';
+import Foto from '../components/Foto.astro';
+import Edicao from '../components/Edicao.astro';
+import Botao from '../components/Botao.astro';
+import Migalhas from '../components/Migalhas.astro';
+import { negocio, waLink, abs, servicoPath, todosServicos, horarioTexto, cidadesTexto } from '../lib/site';
 import { ID, faqLd } from '../lib/schema';
+import { depoimentos, citacao, mesBR, mesCurto } from '../lib/depoimentos';
+
+import retrato from '../assets/fotos/iasmim-estudio-6870.webp';
+import dePe from '../assets/fotos/iasmim-estudio-6871.webp';
+import luz from '../assets/fotos/iasmim-estudio-6876.webp';
 
 const pagina = await getEntry('paginas', 'sobre');
 if (!pagina) throw new Error('Falta src/content/paginas/sobre.md');
-const { Content } = await render(pagina);
 const d = pagina.data;
+
+const migalhas = [{ nome: 'Início', path: '/' }, { nome: 'Sobre', path: '/sobre/' }];
+const e = negocio.endereco;
+const nota = negocio.avaliacoes.nota;
+const avaliacao = negocio.avaliacao.valor;
 const pos = negocio.formacao[1];
-const conclusao = new Date(pos.conclusao + 'T12:00:00Z');
+const horarioCurto = horarioTexto.replace(/, somente com horário marcado$/, '');
+
+// Grade da pós: cada disciplina e o serviço que ela sustenta (copy do canvas). A lista e a ordem vêm
+// de negocio.json; disciplina sem entrada aqui vai para "Também na grade".
+type Linha = { servico: string; nome: string; sub: string } | { nota: string };
+const grade: Record<string, Linha> = {
+  'Toxina Botulínica': { servico: 'botox', nome: 'Botox', sub: 'rugas de expressão' },
+  'Peelings Estéticos e Microagulhamento': { servico: 'peeling', nome: 'Peelings e microagulhamento', sub: 'acne, manchas, cicatrizes, textura' },
+  'Eletrocauterização Estética e Jato de Plasma': { servico: 'remocao-de-sinais-e-verrugas-com-jato-de-plasma', nome: 'Remoção de sinais e verrugas', sub: 'jato de plasma e eletrocautério' },
+  'Ultraformer – Ultrassom Macrofocado e Microfocado': { servico: 'herus-hifu', nome: 'Herus HIFU', sub: 'flacidez, sem cortes' },
+  'Anatomia e fisiologia da pele saudável e distúrbios estéticos': { nota: 'Base de toda avaliação' },
+  'Cosmetologia, Nutracêuticos e Intercorrências em Procedimentos Faciais': { nota: 'Base da rotina em casa e da segurança nos procedimentos' },
+};
+const ids = new Set((await todosServicos()).map((s) => s.id));
+for (const l of Object.values(grade)) if ('servico' in l && !ids.has(l.servico)) throw new Error(`Sobre: serviço "${l.servico}" não existe`);
+const linhas = pos.disciplinasDestaque.filter((x) => grade[x]).map((x) => ({ disciplina: x, ...grade[x] }));
+const tambem = pos.disciplinasDestaque.filter((x) => !grade[x]);
+const ejunta = (l: string[]) => (l.length > 1 ? `${l.slice(0, -1).join(', ')} e ${l.at(-1)}` : l.join(''));
+
+// Cartas: as duas citações gerais (sem serviço) da capa da home
+const cartas = ['Jadna', 'Kalyne'].map((nome) => {
+  const c = depoimentos.find((x) => x.nome === nome);
+  if (!c) throw new Error(`Sobre: depoimento de ${nome} não está em depoimentos.json`);
+  return c;
+});
+
+// FAQ: texto de sobre.md (mesmo do JSON-LD); o total de avaliações vira o odômetro
+const total = String(negocio.avaliacoes.total);
+const msg = 'Olá, Iasmim! Quero agendar uma avaliação.';
 ---
 <Base
   title={d.title}
   description={d.description}
-  migalhas={[{ nome: 'Início', path: '/' }, { nome: 'Sobre', path: '/sobre/' }]}
+  migalhas={migalhas}
   ld={[faqLd(abs('/sobre/'), d.faq)]}
   atualizado={d.atualizado}
   sobre={ID.pessoa}
   tipoPagina="ProfilePage"
+  mensagemWa={msg}
 >
-  <div class="wrap">
-    <header class="sobre-hero">
-      <div class="texto">
-        <p class="eyebrow">Quem atende</p>
-        <h1>{d.h1}</h1>
-        {d.resumo && <p class="lead">{d.resumo}</p>}
+  <section class="wrap" aria-label="Abertura da matéria">
+    <Migalhas itens={migalhas} extra="Matéria de capa, p. 04" />
+    <div class="open">
+      <div class="open-t">
+        <h1 class="disp h1 title">{negocio.profissional}<span class="thin">A esteticista que atende um rosto de cada vez.</span></h1>
+        <p class="dek ch">Tecnóloga em Estética e Cosmetologia, pós-graduada em Harmonização Facial. Atende pessoalmente, somente com hora marcada, no bairro {e.bairro}, em {e.cidade}.</p>
+        <div class="meta ch">
+          <div><span class="lab gold">Formação</span><span class="v">Estética e Cosmetologia</span></div>
+          <div><span class="lab gold">Especialização</span><span class="v">Harmonização Facial</span></div>
+          <div><span class="lab gold">Google</span><span class="v">{nota} em <Edicao /> avaliações</span></div>
+        </div>
       </div>
-      <Foto src={d.imagem?.src} alt={d.imagem?.alt ?? negocio.profissional} formato="retrato" prioridade />
-    </header>
-
-    <div class="texto">
-      <section class="formacao" aria-labelledby="formacao">
-        <h2 id="formacao">Qual é a formação da Iasmim Mayara?</h2>
-        <ul>
-          <li><strong>{negocio.formacao[0].titulo}</strong> ({negocio.formacao[0].categoria.toLowerCase()}).</li>
-          <li>
-            <strong>{pos.titulo}</strong> — {pos.instituicao} ({pos.instituicaoCidade}/{pos.instituicaoUf}),
-            carga horária de {pos.cargaHoraria}, concluída em {conclusao.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' })}.
-          </li>
-        </ul>
-        <p>Algumas disciplinas da pós-graduação ligadas aos serviços oferecidos:</p>
-        <ul>
-          {pos.disciplinasDestaque.map((x) => <li>{x}</li>)}
-        </ul>
-      </section>
-
-      <div class="prosa">
-        <Content />
+      <div class="open-p">
+        <div class="frame">
+          <Foto src={retrato} alt="Iasmim Mayara em retrato de estúdio, olhando para a câmera" prioridade
+            sizes="(min-width: 1440px) 510px, (min-width: 760px) 36vw, calc(100vw - 32px)" widths={[360, 510, 720, 1020, 1400]} />
+          <span class="disp no" aria-hidden="true"><Edicao /></span>
+        </div>
+        <p class="credit-l"><span>{negocio.profissional}, no estúdio do bairro {e.bairro}.</span><span class="lab">Fig. 1</span></p>
       </div>
-
-      <Faq itens={d.faq} titulo="Perguntas sobre a Iasmim Esteticista" />
-      <Agendar mensagem="Olá, Iasmim! Quero agendar uma avaliação." />
     </div>
-  </div>
+  </section>
+
+  <article id="quem" class="rule-t" aria-labelledby="t-quem">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 04</span><span class="lab">Quem atende</span></div>
+      <div class="c6 col" style="gap: 28px">
+        <h2 class="disp h2 mk" id="t-quem" style="font-size: clamp(36px, 4.4vw, 64px)">Da avaliação ao procedimento, a mesma pessoa.</h2>
+        <p class="lede rv">{negocio.profissional} é a esteticista à frente da {negocio.nome}. É ela quem conversa com você na avaliação, quem faz o procedimento e quem orienta os cuidados em casa.</p>
+        <p class="body rv">O trabalho é voltado para a pele do rosto: acne, manchas, cicatrizes, sinais de envelhecimento e flacidez, tratados com procedimentos estéticos e com uma rotina de cuidados que continua entre as sessões. Sem fila e sem pressa: o atendimento é individual, com tempo dedicado a cada cliente, somente com horário marcado. Mulheres, homens e adolescentes são atendidos; menores de 16 anos, com autorização dos pais.</p>
+        <p class="body rv">Além dos tratamentos de pele, ela faz brow lamination e dermaplaning.</p>
+      </div>
+      <dl class="c4 facts rv">
+        <dt class="lab">Formação</dt><dd>{negocio.formacao[0].titulo}</dd>
+        <dt class="lab">Especialização</dt><dd>Pós-graduação lato sensu em Harmonização Facial, {pos.cargaHoraria}, {pos.instituicao}, concluída em {mesBR(pos.conclusao.slice(0, 7))}</dd>
+        <dt class="lab">Atendimento</dt><dd>Individual, feito pela própria Iasmim, com hora marcada</dd>
+        <dt class="lab">Onde</dt><dd>{e.rua} — {e.bairro}, {e.cidade} ({e.uf})</dd>
+        <dt class="lab">Atende</dt><dd>{cidadesTexto}</dd>
+      </dl>
+    </div>
+  </article>
+
+  <section id="jeito" class="rule-t" aria-labelledby="t-jeito">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 05</span><span class="lab">O jeito de trabalhar</span></div>
+      <div class="s3 col" style="gap: clamp(32px, 4vw, 48px)">
+        <h2 class="disp h2 mk" id="t-jeito" style="font-size: clamp(36px, 4.4vw, 64px)">Três coisas que não mudam.</h2>
+        <div class="princ">
+          <div class="pr rv"><span class="lab gold">Avaliação antes de tudo</span><h3 class="disp h3">Primeiro a conversa.</h3><p class="body">Cada tratamento começa com uma conversa sobre o histórico da pele, medicamentos, alergias e o resultado que você espera. A avaliação custa {avaliacao} e é descontada do procedimento, no mesmo dia ou depois.</p></div>
+          <div class="pr rv"><span class="lab gold">Cuidados em casa</span><h3 class="disp h3">O resultado continua entre as sessões.</h3><p class="body">A Iasmim orienta a rotina para o seu tipo de pele e é a única revendedora da linha Anna Pegova em {e.cidade}, para que o cuidado não pare quando você sai do estúdio.</p></div>
+          <div class="pr rv"><span class="lab gold">Hora marcada</span><h3 class="disp h3">Sem fila, com tempo.</h3><p class="body">Um atendimento por vez, de segunda a sábado, das 10h às 17h. Marque pelo WhatsApp com 1 a 2 dias de antecedência; a agenda de sábado costuma fechar até sexta-feira.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="sheet" class="rule-t" aria-label="Fotos de estúdio">
+    <div class="wrap" style="padding-block: clamp(40px, 5vw, 72px)">
+      <div class="sheet">
+        <figure class="mk"><div class="pic"><Foto src={dePe} alt="Iasmim Mayara de pé no estúdio de atendimento"
+          sizes="(min-width: 1440px) 420px, (min-width: 760px) 30vw, calc(33vw - 16px)" widths={[160, 240, 320, 420, 640, 840]} /></div><figcaption><span class="lab">Fig. 2</span><span>No estúdio</span></figcaption></figure>
+        <figure class="mk"><div class="pic"><Foto src={luz} alt="Retrato de Iasmim Mayara em luz suave"
+          sizes="(min-width: 1440px) 420px, (min-width: 760px) 30vw, calc(33vw - 16px)" widths={[160, 240, 320, 420, 640, 840]} /></div><figcaption><span class="lab">Fig. 3</span><span>Retrato</span></figcaption></figure>
+        <figure class="mk"><div class="pic"><Foto src={retrato} alt="Iasmim Mayara em retrato de estúdio, olhando para a câmera" style="object-position: 50% 10%"
+          sizes="(min-width: 1440px) 420px, (min-width: 760px) 30vw, calc(33vw - 16px)" widths={[160, 240, 320, 420, 640, 840]} /></div><figcaption><span class="lab">Fig. 4</span><span>Detalhe</span></figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="grade" class="rule-t" aria-labelledby="t-grade">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 06</span><span class="lab">Formação</span></div>
+      <div class="s3 col" style="gap: clamp(28px, 3vw, 40px)">
+        <h2 class="disp h2 mk" id="t-grade" style="font-size: clamp(36px, 4.4vw, 64px)">O que ela estudou, o que ela faz.</h2>
+        <p class="body rv" style="max-width: 62ch">A pós-graduação em Harmonização Facial, de {pos.cargaHoraria}, tem disciplinas que correspondem diretamente aos tratamentos oferecidos no estúdio. Abaixo, a grade e o serviço que cada uma sustenta.</p>
+        <div class="grade rv">
+          {linhas.map((l) => 'servico' in l ? (
+            <a class="ln" href={servicoPath(l.servico)}><span class="disp d">{l.disciplina}</span><span class="s"><span class="arrow" aria-hidden="true">→</span><b>{l.nome}</b><span>{l.sub}</span></span></a>
+          ) : (
+            <div class="ln"><span class="disp d">{l.disciplina}</span><span class="s"><span class="mute">{l.nota}</span></span></div>
+          ))}
+        </div>
+        {tambem.length > 0 && <p class="also-g rv">Também na grade: {ejunta(tambem)}. Graduação tecnológica em Estética e Cosmetologia.</p>}
+        <a class="ul rv" href="/servicos/" style="align-self: start; font-size: 15px">Ver todos os serviços</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="cartas" class="rule-t" aria-labelledby="t-cartas">
+    <div class="wrap sec">
+      <div class="art end">
+        <div class="c2 folio rv"><span class="lab gold">p. 07</span><span class="lab">Cartas</span></div>
+        <span class="disp big c5 rv" aria-hidden="true">{nota}</span>
+        <div class="c5 rv col" style="gap: 20px">
+          <h2 class="disp" id="t-cartas" style="font-size: clamp(28px, 2.8vw, 40px); line-height: 1.1"><Edicao /> clientes avaliaram no Google. A nota é {nota}.</h2>
+          <div class="cta-row">
+            <a class="ul" href={negocio.googleAvaliacoes} style="font-size: 15px">Ler no Google</a>
+            <a class="ul" href="/depoimentos/" style="font-size: 15px">Cartas desta edição</a>
+          </div>
+        </div>
+      </div>
+      <div class="quotes">
+        {cartas.map((c) => (
+          <figure class="q rv">
+            <blockquote class="disp" cite={c.link}>{citacao(c)}</blockquote>
+            <figcaption class="lab mute">{c.nome} · Google, {mesCurto(c.mes)}</figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <article id="anna-pegova" class="exp" aria-labelledby="t-ap">
+    <div class="wrap sec art mid">
+      <div class="c2 folio rv"><span class="lab gold">p. 26</span><span class="lab">Na prateleira</span></div>
+      <div class="c6 col" style="gap: 24px">
+        <h2 class="disp h2 mk" id="t-ap" style="font-size: clamp(36px, 4.4vw, 64px)">Para continuar em casa: Anna Pegova</h2>
+        <p class="body rv">Revendedora autorizada desde 2025 e a única da linha completa em {e.cidade}. A Iasmim monta a rotina com você: qual produto para o seu tipo de pele, em que ordem, de manhã e à noite. Quem mora em Crato, Barbalha e cidades vizinhas recebe pelos Correios.</p>
+        <a class="ul rv" href="/produtos/anna-pegova/" style="align-self: start; font-size: 15px">Ver a linha</a>
+      </div>
+      <dl class="c4 rv plantao">
+        <dt class="lab gold">Horário</dt><dd>{horarioTexto}</dd>
+        <dt class="lab gold">WhatsApp</dt><dd>{negocio.telefone}</dd>
+      </dl>
+    </div>
+  </article>
+
+  <section id="perguntas" class="rule-t" aria-labelledby="t-faq">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 32</span><span class="lab">Perguntas</span></div>
+      <div class="s3 col" style="gap: clamp(28px, 3vw, 40px)">
+        <h2 class="disp h2 mk" id="t-faq" style="font-size: clamp(36px, 4.4vw, 64px)">Sobre a Iasmim</h2>
+        <div class="faq rv">
+          {d.faq.map((f) => (
+            <details>
+              <summary class="disp">{f.pergunta}</summary>
+              <p class="body">{f.resposta.split(total).map((parte, i) => <>{i > 0 && <Edicao />}{parte}</>)}</p>
+            </details>
+          ))}
+        </div>
+        <a class="ul rv" href="/perguntas-frequentes/" style="align-self: start; font-size: 15px">Todas as perguntas</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="dark" aria-labelledby="t-cta">
+    <div class="wrap sec art end">
+      <div class="c7 cta-final">
+        <span class="lab gold rv">Para fechar a matéria</span>
+        <h2 class="disp h2 mk" id="t-cta">Comece pela avaliação.</h2>
+        <p class="lede rv" style="max-width: 46ch">Mande uma mensagem contando o que incomoda: cravos, espinhas, manchas, cicatrizes, rugas, flacidez ou uma lesão na pele. A Iasmim indica o caminho.</p>
+      </div>
+      <div class="c5 rv col" style="gap: 16px; align-items: start">
+        <Botao href={waLink(msg)} icone="whatsapp">Agendar pelo WhatsApp</Botao>
+        <span class="mute" style="font-size: 13px">{negocio.telefone} · {horarioCurto.charAt(0).toLowerCase() + horarioCurto.slice(1)}</span>
+      </div>
+    </div>
+  </section>
 </Base>
+
 <style>
-  .sobre-hero {
-    display: grid;
-    gap: 2rem;
-    padding-block: 1.5rem 1rem;
-    align-items: center;
+  /* só da /sobre/: abertura da matéria (retrato emoldurado), princípios, grade da pós, folha de contato */
+  .col { display: flex; flex-direction: column }
+
+  .open { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(28px, 3vw, 40px); padding-top: clamp(28px, 3.3vw, 48px); padding-bottom: clamp(48px, 5vw, 72px) }
+  .open-t { display: flex; flex-direction: column; gap: clamp(20px, 2vw, 28px); min-width: 0 }
+  .h1 { font-size: clamp(52px, 8vw, 118px); line-height: .9; letter-spacing: -.03em }
+  .h1 .thin { display: block; font-size: .42em; letter-spacing: -.01em; line-height: 1.05; margin-top: .35em; color: var(--ink2) }
+  .open-p { position: relative; min-width: 0 }
+  .frame { position: relative; aspect-ratio: 2 / 3; overflow: hidden; background: #2a251f; box-shadow: 0 30px 60px -30px rgba(29, 26, 22, .55) }
+  .frame img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 18% }
+  .frame .no { position: absolute; right: 14px; bottom: 8px; font-size: clamp(48px, 6vw, 88px); line-height: 1; color: #e2c588; opacity: .95 }
+  .credit-l { display: flex; justify-content: space-between; gap: 16px; align-items: baseline; margin-top: 10px; font-size: 13px; color: var(--mute) }
+  .meta { display: flex; flex-wrap: wrap; gap: 10px 28px; border-top: 1px solid var(--ink); padding-top: 18px }
+  .meta div { display: flex; flex-direction: column; gap: 4px; min-width: 0 }
+  .meta .v { font-size: 15px; line-height: 1.4 }
+
+  /* entrada por tempo (tempos do canvas desta página) */
+  .title { animation: mask 1.5s var(--ease) .2s both }
+  .frame { animation: frame 1.6s var(--ease) .35s both }
+  .ch { animation: enter 1.1s var(--ease) .9s both }
+  .credit-l { animation: enter 1s var(--ease) 1.3s both }
+  @keyframes frame { from { opacity: 0; transform: translateY(40px) } to { opacity: 1; transform: none } }
+
+  .princ { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 32px clamp(32px, 4vw, 56px) }
+  .pr { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--ink); padding-top: 18px; min-width: 0 }
+
+  .grade { display: flex; flex-direction: column; border-top: 1px solid var(--ink) }
+  .grade .ln { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px 24px; padding: 16px 0; border-bottom: 1px solid var(--rule); min-height: 56px; transition: padding .6s var(--ease), background .6s var(--ease) }
+  .grade a.ln:hover { padding-left: 12px; background: var(--paper2) }
+  .grade .d { font-size: clamp(17px, 1.3vw, 19px); line-height: 1.3 }
+  .grade .s { display: flex; align-items: baseline; gap: 10px; font-size: 14px; color: var(--mute); flex-wrap: wrap }
+  .grade .s .arrow { color: var(--gold); font-family: var(--disp); font-size: 18px; line-height: 1 }
+  .grade .s b { font-weight: 500; color: var(--ink) }
+  .also-g { font-size: 13px; line-height: 1.6; color: var(--mute); max-width: 70ch }
+
+  .sheet { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(8px, 1.5vw, 20px) }
+  .sheet figure { margin: 0; display: flex; flex-direction: column; gap: 8px; min-width: 0 }
+  .sheet .pic { aspect-ratio: 3 / 4; overflow: hidden; background: var(--paper2) }
+  .sheet .pic img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; transition: transform 1.2s var(--ease) }
+  .sheet figure:hover .pic img { transform: scale(1.03) }
+  .sheet figcaption { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; font-size: 12px; color: var(--mute) }
+
+  .plantao { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--ink); padding-top: 18px; font-size: 16px; line-height: 1.5 }
+  .plantao dt + dd + dt { margin-top: 10px }
+
+  @media (min-width: 760px) {
+    .open { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(40px, 5vw, 80px); align-items: end }
+    .open-t { padding-bottom: clamp(8px, 2vw, 32px) }
+    .grade .ln { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); align-items: baseline }
   }
-  .sobre-hero :global(.foto) {
-    max-width: 22rem;
-  }
-  @media (min-width: 56rem) {
-    .sobre-hero {
-      grid-template-columns: 1.5fr 1fr;
-    }
-  }
-  .formacao {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 0.25rem 1.4rem 0.5rem;
-    margin-bottom: 2rem;
-  }
-  .formacao h2 {
-    margin-top: 1.2rem;
+  @media (max-width: 759.98px) {
+    .frame { aspect-ratio: 4 / 5; box-shadow: 0 18px 36px -18px rgba(29, 26, 22, .6) }
+    .sheet { gap: 8px }
+    .sheet figcaption span:last-child { display: none }
   }
 </style>

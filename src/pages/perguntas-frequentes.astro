@@ -1,45 +1,428 @@
 ---
-import { getEntry, render } from 'astro:content';
+// Perguntas frequentes — fiel a design/paginas-3c/perguntas-frequentes-desktop.dc.html.
+// As perguntas e respostas saem dos .md (perguntas-frequentes.md primeiro, depois contato, sobre,
+// Anna Pegova e os serviços): o texto visível é o mesmo do FAQPage no JSON-LD.
+// A ordem e o agrupamento por tema são os do canvas; o índice no topo leva a cada tema (âncoras,
+// funciona sem JS e deixa tudo visível).
+import { getCollection, getEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
-import '../styles/legado.css'; // visual provisório: tirar ao refazer a página na linha 3C
-import Faq from '../components/Faq.astro';
-import Agendar from '../components/Agendar.astro';
-import { todosServicos, servicoPath, abs } from '../lib/site';
+import Edicao from '../components/Edicao.astro';
+import Botao from '../components/Botao.astro';
+import { negocio, waLink, mapsRotaLink, servicoPath, reais, horarioTexto, abs } from '../lib/site';
 import { faqLd } from '../lib/schema';
+
+type Item = { pergunta: string; resposta: string };
 
 const pagina = await getEntry('paginas', 'perguntas-frequentes');
 if (!pagina) throw new Error('Falta src/content/paginas/perguntas-frequentes.md');
-const { Content } = await render(pagina);
 const d = pagina.data;
-const servicos = (await todosServicos()).filter((s) => s.data.faq.length);
 const url = abs('/perguntas-frequentes/');
+
+// Banco de perguntas: a primeira ocorrência de cada pergunta vale (perguntas-frequentes.md tem prioridade)
+const outrasPaginas = ['contato', 'sobre', 'anna-pegova'];
+const servicos = await getCollection('servicos');
+const banco: Item[] = [
+  ...d.faq,
+  ...(await Promise.all(outrasPaginas.map((id) => getEntry('paginas', id)))).flatMap((p) => p?.data.faq ?? []),
+  ...servicos.flatMap((s) => s.data.faq),
+];
+const achar = (pergunta: string): Item => {
+  const item = banco.find((f) => f.pergunta === pergunta);
+  if (!item) throw new Error(`Perguntas frequentes: "${pergunta}" não está em nenhum .md de src/content/`);
+  return item;
+};
+
+const servico = (id: string) => {
+  const s = servicos.find((x) => x.id === id);
+  if (!s) throw new Error(`Perguntas frequentes: falta o serviço ${id}`);
+  return s;
+};
+const limpeza = servico('limpeza-de-pele');
+const precoLimpeza = limpeza.data.preco ? reais(limpeza.data.preco.valor) : 'valor na avaliação';
+const desde = (id: string) => {
+  const p = servico(id).data.preco;
+  return p ? `${p.aPartirDe ? 'a partir de ' : ''}${reais(p.valor)}` : 'valor na avaliação';
+};
+const e = negocio.endereco;
+const avaliacao = negocio.avaliacao.valor;
+
+type Grupo = { titulo?: string; rotulo?: string; perguntas: string[] };
+type Tema = {
+  id: string;
+  titulo: string;
+  intro: string;
+  grupos: Grupo[];
+  mais?: { href: string; texto: string };
+  comoChegar?: boolean;
+};
+
+const temas: Tema[] = [
+  {
+    id: 'agendamento',
+    titulo: 'Agendamento e atendimento',
+    intro: `Somente com horário marcado, pelo WhatsApp. Cada atendimento é feito pela própria ${negocio.profissional}.`,
+    grupos: [{ perguntas: [
+      'Como faço para agendar na Iasmim Esteticista?',
+      'Precisa agendar ou posso ir direto?',
+      'Com quanto tempo de antecedência preciso agendar?',
+      'A Iasmim Esteticista abre no sábado?',
+      'Atende homens e adolescentes?',
+      'Atende quem mora em Crato ou Barbalha?',
+      'É a própria Iasmim quem faz os procedimentos?',
+      'A Iasmim Mayara tem formação em estética?',
+      'A Iasmim Esteticista é bem avaliada?',
+    ] }],
+    mais: { href: '/sobre/', texto: 'Ler a matéria de capa sobre a Iasmim' },
+  },
+  {
+    id: 'valores',
+    titulo: 'Valores e pagamento',
+    intro: `A avaliação custa ${avaliacao} e é descontada do procedimento. Pix, dinheiro ou cartão.`,
+    grupos: [{ perguntas: [
+      'Quanto custam os procedimentos?',
+      'A avaliação é cobrada? Dá para fazer o procedimento no mesmo dia?',
+      'Quais as formas de pagamento?',
+    ] }],
+  },
+  {
+    id: 'onde',
+    titulo: 'Onde fica',
+    intro: `Bairro ${e.bairro}, em ${e.cidade}, perto da Igreja dos Salesianos.`,
+    grupos: [{ perguntas: [
+      'Onde fica a Iasmim Esteticista?',
+      'Em qual bairro fica a Iasmim Esteticista?',
+      'Tem estacionamento?',
+    ] }],
+    comoChegar: true,
+  },
+  {
+    id: 'escolher',
+    titulo: 'Qual tratamento escolher',
+    intro: `Na ${negocio.nome}, em ${e.cidade} (${e.uf}), a escolha do tratamento parte da sua queixa principal e da avaliação da pele. Se você não sabe por onde começar, mande uma mensagem pelo WhatsApp contando o que incomoda: cravos e oleosidade, espinhas, manchas, cicatrizes, rugas, flacidez ou alguma lesão na pele. A partir daí, a Iasmim indica o caminho mais adequado.`,
+    grupos: [{ perguntas: [
+      'Qual tratamento é melhor para manchas no rosto?',
+      'Qual peeling é melhor para o meu caso?',
+      'Posso fazer tratamentos estéticos grávida?',
+      'A Iasmim faz outros procedimentos além dos que estão no site?',
+    ] }],
+    mais: { href: '/servicos/', texto: 'Ver todos os tratamentos' },
+  },
+  {
+    id: 'limpeza',
+    titulo: 'Limpeza de pele',
+    intro: `Premium 3 em 1: peeling de diamante, extração de cravos e milium e mega hidratação. ${precoLimpeza}.`,
+    grupos: [{ perguntas: [
+      'Onde fazer limpeza de pele com esteticista em Juazeiro do Norte?',
+      'O que é a Limpeza de Pele Premium?',
+      'Quanto tempo dura a sessão de limpeza de pele?',
+      'Qual a diferença entre a limpeza de pele premium e uma limpeza de pele comum?',
+      'De quanto em quanto tempo devo fazer limpeza de pele?',
+      'Limpeza de pele dói?',
+      'A pele fica vermelha depois da limpeza de pele?',
+      'Posso fazer limpeza de pele com espinhas?',
+      'Posso passar maquiagem depois da limpeza de pele?',
+      'Quanto custa limpeza de pele em Juazeiro do Norte?',
+    ] }],
+    mais: { href: servicoPath('limpeza-de-pele'), texto: 'Ler sobre a limpeza de pele' },
+  },
+  {
+    id: 'peelings',
+    titulo: 'Peelings',
+    intro: 'Seis fórmulas, uma para cada queixa. As perguntas gerais primeiro; depois, cada peeling.',
+    grupos: [
+      { perguntas: [
+        'Onde fazer peeling em Juazeiro do Norte?',
+        'Qual o intervalo entre as sessões de peeling?',
+        'Peeling descasca a pele?',
+        'Posso tomar sol depois do peeling?',
+        'Qual a melhor época para fazer peeling?',
+        'Quanto custa peeling em Juazeiro do Norte?',
+      ] },
+      { titulo: 'Peeling secativo de acne', rotulo: 'ácido glicólico e salicílico', perguntas: [
+        'O peeling secativo seca as espinhas na hora?',
+        'Quais ácidos são usados no peeling secativo de acne?',
+        'Quantas sessões de peeling secativo são necessárias?',
+        'Peeling secativo substitui o tratamento com dermatologista?',
+        'Posso fazer peeling secativo usando Roacutan?',
+      ] },
+      { titulo: 'Peeling para melasma', rotulo: desde('peeling/peeling-para-melasma'), perguntas: [
+        'Melasma tem cura?',
+        'Quais ativos são usados no peeling para melasma?',
+        'O peeling para melasma funciona em quem já tentou outros tratamentos?',
+        'O peeling pode piorar o melasma?',
+        'Posso fazer peeling para melasma no calor do Cariri?',
+        'Grávida pode fazer peeling para melasma?',
+      ] },
+      { titulo: 'Peeling para manchas marrons', rotulo: desde('peeling/peeling-para-manchas-marrons'), perguntas: [
+        'Qual a diferença entre mancha marrom e melasma?',
+        'O peeling para manchas marrons é diferente do peeling para melasma?',
+        'O peeling tira mancha de espinha?',
+        'As manchas podem voltar depois do peeling?',
+      ] },
+      { titulo: 'Peeling para cicatriz de acne', rotulo: desde('peeling/peeling-para-cicatriz-de-acne'), perguntas: [
+        'Peeling acaba com buraco de espinha?',
+        'O que é melhor para cicatriz de acne, peeling ou microagulhamento?',
+        'Posso tratar cicatriz se ainda tenho espinhas?',
+      ] },
+      { titulo: 'Peeling do Mar Morto', rotulo: 'Rose de Mer', perguntas: [
+        'Peeling Rose de Mer e peeling do Mar Morto são a mesma coisa?',
+        'Para que serve o peeling do Mar Morto?',
+        'O peeling do Mar Morto descasca muito?',
+        'Posso trabalhar depois do peeling do Mar Morto?',
+      ] },
+      { titulo: 'Peeling ATA', rotulo: '5%, 15% e 20%', perguntas: [
+        'O que significa ATA?',
+        'Qual a concentração do peeling ATA?',
+        'O peeling ATA funciona para buraco de espinha?',
+        'O peeling ATA dói?',
+        'Quanto tempo dura a descamação do peeling ATA?',
+      ] },
+    ],
+    mais: { href: servicoPath('peeling'), texto: 'Ver os seis peelings' },
+  },
+  {
+    id: 'microagulhamento',
+    titulo: 'Microagulhamento',
+    intro: 'Caneta Dermapen com drug delivery de ácido hialurônico. Cerca de 40 minutos.',
+    grupos: [{ perguntas: [
+      'Quanto tempo dura a sessão de microagulhamento?',
+      'Como é o microagulhamento da Iasmim Esteticista?',
+      'Microagulhamento dói?',
+      'Quanto tempo a pele fica vermelha depois do microagulhamento?',
+      'Microagulhamento resolve cicatriz de acne?',
+      'Quantas sessões de microagulhamento são necessárias?',
+      'Posso fazer microagulhamento com acne ativa?',
+      'Quanto custa microagulhamento em Juazeiro do Norte?',
+    ] }],
+    mais: { href: servicoPath('microagulhamento'), texto: 'Ler sobre o microagulhamento' },
+  },
+  {
+    id: 'botox',
+    titulo: 'Botox',
+    intro: 'Toxina botulínica para as rugas de expressão, com retorno de revisão em 15 dias incluso.',
+    grupos: [{ perguntas: [
+      'Onde fazer botox em Juazeiro do Norte?',
+      'Quais áreas são aplicadas no botox?',
+      'Tem retorno depois do botox? É cobrado?',
+      'Em quanto tempo o botox faz efeito?',
+      'Quanto tempo dura o efeito do botox?',
+      'O botox deixa o rosto paralisado?',
+      'A aplicação de botox dói?',
+      'Quais cuidados ter depois do botox?',
+      'Quanto custa botox em Juazeiro do Norte?',
+    ] }],
+    mais: { href: servicoPath('botox'), texto: 'Ler sobre o botox' },
+  },
+  {
+    id: 'labios',
+    titulo: 'Preenchimento labial',
+    intro: 'Ácido hialurônico para volume, contorno e hidratação, planejado na avaliação.',
+    grupos: [{ perguntas: [
+      'O que é usado no preenchimento labial?',
+      'O preenchimento labial fica natural?',
+      'O preenchimento labial é permanente?',
+      'Quanto custa preenchimento labial em Juazeiro do Norte?',
+    ] }],
+    mais: { href: servicoPath('preenchimento-labial'), texto: 'Ler sobre o preenchimento labial' },
+  },
+  {
+    id: 'hifu',
+    titulo: 'Herus HIFU',
+    intro: 'Ultrassom micro e macrofocado contra a flacidez, sem cortes. Sessão de 1h30 a 2h.',
+    grupos: [{ perguntas: [
+      'O que é HIFU?',
+      'O HIFU é a mesma coisa que Ultraformer?',
+      'Quais áreas o Herus HIFU trata?',
+      'Quanto tempo dura a sessão de HIFU?',
+      'HIFU dói?',
+      'Quando aparece o resultado do HIFU?',
+      'Precisa ficar de repouso depois do HIFU?',
+      'Quanto custa Herus HIFU em Juazeiro do Norte?',
+    ] }],
+    mais: { href: servicoPath('herus-hifu'), texto: 'Ler sobre o HIFU' },
+  },
+  {
+    id: 'sinais',
+    titulo: 'Sinais e verrugas',
+    intro: 'Jato de plasma e eletrocautério, com anestesia local no ponto de cada lesão.',
+    grupos: [{ perguntas: [
+      'Onde tirar verruga ou sinal em Juazeiro do Norte?',
+      'Qualquer sinal ou pinta pode ser removido?',
+      'Qual a diferença entre jato de plasma e eletrocautério?',
+      'Remoção de nevos é a mesma coisa que remoção de sinais?',
+      'Como funciona o jato de plasma?',
+      'Remover sinal ou verruga dói?',
+      'Quanto tempo leva a cicatrização depois da remoção de sinais e verrugas?',
+      'Quais cuidados ter depois da remoção?',
+      'Fica cicatriz depois da remoção de sinais e verrugas?',
+      'A verruga pode voltar?',
+      'Dá para tratar flacidez nas pálpebras?',
+      'Quanto custa tirar verruga com jato de plasma em Juazeiro do Norte?',
+    ] }],
+    mais: { href: servicoPath('remocao-de-sinais-e-verrugas-com-jato-de-plasma'), texto: 'Ler sobre a remoção de sinais e verrugas' },
+  },
+  {
+    id: 'anna-pegova',
+    titulo: 'Anna Pegova',
+    intro: `Revendedora autorizada desde 2025 e a única da linha completa em ${e.cidade}.`,
+    grupos: [{ perguntas: [
+      'Vocês vendem produtos para usar em casa?',
+      'A Iasmim Esteticista é revendedora autorizada Anna Pegova?',
+      'Posso comprar Anna Pegova sem ser cliente da Iasmim?',
+      'A Iasmim envia produtos Anna Pegova para outras cidades?',
+      'A Iasmim Esteticista tem a linha completa da Anna Pegova?',
+      'Qual produto Anna Pegova é melhor para a minha pele?',
+      'Quanto custam os produtos Anna Pegova?',
+    ] }],
+    mais: { href: '/produtos/anna-pegova/', texto: 'Ver a linha Anna Pegova' },
+  },
+];
+
+const montados = temas.map((t) => {
+  const grupos = t.grupos.map((g) => ({ ...g, itens: g.perguntas.map(achar) }));
+  return { ...t, grupos, total: grupos.reduce((n, g) => n + g.itens.length, 0) };
+});
+const todas = montados.flatMap((t) => t.grupos.flatMap((g) => g.itens));
+const repetida = todas.find((f, i) => todas.findIndex((x) => x.pergunta === f.pergunta) !== i);
+if (repetida) throw new Error(`Perguntas frequentes: "${repetida.pergunta}" aparece em dois temas`);
+
+// Na resposta, o número de avaliações vira o odômetro (<Edicao />, mesmo número no texto) e
+// "página de contato" vira link. O texto lido continua idêntico ao do JSON-LD.
+const total = String(negocio.avaliacoes.total);
+type Parte = { t: 'txt'; v: string } | { t: 'n' } | { t: 'a'; v: string; href: string };
+const links: Record<string, string> = { 'página de contato': '/contato/' };
+const padrao = new RegExp(`(${total}(?= avaliações)|${Object.keys(links).join('|')})`);
+const partes = (texto: string): Parte[] =>
+  texto.split(padrao).filter(Boolean).map((v): Parte => (v === total ? { t: 'n' } : links[v] ? { t: 'a', v, href: links[v] } : { t: 'txt', v }));
+
+const horarioCurto = horarioTexto.replace(/, somente com horário marcado$/, '');
+const msgDuvida = 'Olá, Iasmim! Tenho uma dúvida e quero agendar.';
 ---
 <Base
   title={d.title}
   description={d.description}
   migalhas={[{ nome: 'Início', path: '/' }, { nome: 'Perguntas frequentes', path: '/perguntas-frequentes/' }]}
-  ld={[faqLd(url, d.faq)]}
+  ld={[faqLd(url, todas)]}
   atualizado={d.atualizado}
   sobre={`${url}#faq`}
 >
-  <div class="wrap">
-    <div class="texto">
-      <h1>{d.h1}</h1>
-      {d.resumo && <p class="lead">{d.resumo}</p>}
-      <div class="prosa"><Content /></div>
-      <Faq itens={d.faq} titulo="Perguntas gerais sobre a Iasmim Esteticista" id="gerais" />
-
-      <section aria-labelledby="por-servico">
-        <h2 id="por-servico">Perguntas sobre cada tratamento</h2>
-        <p>Cada página de serviço tem respostas específicas sobre indicação, sessão, cuidados e resultados:</p>
-        <ul>
-          {servicos.map((s) => (
-            <li><a href={`${servicoPath(s.id)}#perguntas`}>Perguntas sobre {s.data.nome.toLowerCase()}</a> ({s.data.faq.length})</li>
-          ))}
-        </ul>
-      </section>
-
-      <Agendar mensagem="Olá, Iasmim! Tenho uma dúvida e quero agendar." />
+  <section class="wrap hero" aria-label="Abertura das perguntas">
+    <div class="hero-r">
+      <p class="lab gold ch">Edição Nº <Edicao /> · p. 32 · Perguntas</p>
+      <h1 class="disp h1 title">O que perguntam antes de marcar.</h1>
+      <p class="dek ch">{d.resumo} Agrupadas por tema; abra só o que interessa.</p>
     </div>
+    <nav class="idx ch" aria-label="Temas desta página">
+      {montados.map((t) => (
+        <a href={`#${t.id}`}><span class="disp">{t.titulo}</span><span class="n">{t.total}<span class="visually-hidden"> perguntas</span></span></a>
+      ))}
+    </nav>
+  </section>
+
+  <div class="wrap">
+    {montados.map((t, i) => (
+      <section id={t.id} class="tema art" aria-labelledby={`t-${t.id}`}>
+        <div class="c3 folio sticky rv">
+          <span class="lab gold">Tema {i + 1} de {montados.length}</span>
+          <span class="lab">{t.titulo}</span>
+          <a class="ul voltar" href="#topo">Voltar ao índice</a>
+        </div>
+        <div class="s5 tema-in">
+          <div class="tema-head">
+            <h2 class="disp h2 mk" id={`t-${t.id}`}>{t.titulo}</h2>
+            <p class="body intro rv">{t.intro}</p>
+          </div>
+          {t.grupos.map((g) => (
+            <>
+              {g.titulo && (
+                <div class="sub rv"><h3 class="disp h3">{g.titulo}</h3>{g.rotulo && <span class="lab gold">{g.rotulo}</span>}</div>
+              )}
+              <div class="faq rv">
+                {g.itens.map((f) => (
+                  <details>
+                    <summary class="disp">{f.pergunta}</summary>
+                    <p class="body">{partes(f.resposta).map((p) => (p.t === 'n' ? <Edicao /> : p.t === 'a' ? <a href={p.href}>{p.v}</a> : p.v))}</p>
+                  </details>
+                ))}
+              </div>
+            </>
+          ))}
+          {t.comoChegar && (
+            <div class="cta-row chegar">
+              <Botao href={mapsRotaLink} ghost>Como chegar</Botao>
+              <a class="ul" href="/contato/" style="font-size: 15px">Ver o mapa e o endereço</a>
+            </div>
+          )}
+          {t.mais && <a class="ul more" href={t.mais.href}>{t.mais.texto}</a>}
+        </div>
+      </section>
+    ))}
   </div>
+
+  <section class="dark" aria-labelledby="t-cta">
+    <div class="wrap sec art end">
+      <div class="c7 cta-final">
+        <span class="lab gold rv">Não achou sua pergunta?</span>
+        <h2 class="disp h2 mk" id="t-cta">Pergunte à Iasmim.</h2>
+        <p class="lede rv" style="max-width: 46ch">Mande uma mensagem no WhatsApp contando o que incomoda e o que você quer saber. A resposta vem da própria Iasmim, e a avaliação é o próximo passo.</p>
+      </div>
+      <div class="c5 rv" style="display: flex; flex-direction: column; gap: 16px; align-items: start">
+        <Botao href={waLink(msgDuvida)} icone="whatsapp">Perguntar pelo WhatsApp</Botao>
+        <span class="mute" style="font-size: 13px">{negocio.telefone} · {horarioCurto.charAt(0).toLowerCase() + horarioCurto.slice(1)}</span>
+      </div>
+    </div>
+  </section>
 </Base>
+
+<style>
+  /* abertura */
+  .hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; padding-top: clamp(24px, 3.3vw, 48px); padding-bottom: clamp(40px, 4vw, 56px) }
+  .hero-r { display: flex; flex-direction: column; gap: 22px; min-width: 0 }
+  .h1 { font-size: clamp(44px, 6vw, 92px); line-height: .94 }
+  .title { animation-delay: .2s }
+  .ch { animation-delay: .8s }
+
+  /* índice de temas */
+  .idx { display: flex; flex-direction: column; border-top: 1px solid var(--ink) }
+  .idx a { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: baseline; min-height: 48px; padding: 10px 0; border-bottom: 1px solid var(--rule); font-size: 17px; transition: padding .5s var(--ease), color .4s var(--ease); animation: idx-slide 1s var(--ease) both }
+  .idx a:hover { padding-left: 8px; color: var(--gold) }
+  .idx .n { font-size: 12px; letter-spacing: .16em; color: var(--gold); font-variant-numeric: tabular-nums }
+  .idx a:nth-child(1) { animation-delay: .6s }
+  .idx a:nth-child(2) { animation-delay: .68s }
+  .idx a:nth-child(3) { animation-delay: .76s }
+  .idx a:nth-child(4) { animation-delay: .84s }
+  .idx a:nth-child(5) { animation-delay: .92s }
+  .idx a:nth-child(6) { animation-delay: 1s }
+  .idx a:nth-child(7) { animation-delay: 1.08s }
+  .idx a:nth-child(8) { animation-delay: 1.16s }
+  .idx a:nth-child(9) { animation-delay: 1.24s }
+  .idx a:nth-child(10) { animation-delay: 1.32s }
+  .idx a:nth-child(11) { animation-delay: 1.4s }
+  .idx a:nth-child(n + 12) { animation-delay: 1.48s }
+  @keyframes idx-slide { from { opacity: 0; transform: translateX(40px) } to { opacity: 1; transform: none } }
+
+  /* cadernos de perguntas */
+  .tema { border-top: 1px solid var(--ink); padding-block: clamp(40px, 4.4vw, 64px) }
+  .tema-in { display: flex; flex-direction: column }
+  .tema-head { display: flex; flex-direction: column; gap: 12px; margin-bottom: clamp(20px, 2.4vw, 32px) }
+  .tema-head .h2 { font-size: clamp(32px, 3.6vw, 52px) }
+  .tema-head .intro { max-width: 62ch }
+  .voltar { align-self: start; font-size: 13px; color: var(--mute) }
+  .sub { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin-top: clamp(28px, 3vw, 40px); margin-bottom: 8px }
+  .sub .h3 { font-size: clamp(22px, 2vw, 28px) }
+  .faq summary { font-size: clamp(20px, 1.7vw, 25px) }
+  .faq .body a { border-bottom: 1px solid currentColor }
+  .faq .body a:hover { color: var(--gold) }
+  .chegar { margin-top: 24px }
+  .more { align-self: start; font-size: 15px; margin-top: 20px }
+
+  @media (min-width: 760px) {
+    .hero { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(40px, 6.6vw, 96px); align-items: end }
+    .hero-r { gap: 24px }
+    .s5 { grid-column: 5 / span 8 }
+    .sticky { position: sticky; top: 24px }
+  }
+  @media (max-width: 759.98px) {
+    .faq summary { min-height: 56px; padding: 14px 0; font-size: 19px }
+  }
+</style>

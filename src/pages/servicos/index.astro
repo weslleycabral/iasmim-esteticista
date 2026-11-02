@@ -1,13 +1,105 @@
 ---
+// Serviços (sumário) — fiel a design/paginas-3c/servicos-desktop.dc.html ("Edição 229").
+// Copy editorial do canvas; a lista, a ordem, os links e os preços saem das coleções e do negocio.json.
 import Base from '../../layouts/Base.astro';
-import '../../styles/legado.css'; // visual provisório: tirar ao refazer a página na linha 3C
-import CardServico from '../../components/CardServico.astro';
-import Agendar from '../../components/Agendar.astro';
-import { servicosPrincipais, peelings, abs, servicoPath } from '../../lib/site';
+import Migalhas from '../../components/Migalhas.astro';
+import Botao from '../../components/Botao.astro';
+import { negocio, waLink, servicosPrincipais, peelings, abs, servicoPath, reais, precoTexto, horarioTexto, type Servico } from '../../lib/site';
 
 const principais = await servicosPrincipais();
 const listaPeelings = await peelings();
 const url = abs('/servicos/');
+const avaliacao = negocio.avaliacao.valor; // "R$ 100"
+const horarioCurto = horarioTexto.replace(/, somente com horário marcado$/, '');
+const minusc = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
+
+// Filtros por objetivo (chips). "tags" de cada serviço vem do canvas.
+const filtros = [
+  { id: 'todos', label: 'Todos' },
+  { id: 'acne', label: 'Acne e cravos' },
+  { id: 'manchas', label: 'Manchas' },
+  { id: 'rugas', label: 'Rugas e flacidez' },
+  { id: 'sinais', label: 'Sinais e verrugas' },
+  { id: 'labios', label: 'Lábios' },
+];
+
+// Copy editorial do canvas por serviço. Existência e ordem vêm da coleção; preço vem do .md.
+type Editorial = { ttl: string; ancora: string; pg: string; texto: string; resolve: string; meta: [string, string][]; tags: string[] };
+const precoLimpeza = principais.find((s) => s.id === 'limpeza-de-pele')?.data.preco;
+const precosPeeling = listaPeelings.filter((s) => s.data.preco?.aPartirDe).map((s) => s.data.preco!.valor);
+const peelingDesde = precosPeeling.length ? reais(Math.min(...precosPeeling)) : null;
+const valorPeelings = peelingDesde ? `Melasma e manchas marrons a partir de ${peelingDesde}; os demais, na avaliação` : 'Na avaliação';
+
+const editorial: Record<string, Editorial> = {
+  'limpeza-de-pele': {
+    ttl: 'Limpeza de Pele Premium', ancora: 'limpeza', pg: 'p. 08', tags: ['acne'],
+    texto: 'Três etapas em uma sessão: peeling de diamante, extração de cravos e milium e mega hidratação com máscara para o seu tipo de pele.',
+    resolve: 'cravos e poros obstruídos, pele oleosa ou mista, acne leve, pele opaca e sem viço.',
+    meta: [['Sessão', '1h a 1h30']],
+  },
+  peeling: {
+    ttl: 'Peelings', ancora: 'peelings', pg: 'p. 10', tags: [],
+    texto: 'Seis fórmulas, uma para cada queixa. O peeling certo depende da sua pele, do seu tom e do momento de vida; a tabela abaixo é o ponto de partida.',
+    resolve: 'espinhas inflamadas, melasma, manchas de sol, marcas e cicatrizes de acne, textura irregular.',
+    meta: [['Valor', valorPeelings]],
+  },
+  microagulhamento: {
+    ttl: 'Microagulhamento', ancora: 'microagulhamento', pg: 'p. 12', tags: ['acne', 'manchas', 'rugas'],
+    texto: 'Caneta Dermapen com drug delivery de ácido hialurônico, antissepsia e peeling no final, para estimular colágeno e elastina.',
+    resolve: 'cicatrizes de acne, poros dilatados, linhas finas, manchas e textura irregular.',
+    meta: [['Sessão', 'Cerca de 40 minutos'], ['Valor', 'Na avaliação']],
+  },
+  botox: {
+    ttl: 'Botox', ancora: 'botox', pg: 'p. 14', tags: ['rugas'],
+    texto: 'Toxina botulínica em três áreas: testa, entre as sobrancelhas e ao redor dos olhos, buscando um rosto descansado, com a expressão preservada.',
+    resolve: 'rugas da testa, a “ruga do bravo”, pés de galinha e a prevenção das rugas de expressão.',
+    meta: [['Retorno', 'Revisão em 15 dias, incluso'], ['Valor', 'Na avaliação']],
+  },
+  'preenchimento-labial': {
+    ttl: 'Preenchimento labial', ancora: 'labios', pg: 'p. 15', tags: ['labios'],
+    texto: 'Ácido hialurônico para dar volume, definir o contorno e hidratar, com a quantidade e o formato combinados na avaliação, em proporção ao rosto.',
+    resolve: 'lábios finos ou com pouco volume, contorno pouco definido, pequenas assimetrias, lábios ressecados.',
+    meta: [['Efeito', 'Temporário; o ácido é absorvido aos poucos'], ['Valor', 'Na avaliação']],
+  },
+  'herus-hifu': {
+    ttl: 'Herus HIFU', ancora: 'hifu', pg: 'p. 16', tags: ['rugas'],
+    texto: 'Ultrassom micro e macrofocado que estimula colágeno nas camadas profundas, sem cortes e sem agulhas. O resultado é progressivo, ao longo dos meses.',
+    resolve: 'flacidez leve a moderada na região dos olhos, no terço inferior do rosto, na papada e no pescoço.',
+    meta: [['Sessão', '1h30 a 2h, conforme as áreas'], ['Valor', 'Por área, na avaliação']],
+  },
+  'remocao-de-sinais-e-verrugas-com-jato-de-plasma': {
+    ttl: 'Remoção de sinais e verrugas com jato de plasma', ancora: 'plasma', pg: 'p. 18', tags: ['sinais', 'rugas'],
+    texto: 'Jato de plasma ou eletrocautério, escolhidos conforme a lesão, com anestesia local só no ponto. Sem cortes e sem pontos; a casquinha cai sozinha em cerca de uma semana.',
+    resolve: 'sinais e pintas benignos, verrugas, melanose solar, milium, as “carninhas” e flacidez das pálpebras.',
+    meta: [['Antes', 'Cada lesão é avaliada; sinais que mudaram vão primeiro ao dermatologista'], ['Valor', 'Na avaliação, pela quantidade e tamanho']],
+  },
+};
+// serviço novo sem copy editorial: entra com os dados do .md
+const ed = (s: Servico): Editorial =>
+  editorial[s.id] ?? {
+    ttl: s.data.nome, ancora: s.id, pg: '', tags: [], texto: s.data.resumo,
+    resolve: s.data.indicacoes.join(', ') + '.', meta: [['Valor', precoTexto(s) ?? 'Na avaliação']],
+  };
+
+// Os seis peelings (linhas 02.1 … 02.6): descrição do canvas; valor do .md
+const subs: Record<string, { st: string; sr: string; tags: string[] }> = {
+  'peeling/peeling-secativo-de-acne': { st: 'Peeling secativo de acne', sr: 'Ácido glicólico e salicílico para espinhas inflamadas e pele muito oleosa. Quando precisa de mais de uma sessão, a cada 15 dias.', tags: ['acne'] },
+  'peeling/peeling-para-melasma': { st: 'Peeling para melasma', sr: 'Blend clareador de gluconolactona e ácido tranexâmico, que uniformiza o tom de forma gradual.', tags: ['manchas'] },
+  'peeling/peeling-para-manchas-marrons': { st: 'Peeling para manchas marrons', sr: 'Para manchas de sol, sardas e marcas escuras deixadas por espinhas. O mesmo protocolo clareador do melasma.', tags: ['manchas'] },
+  'peeling/peeling-para-cicatriz-de-acne': { st: 'Peeling para cicatriz de acne', sr: 'Renova a pele e estimula colágeno para suavizar as marcas e os “buracos” deixados pela acne.', tags: ['acne', 'manchas'] },
+  'peeling/peeling-ata': { st: 'Peeling ATA', sr: 'Ácido tricloroacético a 5%, 15% ou 20%, para cicatrizes pontuais e mais profundas, manchas e textura.', tags: ['acne', 'manchas'] },
+  'peeling/peeling-do-mar-morto': { st: 'Peeling do Mar Morto', sr: 'Rose de Mer, com silicatos de corais: renovação intensa para textura, poros, manchas superficiais, linhas finas e viço.', tags: ['manchas', 'rugas'] },
+};
+const sub = (s: Servico) => subs[s.id] ?? { st: s.data.nome, sr: s.data.resumo, tags: [] };
+const peelingsOrdenados = listaPeelings; // ordem do campo "ordem" dos .md (a mesma do canvas)
+const idxPeeling = principais.findIndex((s) => s.id === 'peeling');
+const numPeeling = String(idxPeeling + 1).padStart(2, '0');
+
+// "12 procedimentos, em 7 serviços": cada serviço conta 1; o grupo Peelings conta pelos seus seis
+const totalProcedimentos = principais.filter((s) => s.data.tipo !== 'grupo').length + listaPeelings.length;
+const countTodos = `${totalProcedimentos} procedimentos, em ${principais.length} serviços`;
+const tagsPeelingGrupo = [...new Set(peelingsOrdenados.flatMap((s) => sub(s).tags))];
+
 const lista = {
   '@type': 'ItemList',
   '@id': `${url}#lista`,
@@ -19,57 +111,243 @@ const lista = {
     url: abs(servicoPath(s.id)),
   })),
 };
+const migalhas = [{ nome: 'Início', path: '/' }, { nome: 'Serviços', path: '/servicos/' }];
 ---
 <Base
   title="Serviços de estética em Juazeiro do Norte | Iasmim"
   description="Limpeza de pele, peelings, microagulhamento, botox, preenchimento labial, Herus HIFU e remoção de sinais com jato de plasma em Juazeiro do Norte (CE)."
-  migalhas={[{ nome: 'Início', path: '/' }, { nome: 'Serviços', path: '/servicos/' }]}
+  migalhas={migalhas}
   ld={[lista]}
   sobre={`${url}#lista`}
   tipoPagina="CollectionPage"
+  mensagemWa="Olá, Iasmim! Quero agendar uma avaliação."
 >
-  <div class="wrap">
-    <header class="texto cab">
-      <h1>Serviços de estética facial em Juazeiro do Norte</h1>
-      <p class="lead">
-        A Iasmim Esteticista, no bairro Salesianos, em Juazeiro do Norte (CE), oferece limpeza de pele, seis tipos de peeling,
-        microagulhamento, botox, preenchimento labial, Herus HIFU e remoção de sinais e verrugas com jato de plasma e eletrocautério, além da linha Anna Pegova para
-        cuidados em casa. Todos os atendimentos são feitos pela esteticista Iasmim Mayara, com horário marcado.
-      </p>
-    </header>
-
-    <section aria-labelledby="principais">
-      <h2 id="principais">Quais tratamentos estão disponíveis?</h2>
-      <ul class="grid-cards">
-        {principais.map((s) => <CardServico servico={s} />)}
-      </ul>
-    </section>
-
-    <section aria-labelledby="peelings">
-      <h2 id="peelings">Quais peelings a Iasmim Esteticista faz?</h2>
-      <p class="texto">Cada peeling tem uma indicação diferente. Veja qual combina com a sua queixa ou <a href="/servicos/peeling/">entenda como escolher o peeling certo</a>.</p>
-      <ul class="grid-cards">
-        {listaPeelings.map((s) => <CardServico servico={s} />)}
-      </ul>
-    </section>
-
-    <section aria-labelledby="outros">
-      <h2 id="outros">A Iasmim faz outros procedimentos?</h2>
-      <p class="texto">Sim. Além dos serviços acima, a Iasmim Esteticista faz brow lamination (laminação das sobrancelhas) e dermaplaning. Consulte pelo WhatsApp.</p>
-    </section>
-
-    <section aria-labelledby="produtos">
-      <h2 id="produtos">Vocês vendem produtos para usar em casa?</h2>
-      <p class="texto">Sim. A Iasmim Esteticista é a única revendedora da <a href="/produtos/anna-pegova/">linha completa Anna Pegova</a> em Juazeiro do Norte, com orientação sobre o que usar entre as sessões.</p>
-    </section>
-
-    <div class="texto">
-      <Agendar mensagem="Olá, Iasmim! Quero agendar uma avaliação." titulo="Como agendar um serviço?" />
+  <section class="wrap" aria-label="Abertura do sumário">
+    <Migalhas itens={migalhas} extra="Sumário completo, p. 08 — 18" />
+    <div class="open">
+      <h1 class="disp h1 title">Serviços</h1>
+      <div class="open-r">
+        <p class="dek ch">Sete tratamentos para a pele do rosto, todos feitos pela própria {negocio.profissional}, com hora marcada. Escolha pelo que incomoda; a avaliação confirma o caminho.</p>
+        <div class="filt ch">
+          <span class="lab gold">Por objetivo</span>
+          <div class="chips" role="group" aria-label="Filtrar serviços por objetivo" id="filtro">
+            {filtros.map((f) => (
+              <button type="button" class:list={['chip', { on: f.id === 'todos' }]} data-f={f.id} aria-pressed={f.id === 'todos' ? 'true' : 'false'}>{f.label}</button>
+            ))}
+          </div>
+          <p class="count" aria-live="polite"><span id="contagem" data-todos={countTodos}>{countTodos}</span><span class="lab">p. 08 — 18</span></p>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
+
+  <section class="wrap" aria-label="Índice de serviços" style="padding-bottom: clamp(56px, 6vw, 96px)">
+    <div class="idx" id="indice">
+      {principais.map((s, i) => {
+        const e = ed(s);
+        const grupo = s.data.tipo === 'grupo' && s.id === 'peeling';
+        const tags = grupo ? tagsPeelingGrupo : e.tags;
+        const preco = s.data.preco;
+        return (
+          <article class="ent" id={e.ancora} aria-labelledby={`t-${e.ancora}`} data-tags={tags.join(' ')} data-grupo={grupo ? '' : undefined}>
+            <span class="disp num">{String(i + 1).padStart(2, '0')}</span>
+            <div class="ent-b">
+              <h2 class="disp h3" id={`t-${e.ancora}`}><a href={servicoPath(s.id)}>{e.ttl}</a></h2>
+              <p class="body">{e.texto}</p>
+              <p class="res"><span class="lab gold">Resolve</span>{e.resolve}</p>
+            </div>
+            <dl class="ent-m">
+              {e.meta.map(([k, v]) => (<><dt class="lab">{k}</dt><dd>{v}</dd></>))}
+              {preco && !preco.aPartirDe && (
+                <><dt class="lab">Valor</dt><dd><span class="disp val">{reais(preco.valor)}</span><span class="from">Avaliação de {avaliacao} descontada</span></dd></>
+              )}
+            </dl>
+            <a class="ul go" href={servicoPath(s.id)}>Ler{e.pg && `, ${e.pg}`}</a>
+            {grupo && (
+              <div class="subs" role="list" aria-label="Os seis peelings">
+                {peelingsOrdenados.map((p, j) => {
+                  const pr = p.data.preco;
+                  return (
+                    <div class="sub" role="listitem" data-tags={sub(p).tags.join(' ')}>
+                      <span class="sn">{numPeeling}.{j + 1}</span>
+                      <a class="disp st" href={servicoPath(p.id)}>{sub(p).st}</a>
+                      <span class="sr">{sub(p).sr}</span>
+                      <span class="sv">{pr ? (<><b>{pr.aPartirDe ? 'A partir de ' : ''}{reais(pr.valor)}</b>{pr.detalhe ? `, ${pr.detalhe}` : ''}</>) : 'Valor na avaliação'}</span>
+                      <a class="ul sgo" href={servicoPath(p.id)}>Ler</a>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </article>
+        );
+      })}
+    </div>
+    <p class="count vazio" id="vazio" hidden>Nenhum procedimento com esse objetivo. Escolha outro filtro ou conte o que incomoda pelo WhatsApp.</p>
+    <div class="outros rv" style="margin-top: clamp(32px, 4vw, 56px)">
+      <span class="lab gold">Fora do sumário</span>
+      <p class="body">A Iasmim também faz brow lamination e dermaplaning; consulte pelo WhatsApp. Para continuar o cuidado em casa, ela é a única revendedora da linha completa Anna Pegova em {negocio.endereco.cidade}.</p>
+      <a class="ul" href="/produtos/anna-pegova/" style="align-self: start; font-size: 15px">Ver a linha Anna Pegova</a>
+    </div>
+  </section>
+
+  <section id="valor" class="dark" aria-labelledby="t-valor">
+    <div class="wrap sec art">
+      <div class="c2 folio rv"><span class="lab gold">p. 28</span><span class="lab">Como funciona o valor</span></div>
+      <div class="c5 col" style="gap: 24px">
+        <h2 class="disp h2 mk" id="t-valor" style="font-size: clamp(36px, 4.4vw, 64px)">A avaliação vale {avaliacao} e volta para você.</h2>
+        <p class="body rv" style="max-width: 48ch">Antes de qualquer procedimento, a Iasmim avalia a pele e o histórico: medicamentos, alergias, gravidez, o que você espera. Essa consulta custa {avaliacao}. Se você faz o tratamento, no mesmo dia ou em outra data, os {avaliacao} são descontados do valor.</p>
+        <p class="body rv" style="max-width: 48ch">É por isso que a maioria dos valores desta edição aparece como “na avaliação”: eles dependem das áreas, da quantidade de sessões e do protocolo indicado para a sua pele.</p>
+      </div>
+      <div class="s7 rv col" style="gap: clamp(28px, 3vw, 40px)">
+        <div class="ledger">
+          <div class="li"><span class="disp k">Avaliação</span><span class="disp v">{avaliacao}</span><span class="n">Obrigatória antes do primeiro procedimento. Descontada do tratamento.</span></div>
+          {precoLimpeza && <div class="li"><span class="disp k">Limpeza de Pele Premium</span><span class="disp v">{reais(precoLimpeza.valor)}</span><span class="n">Peeling de diamante, extração e mega hidratação, de 1h a 1h30.</span></div>}
+          {peelingsOrdenados.filter((p) => p.data.preco).map((p) => (
+            <div class="li"><span class="disp k">{sub(p).st}</span><span class="disp v">{reais(p.data.preco!.valor)}{p.data.preco!.aPartirDe && '+'}</span><span class="n">{p.data.preco!.aPartirDe ? 'A partir de, ' : ''}{p.data.preco!.detalhe ?? ''}.</span></div>
+          ))}
+        </div>
+        <div class="steps">
+          <div class="step"><span class="disp n" aria-hidden="true">1</span><h3 class="disp h3" style="font-size: 22px">Agenda</h3><p class="body">Pelo WhatsApp, com 1 a 2 dias de antecedência. A agenda de sábado costuma fechar até sexta-feira.</p></div>
+          <div class="step"><span class="disp n" aria-hidden="true">2</span><h3 class="disp h3" style="font-size: 22px">Mesmo dia</h3><p class="body">Alguns procedimentos podem ser feitos logo após a avaliação, se a pele estiver em condições e a sua rotina permitir os cuidados.</p></div>
+          <div class="step"><span class="disp n" aria-hidden="true">3</span><h3 class="disp h3" style="font-size: 22px">Pagamento</h3><p class="body">Pix, dinheiro ou cartão, com parcelamento sem juros conforme o valor.</p></div>
+        </div>
+        <div class="cta-row">
+          <Botao href={waLink('Olá, Iasmim! Quero agendar uma avaliação.')}>Agendar a avaliação</Botao>
+          <a class="ul" href="/perguntas-frequentes/" style="font-size: 15px">Perguntas antes de marcar</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="rule-t" aria-labelledby="t-cta">
+    <div class="wrap sec art end">
+      <div class="c7 cta-final">
+        <span class="lab gold rv">Para fechar o sumário</span>
+        <h2 class="disp h2 mk" id="t-cta">Não sabe por onde começar? Conte o que incomoda.</h2>
+        <p class="lede rv" style="max-width: 46ch">Cravos, espinhas, manchas, cicatrizes, rugas, flacidez ou uma lesão na pele. A Iasmim lê, pergunta o que falta e indica o caminho.</p>
+      </div>
+      <div class="c5 rv col" style="gap: 16px; align-items: start">
+        <Botao href={waLink('Olá, Iasmim! Quero agendar uma avaliação.')} icone="whatsapp">Agendar pelo WhatsApp</Botao>
+        <span class="mute" style="font-size: 13px">{negocio.telefone} · {minusc(horarioCurto)}</span>
+      </div>
+    </div>
+  </section>
 </Base>
+
+<script>
+  // Filtro por objetivo (sem framework). Sem JS, tudo fica visível no estado "Todos".
+  const chips = Array.from(document.querySelectorAll<HTMLButtonElement>('#filtro .chip'));
+  const ents = Array.from(document.querySelectorAll<HTMLElement>('#indice .ent'));
+  const contagem = document.getElementById('contagem');
+  const vazio = document.getElementById('vazio');
+  const tem = (el: HTMLElement, f: string) => f === 'todos' || (el.dataset.tags ?? '').split(' ').includes(f);
+
+  function aplicar(f: string, label: string) {
+    let n = 0;
+    for (const ent of ents) {
+      let mostrar: boolean;
+      if ('grupo' in ent.dataset) {
+        let k = 0;
+        for (const s of Array.from(ent.querySelectorAll<HTMLElement>('.sub'))) {
+          const ok = tem(s, f);
+          s.hidden = !ok;
+          if (ok) k += 1;
+        }
+        mostrar = k > 0;
+        n += k;
+      } else {
+        mostrar = tem(ent, f);
+        if (mostrar) n += 1;
+      }
+      ent.hidden = !mostrar;
+    }
+    if (contagem) {
+      contagem.textContent =
+        f === 'todos' ? (contagem.dataset.todos ?? '') : `${n} ${n === 1 ? 'procedimento' : 'procedimentos'} para ${label.toLowerCase()}`;
+    }
+    if (vazio) vazio.hidden = n > 0;
+    for (const c of chips) {
+      const on = c.dataset.f === f;
+      c.classList.toggle('on', on);
+      c.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+  }
+  for (const c of chips) c.addEventListener('click', () => aplicar(c.dataset.f ?? 'todos', c.textContent ?? ''));
+</script>
+
 <style>
-  .cab {
-    padding-top: 1.5rem;
+  /* só do sumário de serviços: abertura com filtro, índice de verbetes, ledger de valores */
+  .col { display: flex; flex-direction: column }
+  .open { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(24px, 3vw, 40px); padding-top: clamp(20px, 2.5vw, 36px); padding-bottom: clamp(40px, 4vw, 56px) }
+  .h1 { font-size: clamp(60px, 8.4vw, 120px); line-height: .86; letter-spacing: -.03em }
+  .title { animation: mask 1.5s var(--ease) .2s both }
+  .ch { animation: enter 1.1s var(--ease) .8s both }
+  .open-r { display: flex; flex-direction: column; gap: clamp(20px, 2vw, 28px); min-width: 0 }
+  .filt { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--ink); padding-top: 16px }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px 8px }
+  .chip { appearance: none; border: 1px solid transparent; background: transparent; color: var(--ink2); font: inherit; font-size: 12px; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; min-height: 44px; padding: 0 14px; cursor: pointer; transition: background .5s var(--ease), color .5s var(--ease), border-color .5s var(--ease) }
+  .chip:hover { border-color: var(--rule); color: var(--ink) }
+  .chip.on { background: var(--ink); color: var(--paper); border-color: var(--ink) }
+  .count { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--mute) }
+  .vazio { padding: 24px 0 0; max-width: 62ch }
+
+  /* o índice — verbetes */
+  .idx { display: flex; flex-direction: column; border-top: 1px solid var(--ink) }
+  .idx .ent { animation: slide 1.1s var(--ease) both }
+  .idx .ent:nth-child(1) { animation-delay: 1s }
+  .idx .ent:nth-child(2) { animation-delay: 1.1s }
+  .idx .ent:nth-child(3) { animation-delay: 1.2s }
+  .ent { display: grid; grid-template-columns: 2.4rem minmax(0, 1fr); gap: 12px 16px; padding: clamp(24px, 2.5vw, 36px) 0; border-bottom: 1px solid var(--rule); transition: padding .6s var(--ease), background .6s var(--ease) }
+  .ent[hidden], .sub[hidden] { display: none }
+  .ent .num { font-size: clamp(20px, 1.8vw, 26px); line-height: 1.1; color: var(--gold); padding-top: 4px }
+  .ent-b { display: flex; flex-direction: column; gap: 12px; min-width: 0 }
+  .ent-b h2 a { display: inline; border-bottom: 1px solid transparent; transition: border-color .5s var(--ease) }
+  .ent-b h2 a:hover { border-color: var(--ink) }
+  .ent-b .body { max-width: 62ch }
+  .res { font-size: clamp(16px, 1.2vw, 17px); line-height: 1.65; color: var(--ink2); max-width: 62ch }
+  .res .lab { margin-right: 10px }
+  .ent-m { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 14px; align-content: start; font-size: 15px; line-height: 1.4; grid-column: 2 }
+  .ent-m dt { color: var(--gold); padding-top: 3px }
+  .ent-m .val { font-size: clamp(22px, 1.8vw, 28px); line-height: 1; color: var(--ink) }
+  .ent-m .from { font-size: 13px; color: var(--mute); display: block; margin-top: 4px }
+  .go { grid-column: 2; font-size: 14px; align-self: start; justify-self: start }
+  .subs { display: flex; flex-direction: column; border-top: 1px solid var(--ink); margin-top: 8px; grid-column: 1 / -1 }
+  .sub { display: grid; grid-template-columns: 2.4rem minmax(0, 1fr); gap: 4px 16px; padding: 14px 0; border-bottom: 1px solid var(--rule); min-height: 56px; transition: padding .6s var(--ease), background .6s var(--ease) }
+  .sub:last-child { border-bottom: 0 }
+  .sub:hover { padding-left: 10px; background: var(--paper2) }
+  .sub .sn { font-size: 14px; color: var(--gold); font-variant-numeric: tabular-nums; padding-top: 3px }
+  .sub .st { font-size: clamp(18px, 1.5vw, 22px); line-height: 1.2 }
+  .sub .sr { font-size: 14px; color: var(--mute); line-height: 1.45; grid-column: 2 }
+  .sub .sv { font-size: 14px; color: var(--ink2); grid-column: 2 }
+  .sub .sv b { font-weight: 500; color: var(--ink) }
+  .sub .sgo { grid-column: 2; font-size: 14px }
+  .outros { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--ink); padding-top: 18px; max-width: 62ch }
+
+  /* valor e avaliação */
+  .ledger { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0; border-top: 1px solid #5e574d }
+  .ledger .li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 24px; align-items: baseline; padding: 18px 0; border-bottom: 1px solid #5e574d }
+  .ledger .li .k { font-size: clamp(18px, 1.6vw, 24px); line-height: 1.2 }
+  .ledger .li .v { font-size: clamp(22px, 2vw, 32px); line-height: 1; color: var(--goldl); white-space: nowrap }
+  .ledger .li .n { grid-column: 1 / -1; font-size: 14px; line-height: 1.5; color: #b8afa1; max-width: 60ch }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 28px clamp(28px, 3vw, 48px) }
+  .step { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #5e574d; padding-top: 16px; min-width: 0 }
+  .step .n { font-size: 36px; line-height: 1; color: var(--goldl) }
+
+  @media (min-width: 760px) {
+    .open { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(40px, 5vw, 80px); align-items: end }
+    .ent { grid-template-columns: 3.5rem minmax(0, 1fr) minmax(180px, 240px) auto; gap: 16px clamp(20px, 2.5vw, 40px); align-items: start }
+    .ent:hover { padding-left: 12px; background: var(--paper2) }
+    .ent-m { grid-column: auto; grid-template-columns: minmax(0, 1fr); gap: 10px }
+    .go { grid-column: auto; justify-self: end; margin-top: 2px }
+    .sub { grid-template-columns: 3rem minmax(0, 1fr) minmax(180px, 240px) auto; gap: 4px clamp(20px, 2.5vw, 40px); align-items: baseline }
+    .sub .sr { grid-column: 2 }
+    .sub .sv { grid-column: 3; grid-row: 1 }
+    .sub .sgo { grid-column: 4; grid-row: 1; justify-self: end }
+    .subs { margin-top: 12px }
+    .ledger { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(32px, 4vw, 64px) }
+  }
+  @media (max-width: 759.98px) {
+    .chip { font-size: 11px; padding: 0 12px }
   }
 </style>
