@@ -8,7 +8,8 @@ Site estático em [Astro](https://astro.build) para https://iasmimesteticista.co
 npm install          # uma vez
 npm run dev          # abre em http://localhost:4321 e atualiza enquanto você edita
 npm run build        # gera o site em dist/
-npm run check:dist   # confere dist/: H1, título, descrição, canonical, JSON-LD, links, NAP, sitemap, llms.txt
+npm run check:dist   # confere dist/: H1, título, descrição, canonical, OG, JSON-LD (FAQ e migalha iguais às visíveis),
+                     # links, NAP, preços, promessas proibidas, imagens, sitemap, robots.txt, llms.txt
 npm run verify       # build + conferência
 ```
 
@@ -24,7 +25,11 @@ Precisa de Node 22.23.4 ou mais novo (a Netlify usa Node 24; ver `netlify.toml`)
 | Início, Sobre, Contato, Perguntas frequentes, Depoimentos, Anna Pegova | `src/content/paginas/*.md` |
 | Depoimentos de clientes (trechos das avaliações do Google) | `src/data/depoimentos.json` (instruções no topo do arquivo); link das avaliações em `googleAvaliacoes`, no `negocio.json` |
 | Fotos | `src/assets/fotos/` (o site gera AVIF e WebP em vários tamanhos) |
-| robots.txt | `public/robots.txt` |
+| robots.txt (libera buscadores e robôs de IA) | `public/robots.txt` |
+| Ícones, logo e imagem de compartilhamento | `public/` (ver "Ícones e imagem de compartilhamento") |
+| Dados estruturados (JSON-LD) | `src/lib/schema.ts` (montado no `<head>` por `src/layouts/Base.astro`) |
+| `/llms.txt` e `/llms-full.txt` | `src/lib/llms.ts` (gerados dos .md e do `negocio.json`) |
+| Redirecionamentos e cabeçalhos | `netlify.toml` |
 
 O nome do arquivo vira o endereço: `src/content/servicos/botox.md` → `/servicos/botox/`.
 `/llms.txt`, `/llms-full.txt` e o sitemap são gerados sozinhos a partir dos .md.
@@ -43,7 +48,7 @@ Abra o .md. A parte entre os `---` do topo são os dados; o resto é o texto da 
 - `duracao` e `sessoes`: opcionais, só quando o texto diz (ex. `duracao: 1h a 1h30`). Entram na ficha técnica.
 - `mensagemWhatsApp`: opcional; se vazio, o botão manda "Olá, Iasmim! Quero agendar <nome>."
 - `faq`: perguntas e respostas (aparecem na página e no Google).
-- `atualizado`: data da última revisão (AAAA-MM-DD).
+- `atualizado`: data da última revisão (AAAA-MM-DD). **Mude sempre que mexer no texto**: ela aparece na página ("Atualizado em…" ou "Página revisada em…" no rodapé), no JSON-LD (`dateModified`), no `lastmod` do sitemap e no llms.txt. Não use a data do dia sem ter mudado nada: o Google deixa de confiar no `lastmod`.
 
 No texto, use títulos `##` em forma de pergunta e comece cada seção respondendo direto.
 Valores que contenham `: ` precisam de aspas: `description: "Texto: com dois-pontos"`.
@@ -94,7 +99,27 @@ casosNota: As fotos de antes foram feitas com a paciente deitada e as de depois,
 
 A página mostra as fotos na seção "Resultado", sempre com a nota "Foto publicada com autorização da paciente. Resultados variam de pessoa para pessoa." (mais o `casosNota`, se houver). Só publique com o termo de uso de imagem assinado. Não escreva `<img>` dentro do texto do .md.
 
-A imagem de compartilhamento (WhatsApp, Facebook) é `public/og-iasmim-esteticista.png` (1200×630); troque o arquivo mantendo o nome.
+## Ícones e imagem de compartilhamento
+
+Todas as fotos do site saem em AVIF/WebP. As exceções, de propósito, ficam em `public/`:
+
+| Arquivo | Para quê | Por que não WebP |
+| --- | --- | --- |
+| `og-iasmim-esteticista.jpg` (1200×630, < 300 KB) | prévia do link no WhatsApp, Facebook, Instagram, LinkedIn e X | WhatsApp, Meta e LinkedIn não documentam WebP em `og:image`; o WhatsApp é o canal principal |
+| `apple-touch-icon.png` (180×180) | ícone na tela inicial do iPhone | o iOS só aceita PNG |
+| `favicon.ico` (16/32/48) e `favicon.svg` | aba do navegador e resultado do Google | — |
+| `logo-iasmim-esteticista.webp` (512×512) | `logo` no JSON-LD | já é WebP |
+
+A imagem de compartilhamento é gerada a partir de `../design/og/og.html` (foto + textos): edite o HTML e rode `node gerar.mjs` dentro de `../design/og/`. Depois de trocar, o WhatsApp pode levar dias para mostrar a nova (ele guarda a prévia em cache); o [Sharing Debugger](https://developers.facebook.com/tools/debug/) força a atualização na Meta.
+
+## Decisões de SEO (não desfazer sem motivo)
+
+- `/bio/` (links do Instagram) tem `noindex`, fica fora do sitemap e do llms.txt: repete a página inicial e a navegação, com pouco texto próprio. As outras páginas continuam ligadas a ela normalmente.
+- Migalha visível = `BreadcrumbList` no JSON-LD. Página sem migalha visível (inicial, depoimentos, perguntas frequentes, bio) não tem `BreadcrumbList`.
+- Sem `AggregateRating`/`Review` e sem `Product` (sem preço publicado, o Google considera inválido): a Anna Pegova é um `Service` "Revenda Anna Pegova" com `brand`.
+- Sem versões `.md` de cada página: o Google diz que não precisa de arquivos especiais para IA; o `/llms.txt` e o `/llms-full.txt` cobrem os assistentes que leem esse formato. Os dois `.txt` têm `X-Robots-Tag: noindex` (não aparecem na busca, mas os robôs de IA leem).
+- O número de avaliações (`avaliacoes.total`) aparece no HTML como texto puro (o odômetro desenha os algarismos só com CSS). Ao atualizar o total, procure também "229" nos .md (alguns textos citam o número).
+- Pergunta nova em `perguntas-frequentes.md` só aparece na página `/perguntas-frequentes/` depois de entrar na lista `temas` de `src/pages/perguntas-frequentes.astro` (o check-dist confere que o FAQ visível e o JSON-LD batem).
 
 ## Publicar
 
@@ -114,6 +139,7 @@ A Netlify roda `npm run build && node scripts/check-dist.mjs` e publica `dist/`.
    - `A` em `iasmimesteticista.com.br` → `75.2.60.5`
    - `CNAME` em `www` → `iasmimesteticista.netlify.app`
 3. Esperar o DNS propagar (minutos a algumas horas); a Netlify emite o HTTPS (Let's Encrypt) sozinha.
-4. Depois: cadastrar o domínio no Google Search Console e enviar `https://iasmimesteticista.com.br/sitemap-index.xml`.
+4. Quando `https://iasmimesteticista.com.br/` abrir: tirar os `#` do redirecionamento de `iasmimesteticista.netlify.app` no `netlify.toml` e publicar de novo (evita o site em dois endereços). Conferir `http://www.iasmimesteticista.com.br/sobre` → `https://iasmimesteticista.com.br/sobre/` (301).
+5. Cadastrar o domínio no Google Search Console e no Bing Webmaster Tools (dá para importar do Search Console) e enviar `https://iasmimesteticista.com.br/sitemap-index.xml` nos dois. Testar a página inicial e uma de serviço no [Teste de pesquisa aprimorada](https://search.google.com/test/rich-results) e no [validador do schema.org](https://validator.schema.org/).
 
 Se o nome `iasmimesteticista` já estiver em uso na Netlify, use outro e troque no `CNAME`.

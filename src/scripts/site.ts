@@ -3,7 +3,7 @@
 //  1. reveals .rv/.mk por IntersectionObserver (classe .in, uma vez só)
 //  2. rolagem com inércia só para roda de mouse; âncoras (#secao) rolam suave
 //  3. odômetro do número da edição (Edicao.astro), guardado em localStorage "iasmim-edicao"
-//  4. menu <details> do celular fecha ao escolher um link
+//  4. menu <details> do celular fecha ao escolher um link, ao tocar fora e com Esc
 
 const mm = (q: string) => (window.matchMedia ? window.matchMedia(q) : ({ matches: false } as MediaQueryList));
 const reduz = mm('(prefers-reduced-motion: reduce)');
@@ -35,6 +35,23 @@ function reveals() {
     { rootMargin: '0px 0px -15% 0px', threshold: 0 },
   );
   els.forEach((el) => io.observe(el));
+
+  // Foto lazy dentro de um .mk: enquanto a máscara (clip-path) esconde tudo, o Chromium não começa a
+  // baixar a imagem, e ela só chega depois que a máscara já abriu (caixa vazia). Quando o bloco
+  // chega perto da tela, as fotos dele passam a eager e carregam antes da revelação.
+  const comFoto = [...els].filter((el) => el.querySelector('img[loading="lazy"]'));
+  if (!comFoto.length) return;
+  const perto = new IntersectionObserver(
+    (ents) => {
+      for (const en of ents) {
+        if (!en.isIntersecting) continue;
+        en.target.querySelectorAll<HTMLImageElement>('img[loading="lazy"]').forEach((img) => (img.loading = 'eager'));
+        perto.unobserve(en.target);
+      }
+    },
+    { rootMargin: '1000px 0px' },
+  );
+  comFoto.forEach((el) => perto.observe(el));
 }
 
 /* 2. rolagem com inércia (lerp 0,1) só para roda de mouse em desktop */
@@ -201,11 +218,19 @@ function odometro() {
   }, 600);
 }
 
-/* 4. menu do celular: fecha ao tocar num link */
+/* 4. menu do celular: fecha ao tocar num link, ao tocar fora dele e com Esc (o foco volta ao "Menu") */
 function menu() {
   document.querySelectorAll<HTMLDetailsElement>('details.menu').forEach((d) => {
     d.addEventListener('click', (e) => {
       if ((e.target as Element).closest('a')) d.removeAttribute('open');
+    });
+    document.addEventListener('click', (e) => {
+      if (d.open && !d.contains(e.target as Node)) d.removeAttribute('open');
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || !d.open) return;
+      d.removeAttribute('open');
+      d.querySelector('summary')?.focus();
     });
   });
 }

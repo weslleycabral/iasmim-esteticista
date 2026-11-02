@@ -69,6 +69,7 @@ const temas: Tema[] = [
       'Atende homens e adolescentes?',
       'Atende quem mora em Crato ou Barbalha?',
       'É a própria Iasmim quem faz os procedimentos?',
+      'A Iasmim Esteticista é uma clínica de estética?',
       'A Iasmim Mayara tem formação em estética?',
       'A Iasmim Esteticista é bem avaliada?',
     ] }],
@@ -100,6 +101,7 @@ const temas: Tema[] = [
     titulo: 'Qual tratamento escolher',
     intro: `Na ${negocio.nome}, em ${e.cidade} (${e.uf}), a escolha do tratamento parte da sua queixa principal e da avaliação da pele. Se você não sabe por onde começar, mande uma mensagem pelo WhatsApp contando o que incomoda: cravos e oleosidade, espinhas, manchas, cicatrizes, rugas, flacidez ou alguma lesão na pele. A partir daí, a Iasmim indica o caminho mais adequado.`,
     grupos: [{ perguntas: [
+      'Onde fazer harmonização facial em Juazeiro do Norte?',
       'Qual tratamento é melhor para manchas no rosto?',
       'Qual peeling é melhor para o meu caso?',
       'Posso fazer tratamentos estéticos grávida?',
@@ -301,7 +303,6 @@ const msgDuvida = 'Olá, Iasmim! Tenho uma dúvida e quero agendar.';
 <Base
   title={d.title}
   description={d.description}
-  migalhas={[{ nome: 'Início', path: '/' }, { nome: 'Perguntas frequentes', path: '/perguntas-frequentes/' }]}
   ld={[faqLd(url, todas)]}
   atualizado={d.atualizado}
   sobre={`${url}#faq`}

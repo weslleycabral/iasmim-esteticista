@@ -24,6 +24,8 @@ const e = negocio.endereco;
 const nota = negocio.avaliacoes.nota;
 const avaliacao = negocio.avaliacao.valor;
 const pos = negocio.formacao[1];
+const { conclusao, disciplinasDestaque } = pos;
+if (!conclusao || !disciplinasDestaque) throw new Error('Sobre: negocio.json → formacao[1] precisa de "conclusao" e "disciplinasDestaque"');
 const horarioCurto = horarioTexto.replace(/, somente com horário marcado$/, '');
 
 // Grade da pós: cada disciplina e o serviço que ela sustenta (copy do canvas). A lista e a ordem vêm
@@ -39,8 +41,8 @@ const grade: Record<string, Linha> = {
 };
 const ids = new Set((await todosServicos()).map((s) => s.id));
 for (const l of Object.values(grade)) if ('servico' in l && !ids.has(l.servico)) throw new Error(`Sobre: serviço "${l.servico}" não existe`);
-const linhas = pos.disciplinasDestaque.filter((x) => grade[x]).map((x) => ({ disciplina: x, ...grade[x] }));
-const tambem = pos.disciplinasDestaque.filter((x) => !grade[x]);
+const linhas = disciplinasDestaque.filter((x) => grade[x]).map((x) => ({ disciplina: x, ...grade[x] }));
+const tambem = disciplinasDestaque.filter((x) => !grade[x]);
 const ejunta = (l: string[]) => (l.length > 1 ? `${l.slice(0, -1).join(', ')} e ${l.at(-1)}` : l.join(''));
 
 // Cartas: as duas citações gerais (sem serviço) da capa da home
@@ -98,7 +100,7 @@ const msg = 'Olá, Iasmim! Quero agendar uma avaliação.';
       </div>
       <dl class="c4 facts rv">
         <dt class="lab">Formação</dt><dd>{negocio.formacao[0].titulo}</dd>
-        <dt class="lab">Especialização</dt><dd>Pós-graduação lato sensu em Harmonização Facial, {pos.cargaHoraria}, {pos.instituicao}, concluída em {mesBR(pos.conclusao.slice(0, 7))}</dd>
+        <dt class="lab">Especialização</dt><dd>Pós-graduação lato sensu em Harmonização Facial, {pos.cargaHoraria}, {pos.instituicao}, concluída em {mesBR(conclusao.slice(0, 7))}</dd>
         <dt class="lab">Atendimento</dt><dd>Individual, feito pela própria Iasmim, com hora marcada</dd>
         <dt class="lab">Onde</dt><dd>{e.rua} — {e.bairro}, {e.cidade} ({e.uf})</dd>
         <dt class="lab">Atende</dt><dd>{cidadesTexto}</dd>

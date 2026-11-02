@@ -14,4 +14,4 @@ interface Props {
 }
 const { href, ghost = false, icone, externo = false, class: classe, ...resto } = Astro.props;
 ---
-<a class:list={['btn', { ghost }, classe]} href={href} {...(externo ? { target: '_blank', rel: 'noopener' } : {})} {...resto}>{icone && <Icone nome={icone} />}<slot /></a>
+<a class:list={['btn', { ghost }, classe]} href={href} {...(externo ? { target: '_blank', rel: 'noopener' } : {})} {...resto}>{icone && <Icone nome={icone} />}<slot />{externo && <span class="visually-hidden"> (abre em nova aba)</span>}</a>

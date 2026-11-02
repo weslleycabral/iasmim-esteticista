@@ -3,15 +3,16 @@
 // páginas (menos /bio/, que não tem rodapé). Tudo sai de src/data/negocio.json.
 import Edicao from './Edicao.astro';
 import Botao from './Botao.astro';
-import { negocio, waLink, enderecoTexto, horarioTexto, cidadesTexto, telLink } from '../lib/site';
+import { negocio, waLink, enderecoTexto, horarioTexto, cidadesTexto, telLink, dataISO, dataBR } from '../lib/site';
 
-interface Props { mensagemWa?: string }
-const { mensagemWa } = Astro.props;
+// atualizado: data de revisão da página (frontmatter "atualizado"), a mesma do JSON-LD (dateModified) e do sitemap
+interface Props { mensagemWa?: string; atualizado?: Date }
+const { mensagemWa, atualizado } = Astro.props;
 const temBio = Object.keys(import.meta.glob('../pages/bio{.astro,/index.astro}')).length > 0;
 const cargo = negocio.cargo.charAt(0).toLowerCase() + negocio.cargo.slice(1);
 ---
 <footer id="expediente" class="exp">
-  <div class="wrap art" style="padding-top: clamp(56px, 6.6vw, 96px); padding-bottom: 32px">
+  <div class="wrap art exp-in">
     <div class="c2 folio rv"><span class="lab gold">p. 34</span><h2 class="lab">Expediente</h2></div>
     <dl class="c6 rv">
       <dt class="lab">Editora</dt><dd>{negocio.profissional}, {cargo}, pós-graduada em Harmonização Facial</dd>
@@ -19,6 +20,7 @@ const cargo = negocio.cargo.charAt(0).toLowerCase() + negocio.cargo.slice(1);
       <dt class="lab">Circulação</dt><dd>{cidadesTexto}</dd>
       <dt class="lab">Horário</dt><dd>{horarioTexto}</dd>
       <dt class="lab">Telefone</dt><dd><a href={telLink}>{negocio.telefone}</a></dd>
+      {atualizado && <><dt class="lab">Atualizado</dt><dd>Página revisada em <time datetime={dataISO(atualizado)}>{dataBR(atualizado)}</time></dd></>}
     </dl>
     <div class="c4 links rv">
       <Botao href={waLink(mensagemWa)} icone="whatsapp">WhatsApp {negocio.telefone}</Botao>
@@ -28,4 +30,5 @@ const cargo = negocio.cargo.charAt(0).toLowerCase() + negocio.cargo.slice(1);
     </div>
     <div class="colophon"><span class="disp" style="font-size: 26px; letter-spacing: .04em" aria-hidden="true">IASMIM</span><span class="lab mute">Edição Nº <Edicao /> · {negocio.nome}</span></div>
   </div>
+  <slot /><!-- botão flutuante (Fab), dentro do rodapé para ficar num landmark -->
 </footer>

@@ -3,16 +3,20 @@ title: Perguntas frequentes | Iasmim Esteticista, Juazeiro do Norte
 description: "Dúvidas sobre agendamento, valores, horários e tratamentos na Iasmim Esteticista, em Juazeiro do Norte (CE): limpeza de pele, peelings, botox e mais."
 h1: Perguntas frequentes sobre a Iasmim Esteticista
 resumo: Respostas rápidas sobre como agendar, onde fica, valores e qual tratamento escolher na Iasmim Esteticista, em Juazeiro do Norte (CE).
-atualizado: 2026-11-01
+atualizado: 2026-11-02
 faq:
   - pergunta: Onde fazer limpeza de pele com esteticista em Juazeiro do Norte?
     resposta: Na Iasmim Esteticista, no bairro Salesianos, em Juazeiro do Norte, que tem nota 5,0 com 229 avaliações no Google. A limpeza de pele é feita pela esteticista Iasmim Mayara, tecnóloga em Estética e Cosmetologia com pós-graduação em Harmonização Facial.
+  - pergunta: A Iasmim Esteticista é uma clínica de estética?
+    resposta: É um espaço de estética facial no bairro Salesianos, em Juazeiro do Norte (CE), em que todos os atendimentos são feitos pela esteticista Iasmim Mayara, tecnóloga em Estética e Cosmetologia com pós-graduação em Harmonização Facial. Os tratamentos são limpeza de pele, peelings, microagulhamento, botox, preenchimento labial, Herus HIFU e remoção de sinais e verrugas, para clientes de Juazeiro do Norte, Crato e Barbalha, somente com horário marcado.
+  - pergunta: Onde fazer harmonização facial em Juazeiro do Norte?
+    resposta: Na Iasmim Esteticista, no bairro Salesianos, em Juazeiro do Norte (CE). A esteticista Iasmim Mayara é pós-graduada em Harmonização Facial e faz botox (toxina botulínica) para rugas de expressão e preenchimento labial com ácido hialurônico, sempre depois de uma avaliação do rosto.
   - pergunta: Como faço para agendar na Iasmim Esteticista?
     resposta: Pelo WhatsApp (88) 99989-0590. O atendimento é somente com horário marcado, de segunda a sábado, das 10h às 17h, conforme disponibilidade na agenda.
   - pergunta: Quanto custam os procedimentos?
     resposta: "A Limpeza de Pele Premium 3 em 1 custa R$ 249,90, e o peeling para melasma e o peeling para manchas marrons custam a partir de R$ 480, conforme a avaliação. Os demais valores são definidos na avaliação, que custa R$ 100 e é descontada do procedimento quando você faz o tratamento. Consulte pelo WhatsApp (88) 99989-0590."
   - pergunta: A avaliação é cobrada? Dá para fazer o procedimento no mesmo dia?
-    resposta: Sim, a avaliação custa R$ 100 e é obrigatória antes de qualquer procedimento. Se você fizer o tratamento, no mesmo dia ou em outra data, os R$ 100 são descontados do valor. Alguns procedimentos podem ser feitos no mesmo dia da avaliação, desde que a pele esteja em condições e a sua rotina nas semanas seguintes permita seguir os cuidados indicados, para garantir o melhor resultado.
+    resposta: Sim, a avaliação custa R$ 100 e é obrigatória antes de qualquer procedimento. Se você fizer o tratamento, no mesmo dia ou em outra data, os R$ 100 são descontados do valor. Alguns procedimentos podem ser feitos no mesmo dia da avaliação, desde que a pele esteja em condições e a sua rotina nas semanas seguintes permita seguir os cuidados indicados, o que favorece o resultado.
   - pergunta: Quais as formas de pagamento?
     resposta: Pix, dinheiro ou cartão. Dá para parcelar sem juros, com o número de parcelas conforme o valor. Pagamentos no Pix ou em dinheiro costumam ter desconto.
   - pergunta: Atende homens e adolescentes?

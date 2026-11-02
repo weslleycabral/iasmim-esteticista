@@ -6,7 +6,7 @@ resumo: Limpeza de pele, peelings, microagulhamento, botox, preenchimento labial
 imagem:
   src: ""
   alt: Iasmim Mayara, esteticista, no espaço de atendimento da Iasmim Esteticista em Juazeiro do Norte
-atualizado: 2026-11-01
+atualizado: 2026-11-02
 faq:
   - pergunta: Onde fica a Iasmim Esteticista?
     resposta: A Iasmim Esteticista fica na R. José Pereira Cansanção, 19, no bairro Salesianos, em Juazeiro do Norte (CE), CEP 63050-012. O atendimento é somente com horário marcado.

@@ -1,5 +1,5 @@
 ---
-title: Depoimentos de clientes | Iasmim Esteticista, Juazeiro
+title: "Depoimentos | Iasmim Esteticista, Juazeiro do Norte"
 description: "O que as clientes dizem da Iasmim Esteticista, em Juazeiro do Norte (CE): trechos reais das avaliações do Google sobre limpeza de pele e atendimento."
 h1: Depoimentos de clientes da Iasmim Esteticista
 resumo: Trechos reais de avaliações deixadas no Google por clientes atendidas pela esteticista Iasmim Mayara, em Juazeiro do Norte (CE). O perfil tem nota 5,0 com 229 avaliações.

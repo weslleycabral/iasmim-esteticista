@@ -5,28 +5,92 @@
 [build.environment]
   NODE_VERSION = "24"
 
-# Arquivos para IAs: texto puro em UTF-8
-[[headers]]
-  for = "/llms*.txt"
-  [headers.values]
-    Content-Type = "text/plain; charset=utf-8"
-    Cache-Control = "public, max-age=3600"
+# ---------------------------------------------------------------------------------------------
+# Redirecionamentos (301). Endereço oficial: https://iasmimesteticista.com.br/ (sem www, com barra final)
+# - http → https: a Netlify faz sozinha depois que o certificado sai.
+# - sem barra → com barra (/sobre → /sobre/): a Netlify faz sozinha num site estático com pastas
+#   (dist/sobre/index.html); regra de redirect não altera esse comportamento.
+# ---------------------------------------------------------------------------------------------
+[[redirects]]
+  from = "https://www.iasmimesteticista.com.br/*"
+  to = "https://iasmimesteticista.com.br/:splat"
+  status = 301
+  force = true
 
-[[headers]]
-  for = "/robots.txt"
-  [headers.values]
-    Content-Type = "text/plain; charset=utf-8"
+# Endereço antigo citado no GMN.md (sem "com"): leva para a página certa
+[[redirects]]
+  from = "/servicos/remocao-de-sinais-e-verrugas-jato-de-plasma/*"
+  to = "/servicos/remocao-de-sinais-e-verrugas-com-jato-de-plasma/"
+  status = 301
 
-# Arquivos com hash gerados pelo Astro podem ficar em cache por 1 ano
-[[headers]]
-  for = "/_astro/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+# Ative (tire os #) SÓ DEPOIS que https://iasmimesteticista.com.br/ abrir: manda o endereço provisório
+# da Netlify para o domínio (evita conteúdo duplicado). Antes disso, deixaria o site inacessível.
+# Os rascunhos (deploy:preview, <id>--iasmimesteticista.netlify.app) não são afetados.
+# [[redirects]]
+#   from = "https://iasmimesteticista.netlify.app/*"
+#   to = "https://iasmimesteticista.com.br/:splat"
+#   status = 301
+#   force = true
 
+# ---------------------------------------------------------------------------------------------
+# Cabeçalhos
+# ---------------------------------------------------------------------------------------------
 [[headers]]
   for = "/*"
   [headers.values]
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-Frame-Options = "SAMEORIGIN"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+    Strict-Transport-Security = "max-age=31536000"
+    # Tudo é servido pelo próprio site (fontes, imagens, scripts). 'unsafe-inline' cobre o script curto
+    # do <head> (classe "js") e os estilos inline do Astro. WhatsApp, Instagram e Maps são só links.
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+
+# Arquivos com hash gerados pelo Astro (CSS, JS, fontes, imagens): cache de 1 ano
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Ícones, logo e imagem de compartilhamento: nome fixo, então cache curto (1 dia)
+[[headers]]
+  for = "/favicon.*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/apple-touch-icon.png"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/logo-iasmim-esteticista.webp"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/og-iasmim-esteticista.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# Arquivos para IAs (https://llmstxt.org): texto puro em UTF-8. Ficam fora do índice do Google
+# (noindex no cabeçalho, como sugere o Google) para a busca mostrar as páginas, não o .txt;
+# os robôs de IA continuam lendo normalmente (robots.txt libera tudo).
+[[headers]]
+  for = "/llms*.txt"
+  [headers.values]
+    Content-Type = "text/plain; charset=utf-8"
+    Cache-Control = "public, max-age=3600"
+    X-Robots-Tag = "noindex"
+
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Content-Type = "text/plain; charset=utf-8"
+
+# Página de links do Instagram: fora da busca (também tem <meta name="robots" content="noindex">)
+[[headers]]
+  for = "/bio/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, follow"

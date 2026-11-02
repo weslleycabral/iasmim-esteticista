@@ -19,10 +19,6 @@ export const waLink = (mensagem = 'Olá, Iasmim! Quero agendar um horário.') =>
 export const msgServico = (s: Servico) =>
   s.data.mensagemWhatsApp ?? `Olá, Iasmim! Quero agendar ${s.data.nome}.`;
 
-export const mapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-  `${negocio.nome}, ${negocio.endereco.rua} - ${negocio.endereco.bairro}, ${negocio.endereco.cidade} - ${negocio.endereco.uf}`,
-)}`;
-
 export const mapsRotaLink = `https://www.google.com/maps/dir/?api=1&destination=${negocio.geo.lat},${negocio.geo.lng}`;
 
 /** Todos os serviços em ordem; os peelings ficam agrupados */

@@ -33,10 +33,14 @@ body {
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
+  /* rede de segurança: palavra que não cabe na linha quebra em vez de vazar (e ser cortada) */
+  overflow-wrap: break-word;
 }
 a { color: inherit; text-decoration: none }
 a:focus-visible, summary:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px }
-p { margin: 0; text-wrap: pretty; hyphens: auto }
+/* em fundo escuro o ouro velho não tem contraste (2,3:1): o foco usa o ouro claro */
+.dark :is(a, summary, button):focus-visible { outline-color: var(--goldl) }
+p, dd { margin: 0; text-wrap: pretty; hyphens: auto }
 h1, h2, h3 { margin: 0; text-wrap: balance; font-weight: 400 }
 img { max-width: 100%; display: block }
 picture { display: contents }
@@ -109,7 +113,8 @@ dl, dd { margin: 0 }
 
 /* migalhas (breadcrumb) */
 .crumb { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin: 0; padding: clamp(20px, 2.5vw, 36px) 0 0; list-style: none }
-.crumb li { display: inline-flex; align-items: center; gap: 16px; min-height: 44px }
+/* só os links precisam de 44 px de alvo; itens de texto mais baixos deixam a migalha quebrada em linhas mais compacta */
+.crumb li { display: inline-flex; align-items: center; gap: 16px; min-height: 24px }
 .crumb a { display: inline-flex; align-items: center; min-height: 44px; color: var(--gold) }
 .crumb .sep, .crumb .extra { color: var(--mute) }
 
@@ -184,6 +189,7 @@ dl, dd { margin: 0 }
 
 /* expediente (rodapé) */
 .exp { background: var(--paper3) }
+.exp-in { padding-top: clamp(56px, 6.6vw, 96px); padding-bottom: 32px }
 .exp dl { display: grid; grid-template-columns: minmax(110px, 160px) minmax(0, 1fr); gap: 14px 20px; font-size: 16px; line-height: 1.5 }
 .exp dt { padding-top: 3px; color: var(--gold) }
 .exp .links { display: flex; flex-direction: column; gap: 6px; align-items: start }
@@ -252,6 +258,9 @@ dl, dd { margin: 0 }
 .odo-d { flex: 1 1 0; min-width: 0; position: relative; clip-path: inset(0 -.3em); overflow-x: visible; overflow-y: clip }
 .odo-s { display: flex; flex-direction: column; height: 100%; transition: transform 1.2s var(--ease); will-change: transform }
 .odo-c { flex: 0 0 100%; display: block }
+/* alto contraste do Windows: a cor "transparent" do número real é forçada e ele apareceria sobre as faixas;
+   nesse modo fica só o número real */
+@media (forced-colors: active) { .odo-w { display: none } }
 
 /* grade de 12 colunas a partir de 760px */
 @media (min-width: 760px) {
@@ -289,9 +298,30 @@ dl, dd { margin: 0 }
   .cover { box-shadow: 0 18px 36px -18px rgba(29, 26, 22, .6) }
   .portrait { aspect-ratio: 4 / 5 }
   .portrait img { object-position: 50% 20% }
+  /* o botão flutuante (48 px + 16 px da borda) não cobre o fim do rodapé */
+  .exp-in { padding-bottom: 96px }
+  /* nem o elemento que recebe foco pelo teclado perto da borda de baixo (WCAG 2.4.11) */
+  html { scroll-padding-bottom: 88px }
+}
+/* 320–359 px: a coluna de texto das fichas ficaria com ~110 px; rótulo em cima, texto embaixo */
+@media (max-width: 359.98px) {
+  .facts, .addr, .exp dl { grid-template-columns: minmax(0, 1fr); row-gap: 4px }
+  :is(.facts, .addr, .exp dl) dd + dt { margin-top: 12px }
 }
 @media (max-width: 1100px) and (min-width: 760px) {
   .mast-ed { display: none }
+  /* no tablet a coluna .c4 tem ~220–290 px: a ficha empilha (rótulo em cima, texto embaixo),
+     senão o texto fica numa coluna de 40 px */
+  .c4.facts, .c4 > .facts, .c4 > .addr { grid-template-columns: minmax(0, 1fr); row-gap: 4px }
+  :is(.c4.facts, .c4 > .facts, .c4 > .addr) dd + dt { margin-top: 12px }
+}
+
+/* rodapé no tablet estreito: a ficha ocupa a largura toda à direita do fólio e os links vão para baixo dela */
+@media (min-width: 760px) and (max-width: 999.98px) {
+  .exp-in > dl { grid-column: 3 / -1 }
+  .exp-in > .links { grid-column: 3 / -1; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px 28px }
+  /* fecho da página: na coluna .c5 o botão quebraria em duas linhas; título e botão empilham */
+  .cta-final, .cta-final + .c5 { grid-column: 1 / -1 }
 }
 
 @media (prefers-reduced-motion: reduce) {

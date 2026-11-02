@@ -1,5 +1,14 @@
 // Dados estruturados (JSON-LD, schema.org). Tudo sai de src/data/negocio.json e dos .md.
+// Um único @graph por página (montado no Base.astro), com @id estáveis que ligam os nós:
+//   WebSite #site ← publisher → BeautySalon #negocio ← founder/employee → Person #iasmim
+//   WebPage #webpage → about/mainEntity (negócio, pessoa, serviço…), breadcrumb, primaryImageOfPage
+//   Service <url>#servico → provider #negocio; FAQPage <url>#faq; BreadcrumbList <url>#breadcrumb
+// Regras do projeto: sem AggregateRating/Review (avaliações da própria empresa); preço (Offer) só onde
+// há preço publicado no .md; FAQ e migalhas com o MESMO texto que aparece na página (o check-dist confere).
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
 import { negocio, SITE, abs, servicoPath, type Servico } from './site';
+import fotoIasmim from '../assets/fotos/iasmim-estudio-6871.webp';
 
 export const ID = {
   negocio: `${SITE}/#negocio`,
@@ -7,8 +16,14 @@ export const ID = {
   site: `${SITE}/#site`,
   faceo: `${SITE}/#faceo`,
   catalogo: `${SITE}/#catalogo`,
+  logo: `${SITE}/#logo`,
+  fotoIasmim: `${SITE}/#foto-iasmim`,
   annaPegova: `${SITE}/produtos/anna-pegova/#marca`,
+  revendaAnnaPegova: `${SITE}/produtos/anna-pegova/#revenda`,
 };
+
+/** Logo quadrado (512×512) em public/: mesmo desenho do favicon */
+export const LOGO = '/logo-iasmim-esteticista.webp';
 
 const cidades = negocio.areaAtendida.map((c) => ({
   '@type': 'City',
@@ -19,14 +34,51 @@ const cidades = negocio.areaAtendida.map((c) => ({
 
 export const areaServed = cidades;
 
+/** Foto otimizada (WebP, até 1200 px) como ImageObject com URL absoluta */
+export async function fotoLd(src: ImageMetadata, alt: string, id: string) {
+  const largura = Math.min(1200, src.width);
+  const o = await getImage({ src, format: 'webp', width: largura });
+  return {
+    '@type': 'ImageObject',
+    '@id': id,
+    contentUrl: abs(o.src),
+    url: abs(o.src),
+    encodingFormat: 'image/webp',
+    width: largura,
+    height: Math.round((largura * src.height) / src.width),
+    caption: alt,
+    copyrightHolder: { '@id': ID.negocio },
+  };
+}
+
+/** Nós de imagem comuns a todas as páginas: logo e foto da Iasmim (usados pelo negócio e pela pessoa) */
+export async function imagensBase() {
+  return [
+    {
+      '@type': 'ImageObject',
+      '@id': ID.logo,
+      contentUrl: abs(LOGO),
+      url: abs(LOGO),
+      encodingFormat: 'image/webp',
+      width: 512,
+      height: 512,
+      caption: `Logo da ${negocio.nome}`,
+    },
+    await fotoLd(fotoIasmim, `${negocio.profissional}, esteticista da ${negocio.nome}, em Juazeiro do Norte (CE)`, ID.fotoIasmim),
+  ];
+}
+
 export function website() {
   return {
     '@type': 'WebSite',
     '@id': ID.site,
     url: `${SITE}/`,
     name: negocio.nome,
+    alternateName: new URL(SITE).hostname,
+    description: `Site da ${negocio.nome}, espaço de estética facial da esteticista ${negocio.profissional} em ${negocio.endereco.cidade} (${negocio.endereco.uf}).`,
     inLanguage: 'pt-BR',
     publisher: { '@id': ID.negocio },
+    about: { '@id': ID.negocio },
   };
 }
 
@@ -39,7 +91,11 @@ export function pessoa() {
     jobTitle: 'Esteticista e cosmetóloga',
     description: `${negocio.profissional} é ${negocio.cargo.toLowerCase()} com pós-graduação em Harmonização Facial e atende na ${negocio.nome}, em Juazeiro do Norte (CE).`,
     url: abs('/sobre/'),
+    image: { '@id': ID.fotoIasmim },
+    sameAs: [negocio.youtube],
     worksFor: { '@id': ID.negocio },
+    workLocation: { '@id': ID.negocio },
+    knowsLanguage: 'pt-BR',
     alumniOf: {
       '@type': 'CollegeOrUniversity',
       '@id': ID.faceo,
@@ -74,10 +130,12 @@ export function pessoa() {
       'Harmonização facial',
       'Limpeza de pele',
       'Peeling químico',
+      'Melasma',
+      'Acne',
       'Microagulhamento',
       'Toxina botulínica',
-      'Ultrassom microfocado (HIFU)',
       'Preenchimento labial',
+      'Ultrassom microfocado (HIFU)',
       'Eletrocauterização estética',
       'Jato de plasma',
     ],
@@ -86,11 +144,15 @@ export function pessoa() {
 
 export function negocioLd(servicos: Servico[]) {
   return {
+    // Tipo mais específico do schema.org para estética (subtipo de HealthAndBeautyBusiness); a categoria
+    // principal no Google é "Esteticista" (gcid:beautician), sem equivalente mais específico no schema.org.
     '@type': 'BeautySalon',
     '@id': ID.negocio,
     name: negocio.nome,
     description: `${negocio.nome} é o espaço de estética facial de ${negocio.profissional}, ${negocio.cargo.toLowerCase()} com pós-graduação em Harmonização Facial, no bairro Salesianos, em Juazeiro do Norte (CE). Atende Juazeiro do Norte, Crato e Barbalha com limpeza de pele, peelings, microagulhamento, botox, preenchimento labial, Herus HIFU e remoção de sinais e verrugas com jato de plasma e eletrocautério, e revende a linha Anna Pegova.`,
     url: `${SITE}/`,
+    logo: { '@id': ID.logo },
+    image: [{ '@id': ID.fotoIasmim }],
     telephone: negocio.telefoneE164,
     address: {
       '@type': 'PostalAddress',
@@ -105,7 +167,8 @@ export function negocioLd(servicos: Servico[]) {
       latitude: negocio.geo.lat,
       longitude: negocio.geo.lng,
     },
-    hasMap: `https://www.google.com/maps/search/?api=1&query=${negocio.geo.lat},${negocio.geo.lng}`,
+    // Perfil no Google Maps (CID do Perfil da Empresa): liga o site à ficha do Google
+    hasMap: negocio.googleMaps,
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',
@@ -114,9 +177,10 @@ export function negocioLd(servicos: Servico[]) {
         closes: negocio.horario.fecha,
       },
     ],
+    priceRange: '$$',
     paymentAccepted: negocio.pagamento.formas.join(', '),
     currenciesAccepted: 'BRL',
-    sameAs: [negocio.instagram, negocio.facebook],
+    sameAs: [negocio.instagram, negocio.facebook, negocio.googleMaps],
     areaServed,
     founder: { '@id': ID.pessoa },
     employee: { '@id': ID.pessoa },
@@ -139,11 +203,10 @@ export function negocioLd(servicos: Servico[]) {
         {
           '@type': 'Offer',
           itemOffered: {
-            '@type': 'Product',
-            '@id': `${abs('/produtos/anna-pegova/')}#produtos`,
-            name: 'Linha completa Anna Pegova',
+            '@type': 'Service',
+            '@id': ID.revendaAnnaPegova,
+            name: 'Revenda Anna Pegova',
             url: abs('/produtos/anna-pegova/'),
-            brand: { '@type': 'Brand', '@id': ID.annaPegova, name: 'Anna Pegova' },
           },
         },
       ],
@@ -191,6 +254,34 @@ export function servicoLd(s: Servico) {
   };
 }
 
+/** Página /produtos/anna-pegova/: a marca e a revenda (Service, sem Product: não há preço publicado,
+ *  e Product sem offers/review é inválido para o Google). */
+export function annaPegovaLd(descricao: string) {
+  const url = abs('/produtos/anna-pegova/');
+  return [
+    { '@type': 'Brand', '@id': ID.annaPegova, name: 'Anna Pegova', url: 'https://www.annapegova.com.br/' },
+    {
+      '@type': 'Service',
+      '@id': ID.revendaAnnaPegova,
+      name: 'Revenda Anna Pegova',
+      alternateName: ['Produtos Anna Pegova', 'Anna Pegova em Juazeiro do Norte', 'Linha completa Anna Pegova'],
+      serviceType: 'Revenda de cosméticos para cuidados com a pele',
+      category: 'Cosméticos para cuidados com a pele',
+      description: descricao,
+      url,
+      brand: { '@id': ID.annaPegova },
+      provider: { '@id': ID.negocio },
+      areaServed,
+      availableChannel: {
+        '@type': 'ServiceChannel',
+        serviceUrl: url,
+        servicePhone: { '@type': 'ContactPoint', telephone: negocio.telefoneE164, contactType: 'vendas' },
+        serviceLocation: { '@id': ID.negocio },
+      },
+    },
+  ];
+}
+
 export function faqLd(url: string, faq: { pergunta: string; resposta: string }[]) {
   if (!faq.length) return null;
   return {
@@ -227,6 +318,7 @@ export function webpageLd(opts: {
   sobre?: string; // @id da entidade principal da página
   tipo?: string;
   temBreadcrumb?: boolean;
+  imagem?: string; // @id do ImageObject principal da página
 }) {
   return {
     '@type': opts.tipo ?? 'WebPage',
@@ -239,6 +331,7 @@ export function webpageLd(opts: {
     about: opts.sobre ? { '@id': opts.sobre } : undefined,
     mainEntity: opts.sobre ? { '@id': opts.sobre } : undefined,
     breadcrumb: opts.temBreadcrumb ? { '@id': `${opts.url}#breadcrumb` } : undefined,
+    primaryImageOfPage: opts.imagem ? { '@id': opts.imagem } : undefined,
     dateModified: opts.atualizado ? opts.atualizado.toISOString().slice(0, 10) : undefined,
   };
 }

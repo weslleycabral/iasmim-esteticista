@@ -10,7 +10,7 @@ import Faq from '../../../components/Faq.astro';
 import Botao from '../../../components/Botao.astro';
 import Migalhas from '../../../components/Migalhas.astro';
 import { negocio, waLink, servicoPath, horarioTexto, abs } from '../../../lib/site';
-import { ID, faqLd, areaServed } from '../../../lib/schema';
+import { ID, faqLd, annaPegovaLd } from '../../../lib/schema';
 
 import retrato from '../../../assets/fotos/iasmim-estudio-6870.webp';
 
@@ -21,27 +21,8 @@ const url = abs('/produtos/anna-pegova/');
 const mensagem = 'Olá, Iasmim! Quero saber sobre os produtos Anna Pegova.';
 const migalhas = [{ nome: 'Início', path: '/' }, { nome: 'Produtos Anna Pegova', path: '/produtos/anna-pegova/' }];
 
-const marca = { '@type': 'Brand', '@id': ID.annaPegova, name: 'Anna Pegova' };
-// Sem preço e sem "offers" de propósito: os valores são informados pelo WhatsApp.
-const produto = {
-  '@type': 'Product',
-  '@id': `${url}#produtos`,
-  name: 'Linha completa Anna Pegova',
-  description: d.resumo,
-  url,
-  brand: { '@id': ID.annaPegova },
-  category: 'Cosméticos para cuidados com a pele',
-};
-const revenda = {
-  '@type': 'Service',
-  '@id': `${url}#revenda`,
-  name: 'Revenda e orientação de uso dos produtos Anna Pegova',
-  description:
-    'Revendedora autorizada Anna Pegova desde 2025. Vende toda a linha de skincare para a rotina em casa, inclusive para quem não é cliente, e envia pelos Correios para cidades vizinhas.',
-  provider: { '@id': ID.negocio },
-  areaServed,
-  isRelatedTo: { '@id': `${url}#produtos` },
-};
+// Marca + revenda (Service): ver annaPegovaLd em src/lib/schema.ts
+const [marca, revenda] = annaPegovaLd(d.resumo ?? d.description);
 
 const peles = ['oleosa', 'seca', 'mista', 'sensível', 'com acne'];
 const metas = ['controlar a oleosidade', 'hidratar', 'clarear', 'cuidar dos sinais do tempo'];
@@ -53,15 +34,15 @@ const cidade = negocio.endereco.cidade;
   title={d.title}
   description={d.description}
   migalhas={migalhas}
-  ld={[marca, produto, revenda, faqLd(url, d.faq)]}
+  ld={[marca, revenda, faqLd(url, d.faq)]}
   mensagemWa={mensagem}
   rotuloWa="Pedir produtos Anna Pegova"
   atualizado={d.atualizado}
-  sobre={`${url}#produtos`}
+  sobre={ID.revendaAnnaPegova}
 >
   <section class="wrap hero" aria-label={`Anna Pegova em ${cidade}`}>
     <div class="hero-t">
-      <Migalhas itens={[migalhas[0], { nome: 'Na prateleira', path: migalhas[1].path }]} />
+      <Migalhas itens={migalhas} extra="Na prateleira, p. 26" />
       <h1 class="disp h1 title">Anna Pegova, em {cidade}.</h1>
       <p class="dek e2">A {negocio.nome} é revendedora autorizada Anna Pegova desde 2025 e a única da linha completa na cidade. Toda a linha de skincare para a rotina em casa, com a orientação da esteticista {negocio.profissional}, inclusive para quem ainda não é cliente.</p>
       <div class="cta-row e3">
@@ -192,8 +173,6 @@ const cidade = negocio.endereco.cidade;
       </div>
     </div>
   </section>
-</Base>
-
 <script>
   // Pedido: cada grupo escolhe no máximo uma opção (tocar de novo desmarca); a mensagem e o link do
   // WhatsApp se atualizam. Mesma regra de texto do canvas.
@@ -229,6 +208,7 @@ const cidade = negocio.endereco.cidade;
     });
   }
 </script>
+</Base>
 
 <style>
   .col { display: flex; flex-direction: column }
@@ -282,8 +262,7 @@ const cidade = negocio.endereco.cidade;
   @media (max-width: 759.98px) {
     .rotulo { box-shadow: 0 18px 36px -18px rgba(29, 26, 22, .6) }
   }
-  /* telas estreitas: "microagulhamento" não cabe ao lado do rótulo de 120px */
-  .facts dd { overflow-wrap: break-word; min-width: 0 }
+  /* telas estreitas: "microagulhamento" não cabe ao lado do rótulo de 120px (rótulos daqui são curtos) */
   @media (max-width: 400px) {
     .facts { grid-template-columns: minmax(0, 96px) minmax(0, 1fr) }
   }

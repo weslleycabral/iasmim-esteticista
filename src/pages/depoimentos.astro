@@ -45,7 +45,6 @@ const msg = 'Olá, Iasmim! Vi os depoimentos e quero agendar um horário.';
 <Base
   title={d.title}
   description={d.description}
-  migalhas={[{ nome: 'Início', path: '/' }, { nome: 'Depoimentos', path: '/depoimentos/' }]}
   atualizado={d.atualizado}
   tipoPagina="CollectionPage"
   mensagemWa={msg}
@@ -141,8 +140,6 @@ const msg = 'Olá, Iasmim! Vi os depoimentos e quero agendar um horário.';
       </div>
     </div>
   </section>
-</Base>
-
 <script>
   // Filtro das cartas por assunto: esconde as de outro assunto e atualiza a contagem (aria-live).
   const grupo = document.querySelector<HTMLElement>('#cartas .tabs');
@@ -161,6 +158,7 @@ const msg = 'Olá, Iasmim! Vi os depoimentos e quero agendar um horário.';
     if (contagem && bt.dataset.resumo) contagem.textContent = bt.dataset.resumo;
   });
 </script>
+</Base>
 
 <style>
   /* só da /depoimentos/: abertura com a nota, filtro por assunto, cartas */

@@ -23,7 +23,6 @@ for (const d of depoimentos) {
     throw new Error(`Depoimento de ${d.nome}: "trecho" precisa ser cópia exata de uma parte do "texto"`);
 }
 
-export const destaques = () => depoimentos.filter((d) => d.destaque);
 export const doServico = (id: string) => depoimentos.filter((d) => d.servico === id);
 export const gerais = () => depoimentos.filter((d) => !d.servico);
 

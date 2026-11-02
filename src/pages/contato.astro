@@ -66,7 +66,7 @@ const enderecoCopia = e.linha.replace(/, Brasil$/, '');
       <div class="c2 folio rv"><span class="lab gold">p. 30</span><span class="lab">Onde fica</span></div>
       <div class="c6 map mk">
         <Foto src={mapa} alt={`Mapa do bairro ${e.bairro}, em ${e.cidade}, com o estúdio marcado no centro`}
-          sizes="(min-width: 1440px) 640px, (min-width: 760px) 46vw, calc(100vw - 32px)" />
+          sizes="(min-width: 1440px) 640px, (min-width: 760px) 46vw, calc(200vw - 64px)" />
         <div class="pin" aria-hidden="true"><span class="pulse"></span><span class="pulse pulse2"></span><span class="dot"></span></div>
         <span class="lab tag" aria-hidden="true">{negocio.nome}</span>
         <span class="credit">© OpenStreetMap</span>
@@ -151,23 +151,35 @@ const enderecoCopia = e.linha.replace(/, Brasil$/, '');
       </div>
     </div>
   </section>
-</Base>
-
 <script>
-  // "Copiar endereço" / "Copiar o Plus Code": copia o texto e troca o rótulo por 2,4 s.
-  for (const bt of document.querySelectorAll<HTMLButtonElement>('button[data-copiar]')) {
+  // "Copiar endereço" / "Copiar o Plus Code": copia o texto, troca o rótulo por 2,4 s e avisa o leitor
+  // de tela (região role=status). Sem a API de área de transferência (http, navegador antigo), os
+  // botões somem: o endereço e o Plus Code continuam na página para copiar à mão.
+  const botoes = document.querySelectorAll<HTMLButtonElement>('button[data-copiar]');
+  if (!navigator.clipboard?.writeText) botoes.forEach((bt) => (bt.hidden = true));
+  const aviso = document.createElement('p');
+  aviso.className = 'visually-hidden';
+  aviso.setAttribute('role', 'status');
+  document.getElementById('conteudo')?.append(aviso);
+
+  for (const bt of botoes) {
     const rotulo = bt.textContent ?? '';
     let t = 0;
     bt.addEventListener('click', () => {
-      if (!navigator.clipboard?.writeText) return;
       navigator.clipboard.writeText(bt.dataset.copiar ?? '').then(() => {
-        bt.textContent = bt.dataset.feito ?? rotulo;
+        const feito = bt.dataset.feito ?? rotulo;
+        bt.textContent = feito;
+        aviso.textContent = `${feito}: ${bt.dataset.copiar}`;
         clearTimeout(t);
-        t = window.setTimeout(() => (bt.textContent = rotulo), 2400);
+        t = window.setTimeout(() => {
+          bt.textContent = rotulo;
+          aviso.textContent = '';
+        }, 2400);
       }).catch(() => {});
     });
   }
 </script>
+</Base>
 
 <style>
   /* só da /contato/: abertura com telefone grande e cartão de visita, como chegar, ficha */
@@ -199,7 +211,7 @@ const enderecoCopia = e.linha.replace(/, Brasil$/, '');
 
   /* copiar (só com JS) */
   button.ul { background: none; border: 0; border-bottom: 1px solid currentColor; border-radius: 0; font: inherit; font-size: 15px; color: inherit; cursor: pointer; padding: 0 }
-  :global(html:not(.js)) .copiar { display: none }
+  :global(html:not(.js)) .copiar, .copiar[hidden] { display: none }
 
   .ways { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); gap: 32px clamp(32px, 4vw, 56px) }
   .way { display: flex; flex-direction: column; gap: 12px; border-top: 1px solid var(--ink); padding-top: 18px; min-width: 0 }
@@ -219,5 +231,10 @@ const enderecoCopia = e.linha.replace(/, Brasil$/, '');
   }
   @media (max-width: 759.98px) {
     .vcard { box-shadow: 0 18px 36px -18px rgba(29, 26, 22, .6) }
+  }
+  /* 320 px: "@iasmimesteticista" não cabe ao lado da coluna de rótulos de 88 px */
+  @media (max-width: 359.98px) {
+    .vcard { padding: 20px }
+    .vl { grid-template-columns: auto minmax(0, 1fr); column-gap: 12px }
   }
 </style>

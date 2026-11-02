@@ -2,19 +2,26 @@
 import { getImage } from 'astro:assets';
 import { getCollection, getEntry } from 'astro:content';
 import type { ImageMetadata } from 'astro';
-import { negocio, abs, servicoPath, todosServicos, ehPeeling, waLink, precoTexto, VALOR_SOB_CONSULTA, type Servico } from './site';
+import { negocio, abs, servicoPath, todosServicos, ehPeeling, waLink, precoTexto, VALOR_SOB_CONSULTA, dataISO, type Servico } from './site';
 import { depoimentos, doServico, gerais, mesBR, type Depoimento } from './depoimentos';
+
+// Revisão mais recente entre todas as páginas (frontmatter "atualizado")
+async function ultimaRevisao() {
+  const todas = [...(await getCollection('servicos')), ...(await getCollection('paginas'))];
+  return dataISO(new Date(Math.max(...todas.map((p) => p.data.atualizado.getTime()))));
+}
 
 const fatos = (servicos: Servico[]) => {
   const pos = negocio.formacao[1];
   const precos = servicos.filter((s) => s.data.preco).map((s) => `${s.data.nome} ${precoTexto(s)}`);
   return [
     `- Nome: ${negocio.nome}`,
-    `- Profissional: ${negocio.profissional} — ${negocio.cargo}; ${pos.titulo} (${pos.instituicao}, ${pos.instituicaoCidade}/${pos.instituicaoUf}, ${pos.cargaHoraria}, concluída em ${pos.conclusao.slice(0, 4)})`,
+    `- Profissional: ${negocio.profissional} — ${negocio.cargo}; ${pos.titulo} (${pos.instituicao}, ${pos.instituicaoCidade}/${pos.instituicaoUf}, ${pos.cargaHoraria}, ${pos.conclusao ? `concluída em ${pos.conclusao.slice(0, 4)}` : 'em andamento'})`,
     `- Endereço: ${negocio.endereco.linha}`,
     `- Coordenadas: ${negocio.geo.lat}, ${negocio.geo.lng} (Plus Code ${negocio.geo.plusCode})`,
     `- Telefone e WhatsApp: ${negocio.telefone} (${negocio.telefoneE164}) — ${waLink()}`,
-    `- Instagram: ${negocio.instagram}`,
+    `- Instagram: ${negocio.instagram} · Facebook: ${negocio.facebook} · YouTube (Iasmim Mayara): ${negocio.youtube}`,
+    `- Perfil no Google Maps: ${negocio.googleMaps}`,
     `- Horário: ${negocio.horario.texto}`,
     `- Antecedência para agendar: ${negocio.antecedencia}`,
     `- Avaliação: ${negocio.avaliacao.texto}`,
@@ -35,9 +42,15 @@ export async function llmsTxt() {
   const peelings = servicos.filter(ehPeeling);
   const linha = (nome: string, path: string, desc: string) => `- [${nome}](${abs(path)}): ${desc}`;
   const anna = await getEntry('paginas', 'anna-pegova');
+  // Sinônimos (outrosNomes) ajudam a casar a pergunta da pessoa ("toxina botulínica", "jato de plasma") com a página
   const linhaServico = (s: Servico) => {
     const preco = precoTexto(s);
-    return linha(s.data.nome, servicoPath(s.id), preco ? `${s.data.resumo} Valor: ${preco}.` : s.data.resumo);
+    const tambem = s.data.outrosNomes.slice(0, 4);
+    return linha(
+      s.data.nome,
+      servicoPath(s.id),
+      `${s.data.resumo}${tambem.length ? ` Também chamado: ${tambem.join(', ')}.` : ''} Valor: ${preco ?? VALOR_SOB_CONSULTA}.`,
+    );
   };
 
   return `# ${negocio.nome}
@@ -45,9 +58,11 @@ export async function llmsTxt() {
 > ${negocio.nome} é o espaço de estética facial da esteticista ${negocio.profissional} (${negocio.cargo}, pós-graduada em Harmonização Facial) no bairro Salesianos, em Juazeiro do Norte (CE). Oferece limpeza de pele, peelings, microagulhamento, botox, preenchimento labial, Herus HIFU e remoção de sinais e verrugas com jato de plasma e eletrocautério, atende também Crato e Barbalha, e é a única revendedora da linha Anna Pegova em Juazeiro do Norte.
 
 ${fatos(servicos)}
+- Última revisão do site: ${await ultimaRevisao()}
 
 ## Serviços
 
+${linha('Todos os serviços', '/servicos/', `Índice dos ${principais.length} serviços e ${peelings.length} peelings, com o que cada um trata e o valor.`)}
 ${principais.map(linhaServico).join('\n')}
 
 ## Peelings
@@ -63,7 +78,7 @@ ${linha('Anna Pegova', '/produtos/anna-pegova/', anna?.data.resumo ?? 'Linha com
 ${linha('Sobre a Iasmim Mayara', '/sobre/', 'Formação, pós-graduação e forma de trabalho.')}
 ${linha('Depoimentos de clientes', '/depoimentos/', `${depoimentos.length} trechos reais de avaliações no Google, sem correções.`)}
 ${linha('Contato e como chegar', '/contato/', 'Endereço, mapa, horário e WhatsApp.')}
-${linha('Perguntas frequentes', '/perguntas-frequentes/', 'Dúvidas sobre agendamento, valores, pagamento e tratamentos.')}
+${linha('Perguntas frequentes', '/perguntas-frequentes/', 'Mais de 100 respostas: como agendar, valores, formas de pagamento, onde fica, qual tratamento escolher e dúvidas de cada serviço (limpeza de pele, peelings, microagulhamento, botox, preenchimento labial, Herus HIFU, sinais e verrugas, Anna Pegova).')}
 
 ## Optional
 
@@ -120,16 +135,16 @@ export async function llmsFullTxt() {
   const blocoPagina = (id: string) => {
     const p = pag(id);
     if (!p) return '';
-    return `## ${p.data.h1}\n\nURL: ${abs(caminhos[id])}\n\n${p.data.resumo ? p.data.resumo + '\n\n' : ''}${rebaixar(p.body ?? '').trim()}\n${faqMd(p.data.faq)}`;
+    return `## ${p.data.h1}\n\nURL: ${abs(caminhos[id])}\nAtualizado em: ${dataISO(p.data.atualizado)}\n\n${p.data.resumo ? p.data.resumo + '\n\n' : ''}${rebaixar(p.body ?? '').trim()}\n${faqMd(p.data.faq)}`;
   };
 
   const fotosCaso = new Map(await Promise.all(servicos.map(async (s) => [s.id, await casosMd(s)] as const)));
   const blocoServico = (s: (typeof servicos)[number]) =>
-    `## ${s.data.h1}\n\nURL: ${abs(servicoPath(s.id))}\n\n${s.data.resumo}\n\n- Indicado para: ${s.data.indicacoes.join('; ') || '—'}\n- Outros nomes: ${s.data.outrosNomes.join(', ') || '—'}\n- Onde fazer: ${negocio.nome}, ${negocio.endereco.linha}\n- Agendamento: WhatsApp ${negocio.telefone}\n- Valor: ${precoTexto(s) ?? VALOR_SOB_CONSULTA}\n${s.data.duracao ? `- Duração da sessão: ${s.data.duracao}\n` : ''}${s.data.sessoes ? `- Sessões: ${s.data.sessoes}\n` : ''}- Avaliação: ${negocio.avaliacao.valor}, descontada do procedimento\n\n${rebaixar(s.body ?? '').trim()}\n${fotosCaso.get(s.id) ?? ''}${faqMd(s.data.faq)}`;
+    `## ${s.data.h1}\n\nURL: ${abs(servicoPath(s.id))}\nAtualizado em: ${dataISO(s.data.atualizado)}\n\n${s.data.resumo}\n\n- Indicado para: ${s.data.indicacoes.join('; ') || '—'}\n- Outros nomes: ${s.data.outrosNomes.join(', ') || '—'}\n- Onde fazer: ${negocio.nome}, ${negocio.endereco.linha}\n- Agendamento: WhatsApp ${negocio.telefone}\n- Valor: ${precoTexto(s) ?? VALOR_SOB_CONSULTA}\n${s.data.duracao ? `- Duração da sessão: ${s.data.duracao}\n` : ''}${s.data.sessoes ? `- Sessões: ${s.data.sessoes}\n` : ''}- Avaliação: ${negocio.avaliacao.valor}, descontada do procedimento\n\n${rebaixar(s.body ?? '').trim()}\n${fotosCaso.get(s.id) ?? ''}${faqMd(s.data.faq)}`;
 
   return `# ${negocio.nome} — conteúdo completo
 
-> Todo o conteúdo do site ${abs('/')} em Markdown, para leitura por assistentes de IA.
+> Todo o conteúdo do site ${abs('/')} em Markdown, para leitura por assistentes de IA. Última revisão: ${await ultimaRevisao()}.
 
 ${fatos(servicos)}
 
