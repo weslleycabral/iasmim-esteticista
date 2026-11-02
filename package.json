@@ -1,0 +1,19 @@
+{
+  "name": "iasmim-esteticista-site",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check:dist": "node scripts/check-dist.mjs",
+    "verify": "astro build && node scripts/check-dist.mjs",
+    "deploy:preview": "npx -y netlify-cli@27 deploy --build",
+    "deploy": "npx -y netlify-cli@27 deploy --build --prod"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "3.7.4",
+    "astro": "7.4.4"
+  }
+}

@@ -1,0 +1,83 @@
+---
+// Lista de depoimentos (trechos das avaliações do Google), em HTML simples: <blockquote> + <figcaption>
+import { todosServicos, servicoPath } from '../lib/site';
+import { mesBR, type Depoimento } from '../lib/depoimentos';
+interface Props { itens: Depoimento[]; mostrarServico?: boolean }
+const { itens, mostrarServico = true } = Astro.props;
+const nomes = new Map((await todosServicos()).map((s) => [s.id, s.data.nome]));
+for (const d of itens) {
+  if (d.servico && !nomes.has(d.servico))
+    throw new Error(`Depoimento de ${d.nome}: serviço "${d.servico}" não existe (em src/data/depoimentos.json)`);
+}
+---
+{itens.length > 0 && (
+  <ul class="depoimentos">
+    {itens.map((d) => (
+      <li>
+        <figure class="depoimento">
+          <p class="nota"><span aria-hidden="true">{'★'.repeat(d.nota)}{'☆'.repeat(5 - d.nota)}</span><span class="visually-hidden">Nota {d.nota} de 5</span></p>
+          <blockquote cite={d.link}>
+            <p>{d.texto}</p>
+          </blockquote>
+          <figcaption>
+            <cite>{d.nome}</cite>, <time datetime={d.mes}>{mesBR(d.mes)}</time>
+            {mostrarServico && d.servico && <> · <a href={servicoPath(d.servico)}>{nomes.get(d.servico)}</a></>}
+            {d.link && <> · <a href={d.link}>Ver no Google<span class="visually-hidden"> (avaliação de {d.nome})</span></a></>}
+          </figcaption>
+        </figure>
+      </li>
+    ))}
+  </ul>
+)}
+<style>
+  .depoimentos {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+    align-items: start;
+    list-style: none;
+    padding: 0;
+    margin: 1.25rem 0 1.5rem;
+  }
+  .depoimentos li {
+    margin: 0;
+  }
+  .depoimento {
+    margin: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem 1rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .nota {
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    font-size: 0.95rem;
+    margin: 0 0 0.4rem;
+  }
+  blockquote {
+    margin: 0;
+    flex: 1;
+    font-family: var(--serif);
+    font-size: 1.08rem;
+    line-height: 1.55;
+  }
+  blockquote p::before {
+    content: '“';
+  }
+  blockquote p::after {
+    content: '”';
+  }
+  figcaption {
+    margin-top: 0.8rem;
+    color: var(--muted);
+    font-size: 0.93rem;
+  }
+  cite {
+    font-style: normal;
+    font-weight: 650;
+    color: var(--ink);
+  }
+</style>

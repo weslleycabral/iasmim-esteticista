@@ -1,0 +1,114 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Foto from '../components/Foto.astro';
+import Faq from '../components/Faq.astro';
+import CardServico from '../components/CardServico.astro';
+import IconWa from '../components/IconWa.astro';
+import Depoimentos from '../components/Depoimentos.astro';
+import { negocio, waLink, mapsLink, servicosPrincipais, peelings, abs } from '../lib/site';
+import { faqLd, ID } from '../lib/schema';
+import { destaques } from '../lib/depoimentos';
+
+const pagina = await getEntry('paginas', 'inicio');
+if (!pagina) throw new Error('Falta src/content/paginas/inicio.md');
+const { Content } = await render(pagina);
+const d = pagina.data;
+const principais = await servicosPrincipais();
+const listaPeelings = await peelings();
+---
+<Base title={d.title} description={d.description} ld={[faqLd(abs('/'), d.faq)]} atualizado={d.atualizado} sobre={ID.negocio}>
+  <section class="wrap hero">
+    <div>
+      <p class="eyebrow">Estética facial · Salesianos · Juazeiro do Norte – CE</p>
+      <h1>{d.h1}</h1>
+      {d.resumo && <p class="lead">{d.resumo}</p>}
+      <p class="selo">★ {negocio.avaliacoes.nota} no Google · {negocio.avaliacoes.total} avaliações</p>
+      <p class="hero-acoes">
+        <a class="btn btn-wa" href={waLink()}><IconWa /> Agendar pelo WhatsApp</a>
+        <a class="btn btn-sec" href="/servicos/">Ver serviços</a>
+      </p>
+    </div>
+    <Foto src={d.imagem?.src} alt={d.imagem?.alt ?? 'Iasmim Esteticista'} formato="retrato" prioridade />
+  </section>
+
+  <section class="secao secao-suave" aria-labelledby="servicos">
+    <div class="wrap">
+      <h2 id="servicos">Quais serviços a Iasmim Esteticista oferece em Juazeiro do Norte?</h2>
+      <ul class="grid-cards">
+        {principais.map((s) => <CardServico servico={s} />)}
+      </ul>
+      <h3>Peelings disponíveis</h3>
+      <ul class="pilulas">
+        {listaPeelings.map((s) => <li><a href={`/servicos/${s.id}/`}>{s.data.nome}</a></li>)}
+      </ul>
+      <p>Também revendemos a <a href="/produtos/anna-pegova/">linha completa Anna Pegova</a> — somos a única revendedora em Juazeiro do Norte.</p>
+    </div>
+  </section>
+
+  <section class="secao" aria-labelledby="depoimentos">
+    <div class="wrap">
+      <h2 id="depoimentos">O que as clientes dizem da Iasmim Esteticista?</h2>
+      <p class="selo">★ {negocio.avaliacoes.nota} no Google · {negocio.avaliacoes.total} avaliações</p>
+      <Depoimentos itens={destaques()} />
+      <p><a href="/depoimentos/">Ver todos os depoimentos</a> · <a href={negocio.googleAvaliacoes}>Ler as {negocio.avaliacoes.total} avaliações no Google</a></p>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <div class="texto prosa">
+      <Content />
+    </div>
+    <div class="texto">
+      <Faq itens={d.faq} titulo="Perguntas frequentes" />
+      <p><a href="/perguntas-frequentes/">Ver todas as perguntas frequentes</a> · <a href={mapsLink}>Abrir no Google Maps</a></p>
+    </div>
+  </div>
+</Base>
+<style>
+  .hero {
+    display: grid;
+    gap: 2rem;
+    padding-block: 2.5rem 3rem;
+    align-items: center;
+  }
+  @media (min-width: 56rem) {
+    .hero {
+      grid-template-columns: 1.4fr 1fr;
+      gap: 4rem;
+    }
+  }
+  .selo {
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .hero-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .pilulas {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .pilulas li {
+    margin: 0;
+  }
+  .pilulas a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 999px;
+    text-decoration: none;
+  }
+  .pilulas a:hover {
+    border-color: var(--accent);
+  }
+</style>

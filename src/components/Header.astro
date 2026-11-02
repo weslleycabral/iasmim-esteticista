@@ -1,0 +1,108 @@
+---
+import { negocio } from '../lib/site';
+const atual = Astro.url.pathname;
+const links = [
+  { href: '/servicos/', nome: 'Serviços' },
+  { href: '/servicos/peeling/', nome: 'Peelings' },
+  { href: '/produtos/anna-pegova/', nome: 'Anna Pegova' },
+  { href: '/sobre/', nome: 'Sobre' },
+  { href: '/depoimentos/', nome: 'Depoimentos' },
+  { href: '/perguntas-frequentes/', nome: 'Dúvidas' },
+  { href: '/contato/', nome: 'Contato' },
+];
+const ativo = (href: string) =>
+  href === '/servicos/' ? atual.startsWith('/servicos/') && !atual.startsWith('/servicos/peeling/') : atual.startsWith(href);
+---
+<header class="topo">
+  <div class="wrap topo-in">
+    <a class="marca" href="/" aria-label={`${negocio.nome} — página inicial`}>
+      <svg class="marca-simbolo" viewBox="0 0 40 40" aria-hidden="true" focusable="false"><circle cx="20" cy="20" r="19" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M20 9c-4.5 5-6.5 9-6.5 12.2a6.5 6.5 0 0 0 13 0C26.5 18 24.5 14 20 9Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+      <span><span class="marca-nome">Iasmim</span> <span class="marca-sub">Esteticista</span></span>
+    </a>
+    <nav aria-label="Menu principal">
+      <ul>
+        {links.map((l) => (
+          <li><a href={l.href} aria-current={ativo(l.href) ? 'page' : undefined}>{l.nome}</a></li>
+        ))}
+      </ul>
+    </nav>
+  </div>
+</header>
+<style>
+  .topo {
+    background: rgba(251, 248, 244, 0.96);
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .topo-in {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem 1.5rem;
+    padding-block: 0.6rem;
+  }
+  .marca {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--ink);
+    text-decoration: none;
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    min-height: 2.75rem;
+  }
+  .marca-simbolo {
+    width: 2rem;
+    height: 2rem;
+    color: var(--accent);
+  }
+  .marca-nome {
+    font-weight: 600;
+  }
+  .marca-sub {
+    color: var(--muted);
+  }
+  nav {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  nav ul {
+    display: flex;
+    gap: 0.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+  }
+  nav li {
+    margin: 0;
+  }
+  nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 0.7rem;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 0.97rem;
+    border-radius: 999px;
+  }
+  nav a:hover {
+    background: var(--soft);
+  }
+  nav a[aria-current='page'] {
+    color: var(--accent);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.35em;
+  }
+  @media (min-width: 60rem) {
+    nav {
+      width: auto;
+    }
+  }
+</style>

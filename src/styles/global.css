@@ -1,0 +1,317 @@
+/* Iasmim Esteticista — estilo base. Fontes do sistema (sem download). */
+:root {
+  --bg: #fbf8f4;
+  --surface: #ffffff;
+  --soft: #f4e9e3;
+  --ink: #2a2321;
+  --muted: #62544f;
+  --accent: #8c4f45;
+  --accent-ink: #ffffff;
+  --sage: #3f4a3c;
+  --line: #e6dad3;
+  --wa: #0e7a3e;
+  --dark: #2e2826;
+  --dark-ink: #f6efe9;
+  --dark-muted: #d9c4bc;
+  --radius: 14px;
+  --max: 72rem;
+  --text: 42rem;
+  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', 'URW Palladio L', P052, Georgia, serif;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  /* espaço para a barra fixa do WhatsApp no celular */
+  padding-bottom: 4.75rem;
+}
+
+@media (min-width: 48rem) {
+  body {
+    padding-bottom: 0;
+  }
+}
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(2rem, 1.4rem + 2.6vw, 3.1rem);
+  margin: 0 0 1rem;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: clamp(1.45rem, 1.2rem + 1vw, 1.95rem);
+  margin: 2.6rem 0 0.8rem;
+}
+
+h3 {
+  font-size: 1.2rem;
+  margin: 1.8rem 0 0.5rem;
+}
+
+p {
+  margin: 0 0 1rem;
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 0.18em;
+  text-decoration-thickness: 1px;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid var(--sage);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+ul,
+ol {
+  padding-left: 1.25rem;
+  margin: 0 0 1rem;
+}
+
+li {
+  margin-bottom: 0.35rem;
+}
+
+strong {
+  font-weight: 650;
+}
+
+.wrap {
+  width: min(100% - 2.5rem, var(--max));
+  margin-inline: auto;
+}
+
+.texto {
+  max-width: var(--text);
+}
+
+.skip {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  background: var(--ink);
+  color: #fff;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  z-index: 100;
+}
+
+.skip:focus {
+  top: 1rem;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Botões */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0.75rem 1.35rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  line-height: 1.2;
+  border: 1.5px solid transparent;
+}
+
+.btn-wa {
+  background: var(--wa);
+  color: #fff;
+}
+
+.btn-wa:hover {
+  background: #0b6633;
+}
+
+.btn-sec {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: transparent;
+}
+
+.btn-sec:hover {
+  background: var(--soft);
+}
+
+.btn svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: none;
+}
+
+/* Conteúdo vindo do Markdown */
+.prosa h2 {
+  scroll-margin-top: 5rem;
+}
+
+.prosa > :first-child {
+  margin-top: 0;
+}
+
+.prosa ul li::marker {
+  color: var(--accent);
+}
+
+.prosa blockquote {
+  margin: 1.5rem 0;
+  padding: 1rem 1.25rem;
+  background: var(--soft);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.prosa blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.prosa table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0 1.5rem;
+  font-size: 0.97rem;
+}
+
+.prosa th,
+.prosa td {
+  border-bottom: 1px solid var(--line);
+  padding: 0.55rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.secao {
+  padding-block: 3rem;
+}
+
+.secao-suave {
+  background: var(--soft);
+}
+
+.eyebrow {
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  margin: 0 0 0.6rem;
+}
+
+.lead {
+  font-size: 1.15rem;
+  color: var(--ink);
+}
+
+.grid-cards {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  padding: 0;
+  list-style: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Fotos de antes e depois dentro do texto (.md): lado a lado no desktop, empilhadas no celular */
+.antes-depois {
+  margin: 1.5rem 0 2rem;
+}
+.antes-depois figure {
+  margin: 0 0 1.5rem;
+}
+.ad-fotos {
+  display: grid;
+  gap: 0.75rem;
+}
+@media (min-width: 36rem) {
+  .ad-fotos {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.ad-item {
+  position: relative;
+  margin: 0;
+}
+.antes-depois img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  background: var(--soft);
+}
+.ad-rotulo {
+  position: absolute;
+  left: 0.6rem;
+  top: 0.6rem;
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 650;
+  font-size: 0.9rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+}
+.ad-uv {
+  max-width: 22rem;
+}
+.antes-depois figcaption,
+.ad-nota {
+  color: var(--muted);
+  font-size: 0.93rem;
+  margin-top: 0.5rem;
+}
+

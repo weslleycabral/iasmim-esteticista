@@ -1,0 +1,74 @@
+---
+import Base from '../../layouts/Base.astro';
+import CardServico from '../../components/CardServico.astro';
+import Agendar from '../../components/Agendar.astro';
+import { servicosPrincipais, peelings, abs, servicoPath } from '../../lib/site';
+
+const principais = await servicosPrincipais();
+const listaPeelings = await peelings();
+const url = abs('/servicos/');
+const lista = {
+  '@type': 'ItemList',
+  '@id': `${url}#lista`,
+  name: 'Serviços da Iasmim Esteticista em Juazeiro do Norte',
+  itemListElement: [...principais, ...listaPeelings].map((s, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: s.data.nome,
+    url: abs(servicoPath(s.id)),
+  })),
+};
+---
+<Base
+  title="Serviços de estética em Juazeiro do Norte | Iasmim"
+  description="Limpeza de pele, peelings, microagulhamento, botox, preenchimento labial, Herus HIFU e remoção de sinais com jato de plasma em Juazeiro do Norte (CE)."
+  migalhas={[{ nome: 'Início', path: '/' }, { nome: 'Serviços', path: '/servicos/' }]}
+  ld={[lista]}
+  sobre={`${url}#lista`}
+  tipoPagina="CollectionPage"
+>
+  <div class="wrap">
+    <header class="texto cab">
+      <h1>Serviços de estética facial em Juazeiro do Norte</h1>
+      <p class="lead">
+        A Iasmim Esteticista, no bairro Salesianos, em Juazeiro do Norte (CE), oferece limpeza de pele, seis tipos de peeling,
+        microagulhamento, botox, preenchimento labial, Herus HIFU e remoção de sinais e verrugas com jato de plasma e eletrocautério, além da linha Anna Pegova para
+        cuidados em casa. Todos os atendimentos são feitos pela esteticista Iasmim Mayara, com horário marcado.
+      </p>
+    </header>
+
+    <section aria-labelledby="principais">
+      <h2 id="principais">Quais tratamentos estão disponíveis?</h2>
+      <ul class="grid-cards">
+        {principais.map((s) => <CardServico servico={s} />)}
+      </ul>
+    </section>
+
+    <section aria-labelledby="peelings">
+      <h2 id="peelings">Quais peelings a Iasmim Esteticista faz?</h2>
+      <p class="texto">Cada peeling tem uma indicação diferente. Veja qual combina com a sua queixa ou <a href="/servicos/peeling/">entenda como escolher o peeling certo</a>.</p>
+      <ul class="grid-cards">
+        {listaPeelings.map((s) => <CardServico servico={s} />)}
+      </ul>
+    </section>
+
+    <section aria-labelledby="outros">
+      <h2 id="outros">A Iasmim faz outros procedimentos?</h2>
+      <p class="texto">Sim. Além dos serviços acima, a Iasmim Esteticista faz brow lamination (laminação das sobrancelhas) e dermaplaning. Consulte pelo WhatsApp.</p>
+    </section>
+
+    <section aria-labelledby="produtos">
+      <h2 id="produtos">Vocês vendem produtos para usar em casa?</h2>
+      <p class="texto">Sim. A Iasmim Esteticista é a única revendedora da <a href="/produtos/anna-pegova/">linha completa Anna Pegova</a> em Juazeiro do Norte, com orientação sobre o que usar entre as sessões.</p>
+    </section>
+
+    <div class="texto">
+      <Agendar mensagem="Olá, Iasmim! Quero agendar uma avaliação." titulo="Como agendar um serviço?" />
+    </div>
+  </div>
+</Base>
+<style>
+  .cab {
+    padding-top: 1.5rem;
+  }
+</style>

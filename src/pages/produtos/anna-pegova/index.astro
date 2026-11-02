@@ -1,0 +1,80 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import Foto from '../../../components/Foto.astro';
+import Faq from '../../../components/Faq.astro';
+import IconWa from '../../../components/IconWa.astro';
+import Agendar from '../../../components/Agendar.astro';
+import { waLink, abs } from '../../../lib/site';
+import { ID, faqLd, areaServed } from '../../../lib/schema';
+
+const pagina = await getEntry('paginas', 'anna-pegova');
+if (!pagina) throw new Error('Falta src/content/paginas/anna-pegova.md');
+const { Content } = await render(pagina);
+const d = pagina.data;
+const url = abs('/produtos/anna-pegova/');
+const mensagem = 'Olá, Iasmim! Quero saber sobre os produtos Anna Pegova.';
+
+const marca = { '@type': 'Brand', '@id': ID.annaPegova, name: 'Anna Pegova' };
+// Sem preço e sem "offers" de propósito: os valores são informados pelo WhatsApp.
+const produto = {
+  '@type': 'Product',
+  '@id': `${url}#produtos`,
+  name: 'Linha completa Anna Pegova',
+  description: d.resumo,
+  url,
+  brand: { '@id': ID.annaPegova },
+  category: 'Cosméticos para cuidados com a pele',
+};
+const revenda = {
+  '@type': 'Service',
+  '@id': `${url}#revenda`,
+  name: 'Revenda e orientação de uso dos produtos Anna Pegova',
+  description:
+    'Revendedora autorizada Anna Pegova desde 2025. Vende toda a linha de skincare para a rotina em casa, inclusive para quem não é cliente, e envia pelos Correios para cidades vizinhas.',
+  provider: { '@id': ID.negocio },
+  areaServed,
+  isRelatedTo: { '@id': `${url}#produtos` },
+};
+---
+<Base
+  title={d.title}
+  description={d.description}
+  migalhas={[{ nome: 'Início', path: '/' }, { nome: 'Produtos Anna Pegova', path: '/produtos/anna-pegova/' }]}
+  ld={[marca, produto, revenda, faqLd(url, d.faq)]}
+  mensagemWa={mensagem}
+  rotuloWa="Pedir produtos Anna Pegova"
+  atualizado={d.atualizado}
+  sobre={`${url}#produtos`}
+>
+  <div class="wrap">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Única revendedora em Juazeiro do Norte</p>
+        <h1>{d.h1}</h1>
+        {d.resumo && <p class="lead">{d.resumo}</p>}
+        <p><a class="btn btn-wa" href={waLink(mensagem)}><IconWa /> Consultar produtos pelo WhatsApp</a></p>
+      </div>
+      <Foto src={d.imagem?.src} alt={d.imagem?.alt ?? 'Produtos Anna Pegova'} prioridade />
+    </header>
+    <div class="texto">
+      <div class="prosa"><Content /></div>
+      <Faq itens={d.faq} titulo="Perguntas frequentes sobre Anna Pegova em Juazeiro do Norte" />
+      <Agendar mensagem={mensagem} titulo="Como comprar Anna Pegova em Juazeiro do Norte?" valor="Valores dos produtos pelo WhatsApp; envio pelos Correios para cidades vizinhas." />
+    </div>
+  </div>
+</Base>
+<style>
+  .hero {
+    display: grid;
+    gap: 2rem;
+    padding-block: 1.25rem 2rem;
+    align-items: center;
+  }
+  @media (min-width: 56rem) {
+    .hero {
+      grid-template-columns: 1.3fr 1fr;
+      gap: 3rem;
+    }
+  }
+</style>

@@ -1,0 +1,40 @@
+---
+import type { Migalha } from '../lib/schema';
+interface Props { itens: Migalha[] }
+const { itens } = Astro.props;
+---
+<nav class="migalhas" aria-label="Você está em">
+  <ol>
+    {itens.map((m, i) => (
+      <li>
+        {i < itens.length - 1 ? <a href={m.path}>{m.nome}</a> : <span aria-current="page">{m.nome}</span>}
+      </li>
+    ))}
+  </ol>
+</nav>
+<style>
+  .migalhas {
+    font-size: 0.9rem;
+    color: var(--muted);
+    padding-top: 1.25rem;
+  }
+  ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem;
+  }
+  li {
+    margin: 0;
+  }
+  li + li::before {
+    content: '›';
+    margin: 0 0.4rem 0 0.2rem;
+    color: var(--muted);
+  }
+  a {
+    color: var(--muted);
+  }
+</style>

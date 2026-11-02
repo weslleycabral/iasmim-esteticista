@@ -1,0 +1,274 @@
+{
+  "_comoEditar": [
+    "Depoimentos reais das avaliações do Google. Copie o texto exatamente como a cliente escreveu: pode cortar trechos com … mas nunca trocar ou corrigir palavras.",
+    "nome: só o primeiro nome (se dois tiverem o mesmo nome, acrescente a inicial do sobrenome, ex. \"Aline B.\").",
+    "mes: mês da avaliação (AAAA-MM). nota: estrelas (1 a 5).",
+    "servico: nome do arquivo do serviço citado, sem .md (ex. \"limpeza-de-pele\" ou \"peeling/peeling-para-melasma\"), ou null. O depoimento aparece também na página desse serviço.",
+    "destaque: true para aparecer na página inicial (use de 6 a 8).",
+    "link: endereço da avaliação no Google (opcional).",
+    "Não use avaliações escritas por quem ainda não foi atendida (ex. o lote de maio de 2023)."
+  ],
+  "depoimentos": [
+    {
+      "nome": "Juliana",
+      "nota": 5,
+      "mes": "2025-05",
+      "texto": "Iasmim é uma profissional excelente, a melhor limpeza de pele que já fiz na vida. Pontual e atenciosa.",
+      "servico": "limpeza-de-pele",
+      "destaque": true,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChZDSUhNMG9nS0VJUzNrcFdPajhmX0p3EAE!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CIHM0ogKEIS3kpWOj8f_Jw%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Edvânia",
+      "nota": 5,
+      "mes": "2025-08",
+      "texto": "Fiz uma limpeza de pele com a Iasmin e adorei. Sentindo minha pele revitalizada... hidratada, lisinha e saudável!! A extração de cravos dela é diferenciada, e isso faz toda a diferença na limpeza de pele! …",
+      "servico": "limpeza-de-pele",
+      "destaque": true,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT205VE4ydE9OWFUwVDFndGRHVlJNWEpLVHpJNFJHYxAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOm9TN2tONXU0T1gtdGVRMXJKTzI4RGc%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Amanda",
+      "nota": 5,
+      "mes": "2026-01",
+      "texto": "Foi essencial para mim ter conhecido o espaço de Iasmim, o cuidado e profissionalismo são maravilhosos, hoje tenho uma pele nova e um pensamento diferente quanto aos cuidados e importância do uso de produtos corretos, agradeço muito por ter recuperado a minha autoestima! Confio de olhos fechados",
+      "servico": null,
+      "destaque": true,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2tOelpXeDFOemhwY1c5c2RWOTFTa3BuUWpGamJrRRAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOkNzZWx1NzhpcW9sdV91SkpnQjFjbkE%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Luana",
+      "nota": 5,
+      "mes": "2025-08",
+      "texto": "Super recomendo! Profissional de confiança, atenciosa e com resultados visíveis já nas primeiras sessões.",
+      "servico": null,
+      "destaque": true,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2pCcFdETlliRVpCTkd3NFVWZzRPRkJ0UmtNMGVIYxAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOjBpWDNYbEZBNGw4UVg4OFBtRkM0eHc%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Barbarah",
+      "nota": 5,
+      "mes": "2025-08",
+      "texto": "maravilhosa!!!! a melhor limpeza de pele do Cariri!!!!!",
+      "servico": "limpeza-de-pele",
+      "destaque": true,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2xsUFkwa3pUMUJKVFdGUFREWTFhelpMTVRGYWVrRRAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOllPY0kzT1BJTWFPTDY1azZLMTFaekE%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Kalyne",
+      "nota": 5,
+      "mes": "2025-06",
+      "texto": "Já sou paciente de Iasmim há 2 ano e adoro o trabalho dela. O espaço sempre bem organizado, o atendimento bem feito, ela explica tudo direitinho no pós e dá a assistência necessária. Nota 10!",
+      "servico": null,
+      "destaque": true,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChdDSUhNMG9nS0VJQ0FnSUNuNzRtQ3N3RRAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CIHM0ogKEICAgICn74mCswE%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Jadna",
+      "nota": 5,
+      "mes": "2026-10",
+      "texto": "Excelente profissional, acolhedora e competente. Entende nossa queixa e sabe resolver",
+      "servico": null,
+      "destaque": true,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChdDSUhNMG9nS0VJQ0FnTUNRMmJDQXRnRRAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CIHM0ogKEICAgMCQ2bCAtgE%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Nayana",
+      "nota": 5,
+      "mes": "2026-07",
+      "texto": "Iasmim é uma profissional excelente, acolhedora e que realmente escuta o paciente com paciência e carinho. O atendimento é impecável e os produtos indicados são maravilhosos, de altíssima qualidade. Super recomendada!",
+      "servico": null,
+      "destaque": true,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT21sTGJXRnNlblpVUVhGTFdWVk1VRVZOYUdGaWIzYxAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOmlLbWFsenZUQXFLWVVMUEVNaGFib3c%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Mitzrael",
+      "nota": 5,
+      "mes": "2025-07",
+      "texto": "Fiz uma limpeza de pele ,e o atendimento me surpreendeu bastante. … A esteticista que me atendeu foi super atenciosa, respeitou o tempo da minha pele e teve bastante técnica. … Saí de lá com a pele bem mais limpa, sem aquele excesso de oleosidade e com uma aparência muito mais saudável. Já senti diferença logo depois do procedimento. …",
+      "servico": "limpeza-de-pele",
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2sxM1VVYzFXVWhZVDNaMVp6Um9RWEZ0WDBGdFdYYxAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOk13UUc1WUhYT3Z1ZzRoQXFtX0FtWXc%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Juan",
+      "nota": 5,
+      "mes": "2025-04",
+      "texto": "Depois de muitos anos sem fazer limpeza de pele, optei pela Iasmim pelos comentários positivos. A profissional realmente é de qualidade e cumpre com o que promete. Apesar de doer um pouco, vale muito a pena. Os resultados estão sendo ótimos e além de tudo recebi dicas de produtos e de cuidados com a minha pele. …",
+      "servico": "limpeza-de-pele",
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChZDSUhNMG9nS0VJQ0FnTUNJcG91aUVREAE!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CIHM0ogKEICAgMCIpouiEQ%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Lauro",
+      "nota": 5,
+      "mes": "2026-10",
+      "texto": "A limpeza de pele é excelente! Além disso, a própria Iasmim é super simpática!",
+      "servico": "limpeza-de-pele",
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2pFeFdUUkxla3BHUlZjNU5VaEVUVEZwUjNoMFIzYxAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOjExWTRLekpGRVc5NUhETTFpR3h0R3c%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Paloma",
+      "nota": 5,
+      "mes": "2026-10",
+      "texto": "Maravilhosa! A melhor limpeza de pele do mundo",
+      "servico": "limpeza-de-pele",
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT25kWE1VWTNia05VYUhreWFqQlpORWhYUWtWeFptYxAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOndXMUY3bkNUaHkyajBZNEhXQkVxZmc%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Erica",
+      "nota": 5,
+      "mes": "2026-09",
+      "texto": "Indico de olhos fechados! Iasmim tem a limpeza de pele realmente completa, com produtos incríveis …",
+      "servico": "limpeza-de-pele",
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2xVM1lqQTJVbGR5UVRobVRsaFhZbXhKYkRGclNWRRAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOlU3YjA2UldyQThmTlhXYmxJbDFrSVE%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Mikaely",
+      "nota": 5,
+      "mes": "2026-08",
+      "texto": "Amo o trabalho dela. Além de trabalhar por amor, faz tudo muito bem feito. Amei a minha limpeza de pele e já vou voltar para fazer outros procedimentos",
+      "servico": "limpeza-de-pele",
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChZDSUhNMG9nS0VJQ0FnSUNudlBETVBnEAE!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CIHM0ogKEICAgICnvPDMPg%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Giana",
+      "nota": 5,
+      "mes": "2025-08",
+      "texto": "Excelente experiência! A limpeza de pele foi feita com cuidado e atenção. Fui muito bem atendida e estou satisfeita com o resultado.",
+      "servico": "limpeza-de-pele",
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2tWaVJVOXFaamt6TVRjNWR6Wk1SMDVHYjI5eVRFRRAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOkViRU9qZjkzMTc5dzZMR05Gb29yTEE%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Rayane",
+      "nota": 5,
+      "mes": "2025-08",
+      "texto": "Eu amo Iasmim e não é atoa que sou cliente há 5 anos. Eu amo o atendimento, a limpeza, os produtos e ela em si.",
+      "servico": "limpeza-de-pele",
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2tOSFEzSmpNREoxVFROYVZFdDBkVmRsUlhkSU9YYxAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOkNHQ3JjMDJ1TTNaVEt0dVdlRXdIOXc%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Thainá",
+      "nota": 5,
+      "mes": "2024-10",
+      "texto": "A responsável pela melhor limpeza de pele da região!",
+      "servico": "limpeza-de-pele",
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChZDSUhNMG9nS0VJQ0FnSURueUxlbVBREAE!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CIHM0ogKEICAgIDnyLemPQ%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Cintia",
+      "nota": 5,
+      "mes": "2026-09",
+      "texto": "Excelente profissional, ambiente lindo e muito calmo. Confio de olhos fechados.",
+      "servico": null,
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2t0TlZrNVJRMHQwVldnemFsazNjemMzZEdSYVNuYxAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOktNVk5RQ0t0VWgzalk3czc3dGRaSnc%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Deise",
+      "nota": 5,
+      "mes": "2026-08",
+      "texto": "Ambiente maravilhoso, atendimento excelente, o procedimento foi muito tranquilo com técnica e cuidado. Profissional de fato!",
+      "servico": null,
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT21aaVIzWnNOemh6VDJSb1EyNXNiVzl3YVhsU1VtYxAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOmZiR3ZsNzhzT2RoQ25sbW9waXlSUmc%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Pedro",
+      "nota": 5,
+      "mes": "2026-06",
+      "texto": "Espaço agradável, fui muito bem atendido! Sensação real de pele limpa!!! Voltarei mais vezes.",
+      "servico": null,
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT210NVpYbGFXbWd0WW14TE5XdzNkWFV3WTNwM05HYxAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOmt5ZXlaWmgtYmxLNWw3dXUwY3p3NGc%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Camila",
+      "nota": 5,
+      "mes": "2026-01",
+      "texto": "Ótimo atendimento, só tenho a agradecer pelo cuidado e atenção que teve comigo e com minha pele. Você Devolveu minha autoestima. Obrigadaaa",
+      "servico": null,
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2kxZmFIaGhTelJSUVRka2QwNUVVRmhpVjFSdlJsRRAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOi1faHhhSzRRQTdkd05EUFhiV1RvRlE%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Jaryssa",
+      "nota": 5,
+      "mes": "2025-09",
+      "texto": "Atendimento excelente, minha pele é outra!!!",
+      "servico": null,
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT25WQlQzaFhZVTl4VEhRNVRrOXZRMUUzTVV0NVozYxAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOnVBT3hXYU9xTHQ5Tk9vQ1E3MUt5Z3c%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Dayane",
+      "nota": 5,
+      "mes": "2025-08",
+      "texto": "amei muito, uma profissional que passa credibilidade, segurança, e entrega resultados, que é o que buscamos, já vou voltar milhões de vezes!",
+      "servico": null,
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT201TU1UZHlVMFZOY2tkTVoydGlVbkYzTVZoRVEyYxAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOm5MMTdyU0VNckdMZ2tiUnF3MVhEQ2c%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Monica",
+      "nota": 5,
+      "mes": "2025-07",
+      "texto": "Gostei muito do atendimento. A Iasmin é muito educada, esclareceu todas as minhas dúvidas e realizou os procedimentos com grande profissionalismo.",
+      "servico": null,
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2tWQk5GUllSMUZsWHpWT1YwSm9Tak50ZEU5ME0xRRAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOkVBNFRYR1FlXzVOV0JoSjNtdE90M1E%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Aparecida",
+      "nota": 5,
+      "mes": "2025-07",
+      "texto": "…Além da técnica impecável, o que mais me tocou foi o cuidado humano que ela coloca em cada detalhe. Ela não atende apenas com as mãos — atende com o coração. …",
+      "servico": null,
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2xsWU5GQTJUbXhzV1hkdlluaGFPRGhXV2pRdFpIYxAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOllYNFA2TmxsWXdvYnhaODhWWjQtZHc%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Aline",
+      "nota": 5,
+      "mes": "2025-07",
+      "texto": "Atendimento maravilhoso, e resultados excelentes. Minha pele foi transformada após os tratamento oferecidos por Iasmim. Super indico",
+      "servico": null,
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sCi9DQUlRQUNvZENodHljRjlvT2xsRFduUkdUbHA1VlRGb1JEZHBkV1JoU1RORExWRRAB!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CAIQACodChtycF9oOllDWnRGTlp5VTFoRDdpdWRhSTNDLVE%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Brena",
+      "nota": 5,
+      "mes": "2025-01",
+      "texto": "Iasmim é um anjo na minha vida. Trouxe minha autoestima de volta e eu sou muito grata por tudo. Confio de olhos fechados.",
+      "servico": null,
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChZDSUhNMG9nS0VJQ0FnSUN4cFA3OEJ3EAE!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CIHM0ogKEICAgICxpP78Bw%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Josane",
+      "nota": 5,
+      "mes": "2024-09",
+      "texto": "Atendimento nota mil, atenciosa, sorridente e me deixou bem tranquila,quanto ao tratamento da minha pele, simplesmente fiquei realizada. Iasmim é uma profissional por excelência.",
+      "servico": null,
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChZDSUhNMG9nS0VJQ0FnSUNuN082WUlREAE!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CIHM0ogKEICAgICn7O6YIQ%7C%7C?hl=pt-BR"
+    },
+    {
+      "nome": "Wirna",
+      "nota": 5,
+      "mes": "2024-08",
+      "texto": "Uma excelente profissional, amo meus produtinhos e não deixo de ter na minha rotina, são perfeitos!",
+      "servico": null,
+      "destaque": false,
+      "link": "https://www.google.com/maps/reviews/data=!4m8!14m7!1m6!2m5!1sChZDSUhNMG9nS0VJQ0FnSUNIb0ptZFdREAE!2m1!1s0x0:0x7a0fc753b476a31a!3m1!1s2@1:CIHM0ogKEICAgICHoJmdWQ%7C%7C?hl=pt-BR"
+    }
+  ]
+}

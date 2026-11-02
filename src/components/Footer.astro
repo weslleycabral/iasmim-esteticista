@@ -1,0 +1,106 @@
+---
+import { negocio, waLink, mapsLink, servicosPrincipais, peelings, servicoPath } from '../lib/site';
+const principais = await servicosPrincipais();
+const listaPeelings = await peelings();
+const ano = new Date().getFullYear();
+---
+<footer class="rodape">
+  <div class="wrap rodape-grid">
+    <section aria-labelledby="rodape-nap">
+      <h2 id="rodape-nap" class="rodape-titulo">{negocio.nome}</h2>
+      <address class="nap">
+        <span class="nap-nome">{negocio.nome}</span><br />
+        <span class="nap-endereco">{negocio.endereco.linha}</span><br />
+        <a class="nap-tel" href={`tel:${negocio.telefoneE164.replace(/\s/g, '')}`}>{negocio.telefone}</a>
+      </address>
+      <p>{negocio.horario.texto}</p>
+      <p class="rodape-links">
+        <a href={waLink()}>WhatsApp</a> ·
+        <a href={negocio.instagram} rel="me">Instagram {negocio.instagramUsuario}</a> ·
+        <a href={mapsLink}>Ver no Google Maps</a> ·
+        <a href={negocio.googleAvaliacoes}>Avaliações no Google</a>
+      </p>
+    </section>
+    <nav aria-labelledby="rodape-servicos">
+      <h2 id="rodape-servicos" class="rodape-titulo">Serviços em Juazeiro do Norte</h2>
+      <ul>
+        {principais.map((s) => <li><a href={servicoPath(s.id)}>{s.data.nome}</a></li>)}
+        <li><a href="/produtos/anna-pegova/">Produtos Anna Pegova</a></li>
+      </ul>
+    </nav>
+    <nav aria-labelledby="rodape-peelings">
+      <h2 id="rodape-peelings" class="rodape-titulo">Peelings</h2>
+      <ul>
+        {listaPeelings.map((s) => <li><a href={servicoPath(s.id)}>{s.data.nome}</a></li>)}
+      </ul>
+    </nav>
+    <nav aria-labelledby="rodape-site">
+      <h2 id="rodape-site" class="rodape-titulo">Site</h2>
+      <ul>
+        <li><a href="/">Início</a></li>
+        <li><a href="/servicos/">Todos os serviços</a></li>
+        <li><a href="/sobre/">Sobre a Iasmim</a></li>
+        <li><a href="/depoimentos/">Depoimentos de clientes</a></li>
+        <li><a href="/perguntas-frequentes/">Perguntas frequentes</a></li>
+        <li><a href="/contato/">Contato e endereço</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="wrap rodape-fim">
+    <p>© {ano} {negocio.nome} · {negocio.profissional}, {negocio.cargo} · Atendimento em Juazeiro do Norte, Crato e Barbalha (CE)</p>
+  </div>
+</footer>
+<style>
+  .rodape {
+    background: var(--dark);
+    color: var(--dark-ink);
+    margin-top: 4rem;
+    padding-top: 3rem;
+    font-size: 0.97rem;
+  }
+  .rodape a {
+    color: var(--dark-ink);
+  }
+  .rodape :focus-visible {
+    outline-color: var(--dark-ink);
+  }
+  .rodape-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  }
+  .rodape-titulo {
+    font-size: 1.1rem;
+    margin: 0 0 0.8rem;
+    color: var(--dark-ink);
+  }
+  .nap {
+    font-style: normal;
+    margin-bottom: 1rem;
+  }
+  .nap-nome {
+    font-weight: 600;
+  }
+  .rodape ul {
+    list-style: none;
+    padding: 0;
+  }
+  .rodape li a {
+    display: inline-block;
+    padding: 0.15rem 0;
+  }
+  .rodape-links a {
+    display: inline-block;
+    padding: 0.2rem 0;
+  }
+  .rodape-fim {
+    border-top: 1px solid rgba(246, 239, 233, 0.18);
+    margin-top: 1.5rem;
+    padding-block: 1.25rem;
+    color: var(--dark-muted);
+    font-size: 0.88rem;
+  }
+  .rodape-fim p {
+    margin: 0;
+  }
+</style>

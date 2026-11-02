@@ -1,0 +1,35 @@
+---
+// Espaço para foto. Sem "src", mostra um desenho neutro (decorativo) até a foto real chegar.
+interface Props { src?: string; alt: string; formato?: 'paisagem' | 'retrato' | 'quadrado'; prioridade?: boolean }
+const { src = '', alt, formato = 'paisagem', prioridade = false } = Astro.props;
+const dims = { paisagem: [1200, 800], retrato: [900, 1200], quadrado: [1000, 1000] }[formato];
+---
+{src ? (
+  <img class={`foto foto-${formato}`} src={src} alt={alt} width={dims[0]} height={dims[1]}
+    loading={prioridade ? 'eager' : 'lazy'} decoding="async" fetchpriority={prioridade ? 'high' : undefined} />
+) : (
+  <div class={`foto foto-${formato} foto-vazia`} aria-hidden="true" data-alt-futuro={alt}>
+    <svg viewBox="0 0 120 80" preserveAspectRatio="xMidYMid slice" focusable="false">
+      <rect width="120" height="80" fill="#f1e4dd" />
+      <circle cx="92" cy="18" r="30" fill="#efe0d8" />
+      <path d="M60 22c-6 7-9 12.5-9 17a9 9 0 0 0 18 0c0-4.5-3-10-9-17Z" fill="none" stroke="#8c4f45" stroke-width="1" opacity=".55" />
+      <path d="M0 64c20-8 40-8 60 0s40 8 60 0v16H0Z" fill="#e6d3c8" />
+    </svg>
+  </div>
+)}
+<style>
+  .foto {
+    width: 100%;
+    border-radius: var(--radius);
+    object-fit: cover;
+    background: var(--soft);
+    overflow: hidden;
+  }
+  .foto-paisagem { aspect-ratio: 3 / 2; }
+  .foto-retrato { aspect-ratio: 3 / 4; }
+  .foto-quadrado { aspect-ratio: 1; }
+  .foto-vazia svg {
+    width: 100%;
+    height: 100%;
+  }
+</style>

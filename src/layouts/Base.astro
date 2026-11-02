@@ -1,0 +1,101 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import BarraWhatsApp from '../components/BarraWhatsApp.astro';
+import Migalhas from '../components/Migalhas.astro';
+import { negocio, abs, todosServicos } from '../lib/site';
+import { website, negocioLd, pessoa, breadcrumbLd, webpageLd, type Migalha } from '../lib/schema';
+
+interface Props {
+  title: string;
+  description: string;
+  migalhas?: Migalha[]; // sem migalhas = página inicial
+  ld?: (Record<string, unknown> | null)[]; // nós JSON-LD específicos da página
+  mensagemWa?: string;
+  rotuloWa?: string;
+  atualizado?: Date;
+  sobre?: string; // @id da entidade principal da página
+  tipoPagina?: string;
+  ogImagem?: string;
+  ogTipo?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description,
+  migalhas = [],
+  ld = [],
+  mensagemWa = 'Olá, Iasmim! Quero agendar um horário.',
+  rotuloWa,
+  atualizado,
+  sobre,
+  tipoPagina,
+  ogImagem = '/og-iasmim-esteticista.png',
+  ogTipo = 'website',
+  noindex = false,
+} = Astro.props;
+
+const canonical = abs(Astro.url.pathname);
+const servicos = await todosServicos();
+
+const grafo = [
+  website(),
+  negocioLd(servicos),
+  pessoa(),
+  webpageLd({ url: canonical, titulo: title, descricao: description, atualizado, sobre, tipo: tipoPagina, temBreadcrumb: migalhas.length > 0 }),
+  migalhas.length ? breadcrumbLd(canonical, migalhas) : null,
+  ...ld,
+].filter(Boolean);
+
+// remove campos undefined e escapa "<" para não quebrar o <script>
+const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': grafo }).replace(/</g, '\\u003c');
+---
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {!noindex && <link rel="canonical" href={canonical} />}
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1'} />
+    <meta name="theme-color" content="#fbf8f4" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="Resumo do site para assistentes de IA" />
+
+    <meta property="og:type" content={ogTipo} />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content={negocio.nome} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={noindex ? abs('/') : canonical} />
+    <meta property="og:image" content={abs(ogImagem)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${negocio.nome} — estética facial em Juazeiro do Norte (CE)`} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={abs(ogImagem)} />
+
+    <meta name="geo.region" content="BR-CE" />
+    <meta name="geo.placename" content="Juazeiro do Norte" />
+    <meta name="geo.position" content={`${negocio.geo.lat};${negocio.geo.lng}`} />
+    <meta name="ICBM" content={`${negocio.geo.lat}, ${negocio.geo.lng}`} />
+
+    <script type="application/ld+json" set:html={jsonLd} />
+  </head>
+  <body>
+    <a class="skip" href="#conteudo">Pular para o conteúdo</a>
+    <Header />
+    <main id="conteudo">
+      {migalhas.length > 0 && <div class="wrap"><Migalhas itens={migalhas} /></div>}
+      <slot />
+    </main>
+    <Footer />
+    <BarraWhatsApp mensagem={mensagemWa} rotulo={rotuloWa} />
+  </body>
+</html>

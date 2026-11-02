@@ -1,0 +1,57 @@
+---
+import { servicoPath, type Servico } from '../lib/site';
+interface Props { servico: Servico; nivel?: 'h2' | 'h3' }
+const { servico, nivel = 'h3' } = Astro.props;
+const Tag = nivel;
+---
+<li class="card">
+  <Tag class="card-titulo"><a href={servicoPath(servico.id)}>{servico.data.nome}</a></Tag>
+  <p>{servico.data.resumo}</p>
+  <span class="card-mais" aria-hidden="true">Saiba mais →</span>
+</li>
+<style>
+  .card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.25rem 1rem;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .card:hover {
+    border-color: var(--accent);
+  }
+  .card:focus-within {
+    outline: 3px solid var(--sage);
+    outline-offset: 2px;
+  }
+  .card-titulo {
+    margin: 0 0 0.5rem;
+    font-size: 1.2rem;
+  }
+  .card-titulo a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  /* o cartão inteiro é clicável, mas só o título é o link */
+  .card-titulo a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .card-titulo a:focus-visible {
+    outline: none;
+  }
+  .card p {
+    color: var(--muted);
+    font-size: 0.97rem;
+    flex: 1;
+  }
+  .card-mais {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.93rem;
+  }
+</style>

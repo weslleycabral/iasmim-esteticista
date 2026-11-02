@@ -1,0 +1,89 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import IconWa from '../components/IconWa.astro';
+import Faq from '../components/Faq.astro';
+import { negocio, waLink, mapsLink, mapsRotaLink, abs } from '../lib/site';
+import { ID, faqLd } from '../lib/schema';
+
+const pagina = await getEntry('paginas', 'contato');
+if (!pagina) throw new Error('Falta src/content/paginas/contato.md');
+const { Content } = await render(pagina);
+const d = pagina.data;
+---
+<Base
+  title={d.title}
+  description={d.description}
+  migalhas={[{ nome: 'Início', path: '/' }, { nome: 'Contato', path: '/contato/' }]}
+  ld={[faqLd(abs('/contato/'), d.faq)]}
+  atualizado={d.atualizado}
+  sobre={ID.negocio}
+  tipoPagina="ContactPage"
+>
+  <div class="wrap">
+    <div class="texto">
+      <h1>{d.h1}</h1>
+      {d.resumo && <p class="lead">{d.resumo}</p>}
+    </div>
+
+    <div class="contato-grid">
+      <section class="caixa" aria-labelledby="endereco">
+        <h2 id="endereco">Endereço</h2>
+        <address>
+          <strong>{negocio.nome}</strong><br />
+          {negocio.endereco.linha}
+        </address>
+        <p>Plus Code: {negocio.geo.plusCode}</p>
+        <p class="acoes">
+          <a class="btn btn-sec" href={mapsLink}>Abrir no Google Maps</a>
+          <a class="btn btn-sec" href={mapsRotaLink}>Traçar rota</a>
+        </p>
+      </section>
+      <section class="caixa" aria-labelledby="agendamento">
+        <h2 id="agendamento">Agendamento</h2>
+        <p>WhatsApp e telefone: <a href={`tel:${negocio.telefoneE164.replace(/\s/g, '')}`}>{negocio.telefone}</a></p>
+        <p>Instagram: <a href={negocio.instagram}>{negocio.instagramUsuario}</a></p>
+        <p class="acoes"><a class="btn btn-wa" href={waLink()}><IconWa /> Chamar no WhatsApp</a></p>
+      </section>
+      <section class="caixa" aria-labelledby="horario">
+        <h2 id="horario">Horário de atendimento</h2>
+        <p>{negocio.horario.texto}</p>
+        <p>Domingo: fechado.</p>
+      </section>
+    </div>
+
+    <div class="texto prosa">
+      <Content />
+    </div>
+    <div class="texto">
+      <Faq itens={d.faq} titulo="Dúvidas sobre atendimento e localização" />
+    </div>
+  </div>
+</Base>
+<style>
+  .contato-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+    margin: 1.5rem 0 1rem;
+  }
+  .caixa {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.25rem 1.4rem 0.75rem;
+  }
+  .caixa h2 {
+    margin-top: 1.2rem;
+    font-size: 1.3rem;
+  }
+  address {
+    font-style: normal;
+    margin-bottom: 1rem;
+  }
+  .acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+</style>

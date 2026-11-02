@@ -1,0 +1,163 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Foto from '../../components/Foto.astro';
+import Faq from '../../components/Faq.astro';
+import Agendar from '../../components/Agendar.astro';
+import CardServico from '../../components/CardServico.astro';
+import ResumoServico from '../../components/ResumoServico.astro';
+import IconWa from '../../components/IconWa.astro';
+import Depoimentos from '../../components/Depoimentos.astro';
+import { negocio, todosServicos, servicoPath, waLink, msgServico, abs, ehPeeling, dataBR, precoTexto, VALOR_SOB_CONSULTA, type Servico } from '../../lib/site';
+import { servicoLd, faqLd } from '../../lib/schema';
+import { doServico } from '../../lib/depoimentos';
+
+export async function getStaticPaths() {
+  const todos = await todosServicos();
+  return todos.map((servico) => ({ params: { slug: servico.id }, props: { servico, todos } }));
+}
+
+interface Props { servico: Servico; todos: Servico[] }
+const { servico, todos } = Astro.props;
+const d = servico.data;
+const { Content } = await render(servico);
+const url = abs(servicoPath(servico.id));
+const porId = new Map(todos.map((s) => [s.id, s]));
+
+const peeling = ehPeeling(servico);
+const hubPeeling = porId.get('peeling');
+const filhos = d.tipo === 'grupo' ? todos.filter((s) => s.id.startsWith(`${servico.id}/`)) : [];
+
+const relacionados = d.relacionados.map((id) => {
+  const r = porId.get(id);
+  if (!r) throw new Error(`Serviço relacionado "${id}" não existe (em ${servico.id}.md)`);
+  return r;
+});
+
+const migalhas = [
+  { nome: 'Início', path: '/' },
+  { nome: 'Serviços', path: '/servicos/' },
+  ...(peeling && hubPeeling ? [{ nome: hubPeeling.data.nome, path: servicoPath('peeling') }] : []),
+  { nome: d.nome, path: servicoPath(servico.id) },
+];
+
+const servicoNode: Record<string, unknown> = servicoLd(servico);
+if (filhos.length) {
+  servicoNode.hasOfferCatalog = {
+    '@type': 'OfferCatalog',
+    name: `Tipos de ${d.nome.toLowerCase()} na Iasmim Esteticista`,
+    itemListElement: filhos.map((f) => ({
+      '@type': 'Offer',
+      itemOffered: { '@type': 'Service', '@id': `${abs(servicoPath(f.id))}#servico`, name: f.data.nome, url: abs(servicoPath(f.id)) },
+    })),
+  };
+}
+if (peeling && hubPeeling) servicoNode.isRelatedTo = { '@id': `${abs(servicoPath('peeling'))}#servico` };
+
+const mensagem = msgServico(servico);
+const preco = precoTexto(servico);
+const valorTexto = `Valor: ${preco ?? VALOR_SOB_CONSULTA}. A avaliação custa ${negocio.avaliacao.valor}, descontados do procedimento.`;
+const depoimentos = doServico(servico.id);
+const MAX_DEPOIMENTOS = 6;
+---
+<Base
+  title={d.title}
+  description={d.description}
+  migalhas={migalhas}
+  ld={[servicoNode, faqLd(url, d.faq)]}
+  mensagemWa={mensagem}
+  atualizado={d.atualizado}
+  sobre={`${url}#servico`}
+>
+  <article>
+    <header class="wrap hero">
+      <div class="hero-texto">
+        <p class="eyebrow">{d.categoria} · Juazeiro do Norte – CE</p>
+        <h1>{d.h1}</h1>
+        <p class="lead">{d.resumo}</p>
+        <p class="hero-acoes">
+          <a class="btn btn-wa" href={waLink(mensagem)}><IconWa /> Agendar pelo WhatsApp</a>
+          <a class="btn btn-sec" href="#perguntas">Perguntas frequentes</a>
+        </p>
+      </div>
+      <div class="hero-foto">
+        <Foto src={d.imagem?.src} alt={d.imagem?.alt ?? `${d.nome} na Iasmim Esteticista, em Juazeiro do Norte`} prioridade />
+      </div>
+    </header>
+
+    <div class="wrap corpo">
+      <div class="texto">
+        <ResumoServico servico={servico} />
+
+        {filhos.length > 0 && (
+          <section aria-labelledby="tipos">
+            <h2 id="tipos">Quais tipos de {d.nome.toLowerCase()} a Iasmim Esteticista faz?</h2>
+            <ul class="grid-cards">
+              {filhos.map((f) => <CardServico servico={f} />)}
+            </ul>
+          </section>
+        )}
+
+        <div class="prosa">
+          <Content />
+        </div>
+
+        {depoimentos.length > 0 && (
+          <section aria-labelledby="depoimentos">
+            <h2 id="depoimentos">O que dizem as clientes que fizeram {d.nome.toLowerCase()} com a Iasmim?</h2>
+            <p>Trechos de avaliações no Google ({negocio.avaliacoes.nota}, com {negocio.avaliacoes.total} avaliações), copiados sem correções.</p>
+            <Depoimentos itens={depoimentos.slice(0, MAX_DEPOIMENTOS)} mostrarServico={false} />
+            <p><a href="/depoimentos/">Ver todos os depoimentos</a> · <a href={negocio.googleAvaliacoes}>Ler as avaliações no Google</a></p>
+          </section>
+        )}
+
+        <Agendar mensagem={mensagem} titulo={`Como agendar ${d.nome.toLowerCase()} em Juazeiro do Norte?`} valor={valorTexto} />
+
+        <Faq itens={d.faq} titulo={`Perguntas frequentes sobre ${d.nome.toLowerCase()} em Juazeiro do Norte`} />
+
+        <p class="atualizado">Página atualizada em <time datetime={d.atualizado.toISOString().slice(0, 10)}>{dataBR(d.atualizado)}</time>.</p>
+      </div>
+    </div>
+  </article>
+
+  {(relacionados.length > 0 || (peeling && hubPeeling)) && (
+    <section class="secao secao-suave" aria-labelledby="relacionados">
+      <div class="wrap">
+        <h2 id="relacionados">Outros tratamentos que combinam com {d.nome.toLowerCase()}</h2>
+        <ul class="grid-cards">
+          {peeling && hubPeeling && !d.relacionados.includes('peeling') && <CardServico servico={hubPeeling} />}
+          {relacionados.map((r) => <CardServico servico={r} />)}
+        </ul>
+        <p><a href="/servicos/">Ver todos os serviços da Iasmim Esteticista</a></p>
+      </div>
+    </section>
+  )}
+</Base>
+<style>
+  .hero {
+    display: grid;
+    gap: 1.75rem;
+    padding-block: 1.25rem 2.25rem;
+    align-items: center;
+  }
+  @media (min-width: 56rem) {
+    .hero {
+      grid-template-columns: 1.25fr 1fr;
+      gap: 3rem;
+    }
+  }
+  .hero-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .corpo {
+    padding-bottom: 1rem;
+  }
+  .atualizado {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 2rem;
+  }
+</style>

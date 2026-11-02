@@ -1,0 +1,24 @@
+---
+interface Props { itens: { pergunta: string; resposta: string }[]; titulo: string; id?: string }
+const { itens, titulo, id = 'perguntas' } = Astro.props;
+---
+{itens.length > 0 && (
+  <section class="faq" aria-labelledby={id}>
+    <h2 id={id}>{titulo}</h2>
+    {itens.map((f) => (
+      <div class="faq-item">
+        <h3>{f.pergunta}</h3>
+        <p>{f.resposta}</p>
+      </div>
+    ))}
+  </section>
+)}
+<style>
+  .faq-item {
+    border-top: 1px solid var(--line);
+    padding-top: 0.2rem;
+  }
+  .faq-item h3 {
+    margin-top: 1.2rem;
+  }
+</style>

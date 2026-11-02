@@ -1,0 +1,100 @@
+{
+  "nome": "Iasmim Esteticista",
+  "profissional": "Iasmim Mayara",
+  "cargo": "Tecnóloga em Estética e Cosmetologia",
+  "site": "https://iasmimesteticista.com.br",
+  "endereco": {
+    "linha": "R. José Pereira Cansanção, 19 - Salesianos, Juazeiro do Norte - CE, 63050-012, Brasil",
+    "rua": "R. José Pereira Cansanção, 19",
+    "bairro": "Salesianos",
+    "cidade": "Juazeiro do Norte",
+    "uf": "CE",
+    "cep": "63050-012",
+    "pais": "BR"
+  },
+  "geo": {
+    "lat": -7.2086704,
+    "lng": -39.3237757,
+    "plusCode": "QMRG+GF Juazeiro do Norte, Ceará"
+  },
+  "telefone": "(88) 99989-0590",
+  "telefoneE164": "+55 88 99989-0590",
+  "whatsapp": "5588999890590",
+  "instagram": "https://www.instagram.com/iasmimesteticista/",
+  "instagramUsuario": "@iasmimesteticista",
+  "facebook": "https://www.facebook.com/iasmimesteticista",
+  "horario": {
+    "texto": "Segunda a sábado, das 10h às 17h, somente com horário marcado e conforme disponibilidade na agenda.",
+    "dias": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "abre": "10:00",
+    "fecha": "17:00"
+  },
+  "antecedencia": "Geralmente 1 a 2 dias; a agenda de sábado costuma fechar até sexta-feira.",
+  "avaliacao": {
+    "valor": "R$ 100",
+    "texto": "Avaliação obrigatória, R$ 100, descontados do procedimento quando a cliente faz o tratamento, no mesmo dia ou depois."
+  },
+  "pagamento": {
+    "formas": [
+      "Pix",
+      "Dinheiro",
+      "Cartão"
+    ],
+    "texto": "Pix, dinheiro ou cartão. Parcelamento sem juros (o número de parcelas depende do valor). Pix e dinheiro costumam ter desconto."
+  },
+  "publico": "Mulheres, homens e adolescentes; menores de 16 anos com autorização dos pais, de preferência acompanhados por eles.",
+  "referencia": "Perto da Igreja dos Salesianos. Sem estacionamento próprio; dá para estacionar nas ruas ao lado.",
+  "avaliacoes": {
+    "nota": "5,0",
+    "total": 229
+  },
+  "googleAvaliacoes": "https://share.google/tRfWShaEtcQygaGYF",
+  "areaAtendida": [
+    {
+      "nome": "Juazeiro do Norte",
+      "wikipedia": "https://pt.wikipedia.org/wiki/Juazeiro_do_Norte"
+    },
+    {
+      "nome": "Crato",
+      "wikipedia": "https://pt.wikipedia.org/wiki/Crato_(Cear%C3%A1)"
+    },
+    {
+      "nome": "Barbalha",
+      "wikipedia": "https://pt.wikipedia.org/wiki/Barbalha"
+    }
+  ],
+  "formacao": [
+    {
+      "titulo": "Tecnóloga em Estética e Cosmetologia",
+      "categoria": "Graduação tecnológica"
+    },
+    {
+      "titulo": "Pós-graduação lato sensu (especialização) em Harmonização Facial",
+      "categoria": "Pós-graduação lato sensu",
+      "instituicao": "FACEO – Faculdade Centro-Oeste",
+      "instituicaoUrl": "https://www.faculdadefaceo.com.br",
+      "instituicaoCidade": "Goiânia",
+      "instituicaoUf": "GO",
+      "cargaHoraria": "720 horas",
+      "conclusao": "2026-05-28",
+      "emissao": "2026-06-15",
+      "disciplinasDestaque": [
+        "Toxina Botulínica",
+        "Peelings Estéticos e Microagulhamento",
+        "Eletrocauterização Estética e Jato de Plasma",
+        "Ultraformer – Ultrassom Macrofocado e Microfocado",
+        "Anatomia e fisiologia da pele saudável e distúrbios estéticos",
+        "Cosmetologia, Nutracêuticos e Intercorrências em Procedimentos Faciais",
+        "Skinbooster Facial",
+        "Intradermoterapia Aplicada à Harmonização Facial"
+      ]
+    }
+  ]
+}

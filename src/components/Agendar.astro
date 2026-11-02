@@ -1,0 +1,38 @@
+---
+// Bloco de chamada para agendar (meio/fim das páginas)
+import IconWa from './IconWa.astro';
+import { negocio, waLink } from '../lib/site';
+interface Props { mensagem: string; titulo?: string; valor?: string }
+const {
+  mensagem,
+  titulo = 'Como agendar',
+  valor = `A avaliação custa ${negocio.avaliacao.valor}, descontados do procedimento; os valores estão na página de cada serviço ou pelo WhatsApp.`,
+} = Astro.props;
+---
+<section class="agendar" aria-labelledby="agendar-titulo">
+  <h2 id="agendar-titulo">{titulo}</h2>
+  <p>
+    O agendamento é feito pelo WhatsApp {negocio.telefone}. Atendimento {negocio.horario.texto.charAt(0).toLowerCase() + negocio.horario.texto.slice(1)}
+    {valor}
+  </p>
+  <p class="agendar-acoes">
+    <a class="btn btn-wa" href={waLink(mensagem)}><IconWa /> Chamar no WhatsApp</a>
+    <a class="btn btn-sec" href="/contato/">Endereço e como chegar</a>
+  </p>
+</section>
+<style>
+  .agendar {
+    background: var(--soft);
+    border-radius: var(--radius);
+    padding: 1.5rem 1.5rem 0.75rem;
+    margin: 2.5rem 0;
+  }
+  .agendar h2 {
+    margin-top: 0;
+  }
+  .agendar-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+</style>

@@ -1,0 +1,86 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Foto from '../components/Foto.astro';
+import Agendar from '../components/Agendar.astro';
+import Faq from '../components/Faq.astro';
+import { negocio, abs } from '../lib/site';
+import { ID, faqLd } from '../lib/schema';
+
+const pagina = await getEntry('paginas', 'sobre');
+if (!pagina) throw new Error('Falta src/content/paginas/sobre.md');
+const { Content } = await render(pagina);
+const d = pagina.data;
+const pos = negocio.formacao[1];
+const conclusao = new Date(pos.conclusao + 'T12:00:00Z');
+---
+<Base
+  title={d.title}
+  description={d.description}
+  migalhas={[{ nome: 'Início', path: '/' }, { nome: 'Sobre', path: '/sobre/' }]}
+  ld={[faqLd(abs('/sobre/'), d.faq)]}
+  atualizado={d.atualizado}
+  sobre={ID.pessoa}
+  tipoPagina="ProfilePage"
+>
+  <div class="wrap">
+    <header class="sobre-hero">
+      <div class="texto">
+        <p class="eyebrow">Quem atende</p>
+        <h1>{d.h1}</h1>
+        {d.resumo && <p class="lead">{d.resumo}</p>}
+      </div>
+      <Foto src={d.imagem?.src} alt={d.imagem?.alt ?? negocio.profissional} formato="retrato" prioridade />
+    </header>
+
+    <div class="texto">
+      <section class="formacao" aria-labelledby="formacao">
+        <h2 id="formacao">Qual é a formação da Iasmim Mayara?</h2>
+        <ul>
+          <li><strong>{negocio.formacao[0].titulo}</strong> ({negocio.formacao[0].categoria.toLowerCase()}).</li>
+          <li>
+            <strong>{pos.titulo}</strong> — {pos.instituicao} ({pos.instituicaoCidade}/{pos.instituicaoUf}),
+            carga horária de {pos.cargaHoraria}, concluída em {conclusao.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' })}.
+          </li>
+        </ul>
+        <p>Algumas disciplinas da pós-graduação ligadas aos serviços oferecidos:</p>
+        <ul>
+          {pos.disciplinasDestaque.map((x) => <li>{x}</li>)}
+        </ul>
+      </section>
+
+      <div class="prosa">
+        <Content />
+      </div>
+
+      <Faq itens={d.faq} titulo="Perguntas sobre a Iasmim Esteticista" />
+      <Agendar mensagem="Olá, Iasmim! Quero agendar uma avaliação." />
+    </div>
+  </div>
+</Base>
+<style>
+  .sobre-hero {
+    display: grid;
+    gap: 2rem;
+    padding-block: 1.5rem 1rem;
+    align-items: center;
+  }
+  .sobre-hero :global(.foto) {
+    max-width: 22rem;
+  }
+  @media (min-width: 56rem) {
+    .sobre-hero {
+      grid-template-columns: 1.5fr 1fr;
+    }
+  }
+  .formacao {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.25rem 1.4rem 0.5rem;
+    margin-bottom: 2rem;
+  }
+  .formacao h2 {
+    margin-top: 1.2rem;
+  }
+</style>

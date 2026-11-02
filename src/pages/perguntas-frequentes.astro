@@ -1,0 +1,44 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Faq from '../components/Faq.astro';
+import Agendar from '../components/Agendar.astro';
+import { todosServicos, servicoPath, abs } from '../lib/site';
+import { faqLd } from '../lib/schema';
+
+const pagina = await getEntry('paginas', 'perguntas-frequentes');
+if (!pagina) throw new Error('Falta src/content/paginas/perguntas-frequentes.md');
+const { Content } = await render(pagina);
+const d = pagina.data;
+const servicos = (await todosServicos()).filter((s) => s.data.faq.length);
+const url = abs('/perguntas-frequentes/');
+---
+<Base
+  title={d.title}
+  description={d.description}
+  migalhas={[{ nome: 'Início', path: '/' }, { nome: 'Perguntas frequentes', path: '/perguntas-frequentes/' }]}
+  ld={[faqLd(url, d.faq)]}
+  atualizado={d.atualizado}
+  sobre={`${url}#faq`}
+>
+  <div class="wrap">
+    <div class="texto">
+      <h1>{d.h1}</h1>
+      {d.resumo && <p class="lead">{d.resumo}</p>}
+      <div class="prosa"><Content /></div>
+      <Faq itens={d.faq} titulo="Perguntas gerais sobre a Iasmim Esteticista" id="gerais" />
+
+      <section aria-labelledby="por-servico">
+        <h2 id="por-servico">Perguntas sobre cada tratamento</h2>
+        <p>Cada página de serviço tem respostas específicas sobre indicação, sessão, cuidados e resultados:</p>
+        <ul>
+          {servicos.map((s) => (
+            <li><a href={`${servicoPath(s.id)}#perguntas`}>Perguntas sobre {s.data.nome.toLowerCase()}</a> ({s.data.faq.length})</li>
+          ))}
+        </ul>
+      </section>
+
+      <Agendar mensagem="Olá, Iasmim! Tenho uma dúvida e quero agendar." />
+    </div>
+  </div>
+</Base>

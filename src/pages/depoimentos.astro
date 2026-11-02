@@ -1,0 +1,63 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Agendar from '../components/Agendar.astro';
+import Depoimentos from '../components/Depoimentos.astro';
+import { negocio, todosServicos, servicoPath } from '../lib/site';
+import { doServico, gerais } from '../lib/depoimentos';
+
+const pagina = await getEntry('paginas', 'depoimentos');
+if (!pagina) throw new Error('Falta src/content/paginas/depoimentos.md');
+const { Content } = await render(pagina);
+const d = pagina.data;
+// Um bloco por serviço citado (na ordem dos serviços), depois os depoimentos gerais
+const porServico = (await todosServicos())
+  .map((s) => ({ servico: s, itens: doServico(s.id) }))
+  .filter((g) => g.itens.length);
+const outros = gerais();
+---
+<Base
+  title={d.title}
+  description={d.description}
+  migalhas={[{ nome: 'Início', path: '/' }, { nome: 'Depoimentos', path: '/depoimentos/' }]}
+  atualizado={d.atualizado}
+  tipoPagina="CollectionPage"
+>
+  <div class="wrap">
+    <header class="texto cab">
+      <h1>{d.h1}</h1>
+      {d.resumo && <p class="lead">{d.resumo}</p>}
+      <p class="selo">★ {negocio.avaliacoes.nota} no Google · {negocio.avaliacoes.total} avaliações · <a href={negocio.googleAvaliacoes}>Ler todas no Google</a></p>
+      <div class="prosa"><Content /></div>
+    </header>
+
+    {porServico.map(({ servico, itens }) => (
+      <section aria-labelledby={`sobre-${servico.id.replace(/\//g, '-')}`}>
+        <h2 id={`sobre-${servico.id.replace(/\//g, '-')}`}>O que dizem as clientes que fizeram {servico.data.nome.toLowerCase()}?</h2>
+        <Depoimentos itens={itens} mostrarServico={false} />
+        <p><a href={servicoPath(servico.id)}>Saiba mais sobre {servico.data.nome.toLowerCase()} em Juazeiro do Norte</a></p>
+      </section>
+    ))}
+
+    {outros.length > 0 && (
+      <section aria-labelledby="atendimento">
+        <h2 id="atendimento">O que dizem do atendimento e dos resultados?</h2>
+        <Depoimentos itens={outros} />
+      </section>
+    )}
+
+    <div class="texto">
+      <p>Já foi atendida? <a href={negocio.googleAvaliacoes}>Deixe sua avaliação no Google</a> contando qual procedimento você fez.</p>
+      <Agendar mensagem="Olá, Iasmim! Vi os depoimentos e quero agendar um horário." />
+    </div>
+  </div>
+</Base>
+<style>
+  .cab {
+    padding-top: 1.5rem;
+  }
+  .selo {
+    color: var(--muted);
+    font-weight: 600;
+  }
+</style>
