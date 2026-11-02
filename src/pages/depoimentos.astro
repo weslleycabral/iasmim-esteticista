@@ -57,7 +57,7 @@ const msg = 'Olá, Iasmim! Vi os depoimentos e quero agendar um horário.';
       <div class="nota-red ch">
         <span class="lab gold">Da redação</span>
         <p class="body">Todos os depoimentos são avaliações públicas do Google. Cada carta tem o link para a avaliação original.</p>
-        <a class="ul" href={negocio.googleAvaliacoes} style="align-self: start; font-size: 15px"><span>Ler todas as <Edicao /> no Google</span></a>
+        <a class="ul" href={negocio.googleAvaliacoes} style="align-self: start; font-size: 15px" data-evento="google-perfil" data-posicao="hero"><span>Ler todas as <Edicao /> no Google</span></a>
       </div>
     </div>
     <div class="score">
@@ -83,7 +83,7 @@ const msg = 'Olá, Iasmim! Vi os depoimentos e quero agendar um horário.';
           <article class:list={['carta rv', { grande: c.grande }]} data-tema={c.tema.id}>
             <span class="lab gold">{c.tema.rotulo}</span>
             <blockquote class="disp" cite={c.link}>{c.texto}</blockquote>
-            <div class="sig"><span class="nome">{c.nome}</span><span class="mute">Google, {mesCurto(c.mes)}</span>{c.link && <a class="ler" href={c.link} aria-label={`Ler no Google a avaliação de ${c.nome}`}>Ler no Google</a>}</div>
+            <div class="sig"><span class="nome">{c.nome}</span><span class="mute">Google, {mesCurto(c.mes)}</span>{c.link && <a class="ler" href={c.link} data-evento="google-perfil" data-posicao="carta" aria-label={`Ler no Google a avaliação de ${c.nome}`}>Ler no Google</a>}</div>
           </article>
         ))}
       </div>
@@ -99,7 +99,7 @@ const msg = 'Olá, Iasmim! Vi os depoimentos e quero agendar um horário.';
         <p class="fine rv">Foto publicada com autorização da paciente. Resultados variam de pessoa para pessoa.</p>
         <a class="ul rv" href={servicoPath('peeling/peeling-para-melasma')} style="align-self: start; font-size: 15px">Ler sobre o peeling para melasma</a>
       </div>
-      <div class="c6 ba">
+      <div class="c6 ba" data-foto-caso>
         <figure class="mk">
           <div class="pic"><Foto src={melasmaAntes} alt="Rosto antes do tratamento de melasma, com manchas escuras nas maçãs"
             sizes="(min-width: 1440px) 310px, (min-width: 760px) 22vw, calc(50vw - 22px)" widths={[240, 320, 480, 640, 900]} /></div>
@@ -122,7 +122,7 @@ const msg = 'Olá, Iasmim! Vi os depoimentos e quero agendar um horário.';
         <p class="body">Sua avaliação no Google ajuda quem ainda está decidindo. Escreva o que mudou na sua pele e no seu dia a dia.</p>
       </div>
       <div class="c4 rv col" style="gap: 12px; align-items: start">
-        <Botao href={negocio.googleAvaliacoes} ghost>Deixar avaliação no Google</Botao>
+        <Botao href={negocio.googleAvaliacoes} ghost data-evento="google-perfil" data-posicao="escreva">Deixar avaliação no Google</Botao>
       </div>
     </div>
   </section>
@@ -135,7 +135,7 @@ const msg = 'Olá, Iasmim! Vi os depoimentos e quero agendar um horário.';
         <p class="lede rv" style="max-width: 46ch">Mande uma mensagem contando o que incomoda: cravos, espinhas, manchas, cicatrizes, rugas, flacidez ou uma lesão na pele. A Iasmim indica o caminho.</p>
       </div>
       <div class="c5 rv col" style="gap: 16px; align-items: start">
-        <Botao href={waLink(msg)} icone="whatsapp">Agendar pelo WhatsApp</Botao>
+        <Botao href={waLink(msg)} icone="whatsapp" data-evento="whatsapp" data-posicao="fim">Agendar pelo WhatsApp</Botao>
         <span class="mute" style="font-size: 13px">{negocio.telefone} · {horarioCurto.charAt(0).toLowerCase() + horarioCurto.slice(1)}</span>
       </div>
     </div>

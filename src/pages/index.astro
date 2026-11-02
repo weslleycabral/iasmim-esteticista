@@ -8,7 +8,7 @@ import Faq from '../components/Faq.astro';
 import Edicao from '../components/Edicao.astro';
 import Botao from '../components/Botao.astro';
 import {
-  negocio, waLink, msgServico, mapsRotaLink, servicosPrincipais, peelings, servicoPath, reais, abs,
+  negocio, waLink, msgServico, refServico, mapsRotaLink, servicosPrincipais, peelings, servicoPath, reais, abs,
   enderecoTexto, horarioTexto, cidadesTexto, type Servico,
 } from '../lib/site';
 import { faqLd, ID } from '../lib/schema';
@@ -184,7 +184,7 @@ const msgAnna = 'Olá, Iasmim! Quero saber sobre os produtos Anna Pegova.';
         <p class="body rv">Para quem tem cravos, oleosidade e poros obstruídos. A pele sai mais lisa, uniforme e pronta para absorver os cosméticos da rotina.</p>
         <div class="price rv"><span class="disp val">{precoLimpeza}</span><span class="mute" style="font-size: 13px">Avaliação de {avaliacao} descontada do valor.</span></div>
         <div class="cta-row rv">
-          <Botao href={waLink(msgServico(limpeza))} icone="whatsapp">Marcar pelo WhatsApp</Botao>
+          <Botao href={waLink(msgServico(limpeza))} icone="whatsapp" data-evento="whatsapp" data-posicao="preco" data-servico={refServico(limpeza.id)}>Marcar pelo WhatsApp</Botao>
           <a class="ul" href={servicoPath(limpeza.id)} style="font-size: 15px">Ler sobre a limpeza</a>
         </div>
       </div>
@@ -216,7 +216,7 @@ const msgAnna = 'Olá, Iasmim! Quero saber sobre os produtos Anna Pegova.';
         <p class="fine rv">Foto publicada com autorização da paciente. Resultados variam de pessoa para pessoa.</p>
         <a class="ul rv" href={servicoPath('peeling/peeling-para-melasma')} style="align-self: start; font-size: 15px">Ler sobre o peeling para melasma</a>
       </div>
-      <div class="c6 ba">
+      <div class="c6 ba" data-foto-caso>
         <figure class="mk">
           <div class="pic"><Foto src={melasmaAntes} alt="Rosto antes do tratamento de melasma, com manchas escuras nas maçãs"
             sizes="(min-width: 1440px) 310px, (min-width: 760px) 22vw, calc(50vw - 22px)" widths={[240, 320, 480, 640, 900]} /></div>
@@ -238,7 +238,7 @@ const msgAnna = 'Olá, Iasmim! Quero saber sobre os produtos Anna Pegova.';
         <span class="disp big c5 rv" aria-hidden="true">{nota}</span>
         <div class="c5 rv col" style="gap: 20px">
           <h2 class="disp" id="t-cartas" style="font-size: clamp(28px, 2.8vw, 40px); line-height: 1.1"><Edicao /> clientes avaliaram no Google. A nota é {nota}.</h2>
-          <a class="ul" href={negocio.googleAvaliacoes} style="align-self: start; font-size: 15px">Ler todas as avaliações</a>
+          <a class="ul" href={negocio.googleAvaliacoes} style="align-self: start; font-size: 15px" data-evento="google-perfil" data-posicao="meio">Ler todas as avaliações</a>
         </div>
       </div>
       <div class="quotes">
@@ -260,7 +260,7 @@ const msgAnna = 'Olá, Iasmim! Quero saber sobre os produtos Anna Pegova.';
         <p class="lede rv">Revendedora autorizada desde 2025 e a única da linha completa em {negocio.endereco.cidade}.</p>
         <p class="body rv">O resultado de uma limpeza, de um peeling ou do microagulhamento depende do que acontece entre as sessões. A Iasmim monta a rotina com você: qual produto para o seu tipo de pele, em que ordem, de manhã e à noite. Vende também para quem ainda não é cliente, e quem mora em Crato, Barbalha e cidades vizinhas recebe pelos Correios.</p>
         <div class="cta-row rv">
-          <Botao href={waLink(msgAnna)} icone="whatsapp">Pedir pelo WhatsApp</Botao>
+          <Botao href={waLink(msgAnna)} icone="whatsapp" data-evento="whatsapp" data-posicao="meio" data-servico="anna pegova">Pedir pelo WhatsApp</Botao>
           <a class="ul" href="/produtos/anna-pegova/" style="font-size: 15px">Ver a linha</a>
         </div>
       </div>
@@ -300,8 +300,8 @@ const msgAnna = 'Olá, Iasmim! Quero saber sobre os produtos Anna Pegova.';
           <dt class="lab">Atende</dt><dd>{cidadesTexto}</dd>
         </dl>
         <div class="cta-row rv">
-          <Botao href={mapsRotaLink} ghost>Como chegar</Botao>
-          <Botao href={waLink()} icone="whatsapp">Agendar pelo WhatsApp</Botao>
+          <Botao href={mapsRotaLink} ghost data-evento="rota" data-posicao="localizacao">Como chegar</Botao>
+          <Botao href={waLink()} icone="whatsapp" data-evento="whatsapp" data-posicao="localizacao">Agendar pelo WhatsApp</Botao>
         </div>
       </div>
     </div>
@@ -326,7 +326,7 @@ const msgAnna = 'Olá, Iasmim! Quero saber sobre os produtos Anna Pegova.';
         <p class="lede rv" style="max-width: 46ch">Mande uma mensagem contando o que incomoda: cravos, espinhas, manchas, cicatrizes, rugas, flacidez ou uma lesão na pele. A Iasmim indica o caminho.</p>
       </div>
       <div class="c5 rv col" style="gap: 16px; align-items: start">
-        <Botao href={waLink()} icone="whatsapp">Agendar pelo WhatsApp</Botao>
+        <Botao href={waLink()} icone="whatsapp" data-evento="whatsapp" data-posicao="fim">Agendar pelo WhatsApp</Botao>
         <span class="mute" style="font-size: 13px">{negocio.telefone} · {horarioCurto.charAt(0).toLowerCase() + horarioCurto.slice(1)}</span>
       </div>
     </div>

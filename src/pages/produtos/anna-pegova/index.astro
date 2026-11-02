@@ -37,6 +37,7 @@ const cidade = negocio.endereco.cidade;
   ld={[marca, revenda, faqLd(url, d.faq)]}
   mensagemWa={mensagem}
   rotuloWa="Pedir produtos Anna Pegova"
+  servicoRef="anna pegova"
   atualizado={d.atualizado}
   sobre={ID.revendaAnnaPegova}
 >
@@ -103,7 +104,7 @@ const cidade = negocio.endereco.cidade;
   <section id="pedido" class="exp" aria-labelledby="t-pedido">
     <div class="wrap sec art">
       <div class="c2 folio rv"><span class="lab gold">p. 28</span><span class="lab">Pedido</span></div>
-      <div class="s3 col pedido" style="gap: clamp(32px, 4vw, 48px)" data-wa={waLink('')} data-base={mensagem.replace(/\.$/, '')}>
+      <div class="s3 col pedido" style="gap: clamp(32px, 4vw, 48px)" data-pedido="anna-pegova" data-wa={waLink('')} data-base={mensagem.replace(/\.$/, '')}>
         <h2 class="disp h2 mk" id="t-pedido" style="font-size: clamp(36px, 4.4vw, 64px)">Peça a indicação certa.</h2>
         <p class="body rv" style="max-width: 60ch">Escolha o que descreve a sua pele e o que você quer tratar. A mensagem se monta sozinha e segue pelo WhatsApp; a Iasmim responde com o produto indicado, a disponibilidade e o valor.</p>
         <div class="grp rv">
@@ -122,7 +123,7 @@ const cidade = negocio.endereco.cidade;
           <span class="lab">Sua mensagem</span>
           <p class="disp msg-q" aria-live="polite">{mensagem}</p>
           <div class="cta-row">
-            <Botao href={waLink(mensagem)} icone="whatsapp" class="enviar">Enviar pelo WhatsApp</Botao>
+            <Botao href={waLink(mensagem)} icone="whatsapp" class="enviar" data-evento="whatsapp" data-posicao="pedido">Enviar pelo WhatsApp</Botao>
             <span class="fine">{contato}</span>
           </div>
         </div>
@@ -168,7 +169,7 @@ const cidade = negocio.endereco.cidade;
         <p class="lede rv" style="max-width: 46ch">Diga como é a sua pele e o que quer tratar. A Iasmim indica o produto, confirma o valor e combina a entrega.</p>
       </div>
       <div class="c5 rv col" style="gap: 16px; align-items: start">
-        <Botao href={waLink(mensagem)} icone="whatsapp">Pedir pelo WhatsApp</Botao>
+        <Botao href={waLink(mensagem)} icone="whatsapp" data-evento="whatsapp" data-posicao="fim">Pedir pelo WhatsApp</Botao>
         <span class="mute" style="font-size: 13px">{contato}</span>
       </div>
     </div>

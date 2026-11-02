@@ -1,4 +1,5 @@
-// Confere o site gerado em dist/: SEO técnico, JSON-LD, links internos, NAP, imagens, sitemap, robots.txt e llms.txt.
+// Confere o site gerado em dist/: SEO técnico, JSON-LD, links internos, NAP, imagens, sitemap, robots.txt, llms.txt
+// e a marcação das métricas (Umami e data-evento/data-posicao nos links de contato).
 // Uso: npm run build && node scripts/check-dist.mjs [pasta]   (pasta padrão: dist/)
 // Qualquer erro faz a publicação na Netlify parar (ver netlify.toml).
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
@@ -40,6 +41,19 @@ const PROIBIDAS = [
   /100% (seguro|natural|eficaz|garantido)/i,
   /Dysport/i,
 ];
+
+// Métricas (METRICAS.md 1.2 e 1.3): script do Umami servido pelo próprio domínio, uma vez em toda página,
+// e o evento esperado em cada tipo de link de contato (o listener de src/scripts/site.ts lê data-evento)
+const UMAMI = '<script defer src="/u/s.js" data-website-id="ec00859b-4390-41df-a98a-b83440f4b6ee" data-host-url="/u" data-domains="iasmimesteticista.com.br"></script>';
+const EVENTOS = [
+  [/^https:\/\/wa\.me\//, 'whatsapp'],
+  [/^tel:/, 'ligar'],
+  [/^https:\/\/www\.google\.com\/maps\/dir\//, 'rota'],
+  [/^https:\/\/(www\.)?instagram\.com\//, 'instagram'],
+  [/^https:\/\/(share\.google\/|g\.page\/|maps\.google\.com\/|www\.google\.com\/maps\/(reviews|place)\/)/, 'google-perfil'],
+];
+const POSICAO = /^[a-z][a-z0-9-]*$/;
+let totalEventos = 0;
 
 const erros = [];
 const avisos = [];
@@ -313,6 +327,22 @@ for (const arq of paginas) {
   // CTA do WhatsApp
   if (!/href="https:\/\/wa\.me\/5588999890590\?text=/.test(html)) erro(rel, 'sem link de WhatsApp com mensagem');
 
+  // Métricas: Umami uma vez; todo link de contato com data-evento certo e data-posicao
+  const umamis = html.split('src="/u/s.js"').length - 1;
+  if (umamis !== 1) erro(rel, `script do Umami ${umamis} vezes (esperado 1)`);
+  else if (!html.includes(UMAMI)) erro(rel, 'script do Umami fora do formato (website-id, host-url="/u", domains)');
+  if (/cloud\.umami\.is|gateway\.umami\.is/.test(html)) erro(rel, 'Umami chamado direto (use o proxy /u/)');
+  for (const [tag] of html.matchAll(/<a\b[^>]*>/g)) {
+    const href = decode(tag.match(/\shref="([^"]*)"/)?.[1] ?? '');
+    const esperado = EVENTOS.find(([re]) => re.test(href))?.[1];
+    if (!esperado) continue;
+    totalEventos++;
+    const ev = tag.match(/\sdata-evento="([^"]*)"/)?.[1];
+    const pos = tag.match(/\sdata-posicao="([^"]*)"/)?.[1];
+    if (ev !== esperado) erro(rel, `link ${href.slice(0, 40)}… com data-evento="${ev ?? ''}" (esperado "${esperado}")`);
+    if (!pos || !POSICAO.test(pos)) erro(rel, `link ${href.slice(0, 40)}… sem data-posicao válido`);
+  }
+
   // Links internos
   for (const [, href] of html.matchAll(/\s(?:href|src)="([^"]+)"/g)) {
     let path = null;
@@ -323,6 +353,7 @@ for (const arq of paginas) {
       erro(rel, `link relativo não suportado: ${href}`);
       continue;
     }
+    if (path.startsWith('/u/')) continue; // proxy do Umami (netlify.toml), não existe em dist/
     totalLinks++;
     if (!existe(path)) erro(rel, `link interno quebrado: ${href}`);
     const semHash = path.split('#')[0].split('?')[0];
@@ -434,11 +465,28 @@ const netlify = readFileSync(join(RAIZ, 'netlify.toml'), 'utf8');
 if (!/from = "https:\/\/www\.iasmimesteticista\.com\.br\/\*"\n\s*to = "https:\/\/iasmimesteticista\.com\.br\/:splat"\n\s*status = 301\n\s*force = true/.test(netlify))
   erros.push('netlify.toml sem o redirecionamento 301 de www para o domínio');
 if (!/for = "\/llms\*\.txt"[\s\S]*?X-Robots-Tag = "noindex"/.test(netlify)) erros.push('netlify.toml sem X-Robots-Tag noindex nos llms*.txt');
+// Umami pelo próprio domínio (regras 200) e CSP sem domínio de fora em script-src e connect-src
+for (const [de, para] of [['/u/s.js', 'https://cloud.umami.is/script.js'], ['/u/api/send', 'https://cloud.umami.is/api/send']]) {
+  if (!new RegExp(`from = "${de}"\\n\\s*to = "${para}"\\n\\s*status = 200`).test(netlify)) erros.push(`netlify.toml sem o proxy ${de} → ${para} (status 200)`);
+}
+const csp = netlify.match(/Content-Security-Policy = "([^"]*)"/)?.[1] ?? '';
+for (const d of ['script-src', 'connect-src']) {
+  if (!new RegExp(`${d} 'self'( 'unsafe-inline')?;`).test(csp)) erros.push(`netlify.toml: CSP ${d} deveria ser só 'self' (o Umami passa pelo proxy /u/)`);
+}
+// Log de acessos (Edge Function): existe, grava depois da resposta e não roda nos arquivos do Astro nem no proxy
+const edge = join(RAIZ, 'netlify/edge-functions/acessos/index.ts');
+const edgeSrc = existsSync(edge) ? readFileSync(edge, 'utf8') : '';
+if (!edgeSrc) erros.push('falta netlify/edge-functions/acessos/index.ts (log de acessos)');
+else {
+  if (!edgeSrc.includes('context.waitUntil(')) erros.push('Edge Function de acessos sem context.waitUntil (atrasaria a resposta)');
+  for (const p of ['/_astro/*', '/u/*']) if (!edgeSrc.includes(`'${p}'`)) erros.push(`Edge Function de acessos sem excludedPath ${p}`);
+}
 
 console.log(`Páginas HTML: ${paginas.length} (${noindex.size} noindex)`);
 console.log(`Blocos JSON-LD válidos verificados: ${totalLd}`);
 console.log(`Links internos verificados: ${totalLinks}`);
 console.log(`URLs no sitemap: ${urlsSitemap.length}`);
+console.log(`Links de contato com evento verificados: ${totalEventos}`);
 console.log(`Preços publicáveis: ${[...PRECOS].sort((a, b) => a - b).join(', ')}`);
 for (const a of avisos) console.log(`aviso: ${a}`);
 if (erros.length) {

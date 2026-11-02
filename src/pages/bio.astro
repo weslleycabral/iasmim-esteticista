@@ -63,16 +63,16 @@ const widths = [120, 132, 240, 264, 400];
     </div>
 
     <div class="col" style="gap: 12px">
-      <Botao href={wa} icone="whatsapp" class="grande">Agendar pelo WhatsApp</Botao>
-      <Botao href={negocio.instagram} icone="instagram" ghost externo class="grande">Agendar pelo Instagram</Botao>
+      <Botao href={wa} icone="whatsapp" class="grande" data-evento="whatsapp" data-posicao="bio">Agendar pelo WhatsApp</Botao>
+      <Botao href={negocio.instagram} icone="instagram" ghost externo class="grande" data-evento="instagram" data-posicao="bio">Agendar pelo Instagram</Botao>
     </div>
 
     <nav class="links" aria-label="Links da bio">
       <a href="/servicos/"><span class="lead"><span class="disp ttl">Serviços</span><span class="sub">Limpeza de pele, peelings, microagulhamento, botox, lábios, HIFU, sinais</span></span><span class="lab pg">p. 08</span></a>
       <a href="/#resultados"><span class="lead"><span class="disp ttl">Resultado do melasma</span><span class="sub">Antes e depois, com autorização da paciente</span></span><span class="lab pg">p. 20</span></a>
       <a href="/produtos/anna-pegova/"><span class="lead"><span class="disp ttl">Anna Pegova</span><span class="sub">Revenda autorizada, para continuar em casa</span></span><span class="lab pg">p. 26</span></a>
-      <a href={mapsRotaLink}><span class="lead"><span class="disp ttl">Como chegar</span><span class="sub">{negocio.endereco.bairro}, perto da Igreja dos Salesianos</span></span><span class="lab pg">Maps</span></a>
-      <a href={negocio.googleAvaliacoes}><span class="lead"><span class="disp ttl">Avaliações no Google</span><span class="sub"><Edicao /> clientes, nota {nota}</span></span><span class="lab pg">Google</span></a>
+      <a href={mapsRotaLink} data-evento="rota" data-posicao="bio"><span class="lead"><span class="disp ttl">Como chegar</span><span class="sub">{negocio.endereco.bairro}, perto da Igreja dos Salesianos</span></span><span class="lab pg">Maps</span></a>
+      <a href={negocio.googleAvaliacoes} data-evento="google-perfil" data-posicao="bio"><span class="lead"><span class="disp ttl">Avaliações no Google</span><span class="sub"><Edicao /> clientes, nota {nota}</span></span><span class="lab pg">Google</span></a>
       <a href="/"><span class="lead"><span class="disp ttl">Site completo</span><span class="sub">A Edição Nº <Edicao /> inteira</span></span><span class="lab pg">p. 01</span></a>
     </nav>
 
@@ -83,8 +83,8 @@ const widths = [120, 132, 240, 264, 400];
         <dt class="lab">Avaliação</dt><dd>{negocio.avaliacao.valor}, descontada do procedimento</dd>
       </dl>
       <div class="social">
-        <a class="ul" href={wa}>{negocio.telefone}</a>
-        <a class="ul" href={negocio.instagram} rel="me">{negocio.instagramUsuario}</a>
+        <a class="ul" href={wa} data-evento="whatsapp" data-posicao="bio-rodape">{negocio.telefone}</a>
+        <a class="ul" href={negocio.instagram} rel="me" data-evento="instagram" data-posicao="bio-rodape">{negocio.instagramUsuario}</a>
       </div>
       <div class="bio-col"><span class="disp" style="font-size: 22px; letter-spacing: .04em" aria-hidden="true">IASMIM</span><span class="lab mute">Edição Nº <Edicao /> · {negocio.nome}</span></div>
     </footer>

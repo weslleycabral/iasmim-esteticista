@@ -350,7 +350,7 @@ const msgDuvida = 'Olá, Iasmim! Tenho uma dúvida e quero agendar.';
           ))}
           {t.comoChegar && (
             <div class="cta-row chegar">
-              <Botao href={mapsRotaLink} ghost>Como chegar</Botao>
+              <Botao href={mapsRotaLink} ghost data-evento="rota" data-posicao="faq">Como chegar</Botao>
               <a class="ul" href="/contato/" style="font-size: 15px">Ver o mapa e o endereço</a>
             </div>
           )}
@@ -368,7 +368,7 @@ const msgDuvida = 'Olá, Iasmim! Tenho uma dúvida e quero agendar.';
         <p class="lede rv" style="max-width: 46ch">Mande uma mensagem no WhatsApp contando o que incomoda e o que você quer saber. A resposta vem da própria Iasmim, e a avaliação é o próximo passo.</p>
       </div>
       <div class="c5 rv" style="display: flex; flex-direction: column; gap: 16px; align-items: start">
-        <Botao href={waLink(msgDuvida)} icone="whatsapp">Perguntar pelo WhatsApp</Botao>
+        <Botao href={waLink(msgDuvida)} icone="whatsapp" data-evento="whatsapp" data-posicao="fim">Perguntar pelo WhatsApp</Botao>
         <span class="mute" style="font-size: 13px">{negocio.telefone} · {horarioCurto.charAt(0).toLowerCase() + horarioCurto.slice(1)}</span>
       </div>
     </div>

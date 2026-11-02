@@ -41,10 +41,10 @@ const enderecoCopia = e.linha.replace(/, Brasil$/, '');
       <div class="e1"><Migalhas itens={migalhas} /></div>
       <h1 class="disp h1 title">Fale com a Iasmim.</h1>
       <p class="dek e2">Uma mensagem no WhatsApp é o começo de tudo: você conta o que incomoda, a Iasmim responde com os horários livres e o valor. Atendimento somente com horário marcado, no bairro {e.bairro}, em {e.cidade}.</p>
-      <a class="disp tel e2" href={wa} aria-label={`WhatsApp ${negocio.telefone}`}>{negocio.telefone}</a>
+      <a class="disp tel e2" href={wa} data-evento="whatsapp" data-posicao="hero-numero" aria-label={`WhatsApp ${negocio.telefone}`}>{negocio.telefone}</a>
       <div class="cta-row e3">
-        <Botao href={wa} icone="whatsapp">Chamar no WhatsApp</Botao>
-        <a class="ul" href={negocio.instagram} rel="me" style="font-size: 15px">{negocio.instagramUsuario}</a>
+        <Botao href={wa} icone="whatsapp" data-evento="whatsapp" data-posicao="hero">Chamar no WhatsApp</Botao>
+        <a class="ul" href={negocio.instagram} rel="me" style="font-size: 15px" data-evento="instagram" data-posicao="hero">{negocio.instagramUsuario}</a>
       </div>
       <p class="fine e4">{horarioCurto}. Sem fila e sem atendimento por ordem de chegada.</p>
     </div>
@@ -80,8 +80,8 @@ const enderecoCopia = e.linha.replace(/, Brasil$/, '');
           <dt class="lab">Atende</dt><dd>{cidadesTexto}</dd>
         </dl>
         <div class="cta-row rv">
-          <Botao href={mapsRotaLink} ghost>Como chegar</Botao>
-          <button type="button" class="ul copiar" data-copiar={enderecoCopia} data-feito="Endereço copiado">Copiar endereço</button>
+          <Botao href={mapsRotaLink} ghost data-evento="rota" data-posicao="endereco">Como chegar</Botao>
+          <button type="button" class="ul copiar" data-copiar={enderecoCopia} data-feito="Endereço copiado" data-evento="copia" data-tipo="endereco">Copiar endereço</button>
         </div>
       </div>
     </div>
@@ -98,8 +98,8 @@ const enderecoCopia = e.linha.replace(/, Brasil$/, '');
           <div class="way rv"><span class="lab gold">De fora da cidade</span><h3 class="disp h3">Vindo de Crato ou Barbalha</h3><p class="body">Siga para {e.cidade} e, já na cidade, procure pelo bairro {e.bairro} no aplicativo de mapa. Clientes de todo o Cariri são bem-vindas.</p></div>
         </div>
         <div class="cta-row rv">
-          <Botao href={mapsRotaLink}>Abrir a rota no Google Maps</Botao>
-          <button type="button" class="ul copiar" data-copiar={negocio.geo.plusCode} data-feito="Plus Code copiado">Copiar o Plus Code</button>
+          <Botao href={mapsRotaLink} data-evento="rota" data-posicao="como-chegar">Abrir a rota no Google Maps</Botao>
+          <button type="button" class="ul copiar" data-copiar={negocio.geo.plusCode} data-feito="Plus Code copiado" data-evento="copia" data-tipo="plus-code">Copiar o Plus Code</button>
         </div>
       </div>
     </div>
@@ -146,7 +146,7 @@ const enderecoCopia = e.linha.replace(/, Brasil$/, '');
         <p class="lede rv" style="max-width: 46ch">Escreva contando o que incomoda. A Iasmim responde com os horários disponíveis, o valor e o caminho até a cadeira.</p>
       </div>
       <div class="c5 rv col" style="gap: 16px; align-items: start">
-        <Botao href={wa} icone="whatsapp">Chamar no WhatsApp</Botao>
+        <Botao href={wa} icone="whatsapp" data-evento="whatsapp" data-posicao="fim">Chamar no WhatsApp</Botao>
         <span class="mute" style="font-size: 13px">{negocio.telefone} · {minusc(horarioCurto)}</span>
       </div>
     </div>

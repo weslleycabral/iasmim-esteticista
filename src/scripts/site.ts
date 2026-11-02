@@ -4,6 +4,9 @@
 //  2. rolagem com inércia só para roda de mouse; âncoras (#secao) rolam suave
 //  3. odômetro do número da edição (Edicao.astro), guardado em localStorage "iasmim-edicao"
 //  4. menu <details> do celular fecha ao escolher um link, ao tocar fora e com Esc
+//  5. métricas (METRICAS.md 1.3, 1.4 e 1.6): eventos do Umami, origem da visita no WhatsApp e Web Vitals
+
+import { whatsapp, endereco } from '../data/negocio.json';
 
 const mm = (q: string) => (window.matchMedia ? window.matchMedia(q) : ({ matches: false } as MediaQueryList));
 const reduz = mm('(prefers-reduced-motion: reduce)');
@@ -235,9 +238,209 @@ function menu() {
   });
 }
 
+/* 5. métricas. O Umami (/u/s.js, no <head> do Base.astro) só envia em iasmimesteticista.com.br e
+   respeita localStorage "umami.disabled" (?nao-contar). Os links marcam o evento no HTML:
+   data-evento="whatsapp|ligar|rota|instagram|google-perfil|copia" e data-posicao="topo|hero|fim|…"
+   (o scripts/check-dist.mjs confere); data-servico vem do link ou do <body>. Um único listener de
+   clique, delegado, cuida de todos; os outros eventos vêm de rolagem, tempo, cópia e <details>. */
+type Dados = Record<string, string | number>;
+type Umami = { track: (nome: string, dados?: Dados) => Promise<unknown> };
+const pagina = location.pathname;
+const fila: [string, Dados][] = [];
+
+function evento(nome: string, dados: Dados = {}) {
+  const limpos = Object.fromEntries(Object.entries(dados).filter(([, v]) => v !== '')) as Dados;
+  const umami = (window as unknown as { umami?: Umami }).umami;
+  if (umami) umami.track(nome, limpos).catch(() => {});
+  else if (fila.length < 20) fila.push([nome, limpos]); // o script do Umami ainda não rodou
+}
+window.addEventListener('load', () => fila.splice(0).forEach(([n, d]) => evento(n, d)));
+
+// Origem da visita (primeiro toque): UTM ou referência normalizada, guardada na sessão inteira.
+// Vai no sufixo da mensagem do WhatsApp para a Iasmim saber de onde a cliente veio sem perguntar.
+const ORIGENS: [RegExp, string][] = [
+  [/(^|\.)(chatgpt\.com|chat\.openai\.com|openai\.com)$/, 'chatgpt'],
+  [/^(gemini|bard)\.google\./, 'gemini'],
+  [/(^|\.)perplexity\.ai$/, 'perplexity'],
+  [/^copilot\.microsoft\.com$/, 'copilot'],
+  [/(^|\.)claude\.ai$/, 'claude'],
+  [/^maps\.google\.|^maps\.app\.goo\.gl$/, 'maps'],
+  [/(^|\.)google\.[a-z.]+$|googlequicksearchbox/, 'google'],
+  [/(^|\.)bing\.com$/, 'bing'],
+  [/(^|\.)instagram\.com$/, 'instagram'],
+  [/(^|\.)facebook\.com$|^fb\.me$/, 'facebook'],
+  [/(^|\.)duckduckgo\.com$/, 'duckduckgo'],
+  [/(^|\.)(whatsapp\.com|wa\.me)$/, 'whatsapp'],
+  [/(^|\.)(youtube\.com|youtu\.be)$/, 'youtube'],
+];
+const curto = (s: string) => s.toLowerCase().replace(/[^a-z0-9.-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30);
+function normalizar(fonte: string, caminho = '') {
+  const host = fonte.toLowerCase().replace(/^android-app:\/\//, '').replace(/^www\./, '');
+  if (/^google\./.test(host) && caminho.startsWith('/maps')) return 'maps';
+  return ORIGENS.find(([re]) => re.test(host))?.[1] ?? curto(host);
+}
+function calcularOrigem() {
+  const q = new URLSearchParams(location.search);
+  const fonte = q.get('utm_source');
+  if (fonte) {
+    const meio = curto(q.get('utm_medium') ?? '');
+    return normalizar(fonte) + (meio ? `-${meio}` : ''); // "google-gmn", "instagram-bio"
+  }
+  if (q.has('gclid')) return 'google-ads';
+  try {
+    const ref = new URL(document.referrer);
+    if (ref.hostname !== location.hostname) return normalizar(ref.hostname, ref.pathname);
+  } catch {}
+  return q.has('fbclid') ? 'meta' : 'direto';
+}
+const CHAVE_ORIGEM = 'iasmim-origem';
+const origem = (() => {
+  try {
+    const salva = sessionStorage.getItem(CHAVE_ORIGEM);
+    if (salva) return salva;
+    const o = calcularOrigem();
+    sessionStorage.setItem(CHAVE_ORIGEM, o);
+    return o;
+  } catch {
+    return calcularOrigem();
+  }
+})();
+
+// "(ref. limpeza · google)" no fim da mensagem pronta (troca o sufixo anterior, se houver). Sem JS, a
+// mensagem sai como está no HTML. Sem serviço na página, vale o nome da página ("inicio", "contato").
+function comRef(a: HTMLAnchorElement, servico: string) {
+  const url = new URL(a.href);
+  const texto = (url.searchParams.get('text') ?? '').replace(/\s*\(ref\. [^)]*\)$/, '');
+  const nome = document.body.dataset.pagina ?? (pagina.split('/').filter(Boolean).at(-1) || 'inicio');
+  const ref = `(ref. ${servico || nome} · ${origem})`;
+  a.href = `${url.origin}${url.pathname}?text=${encodeURIComponent(`${texto} ${ref}`.trim())}`;
+}
+
+// posição de um link sem data-posicao: a do bloco que o contém ou a região da página
+const posicaoDe = (el: Element) =>
+  el.closest<HTMLElement>('[data-posicao]')?.dataset.posicao ??
+  (el.closest('.menu') ? 'menu' : el.closest('header') ? 'topo' : el.closest('footer') ? 'rodape' : el.closest('[aria-label="Você está em"]') ? 'migalha' : 'corpo');
+
+// escolhas do montador de pedido (página Anna Pegova): botões aria-pressed de cada grupo
+function escolhas(pedido: HTMLElement): Dados {
+  const de = (g: string) => pedido.querySelector<HTMLElement>(`[data-grupo="${g}"] [aria-pressed="true"]`)?.dataset.valor ?? 'nenhuma';
+  return { pele: de('pele'), objetivo: de('meta') };
+}
+
+let fotoTocada = false;
+function aoClicar(e: MouseEvent) {
+  const alvo = e.target as Element | null;
+  if (!alvo?.closest) return;
+  if (!fotoTocada && alvo.closest('[data-foto-caso]')) {
+    fotoTocada = true;
+    evento('foto-caso', { pagina, acao: 'toque' });
+  }
+  const el = alvo.closest<HTMLElement>('[data-evento], a[href]');
+  if (!el) return;
+  const tipo = el.dataset.evento;
+  if (tipo === 'copia') return evento('copia', { pagina, tipo: el.dataset.tipo ?? 'outro' });
+  if (tipo) {
+    const dados: Dados = { pagina, posicao: el.dataset.posicao ?? posicaoDe(el) };
+    if (tipo === 'whatsapp' && el instanceof HTMLAnchorElement) {
+      dados.servico = el.dataset.servico ?? document.body.dataset.servico ?? '';
+      dados.origem = origem;
+      comRef(el, String(dados.servico));
+      const pedido = el.closest<HTMLElement>('[data-pedido]');
+      if (pedido) evento(`pedido-${pedido.dataset.pedido}`, escolhas(pedido));
+    }
+    return evento(tipo, dados);
+  }
+  const url = new URL((el as HTMLAnchorElement).href, location.href);
+  if (!/^https?:$/.test(url.protocol)) return;
+  if (url.origin !== location.origin) evento('externo', { url: url.origin + url.pathname });
+  else if (url.pathname !== pagina) evento('link-interno', { de: pagina, para: url.pathname, posicao: posicaoDe(el) });
+}
+
+// <details>: pergunta do FAQ aberta e menu do celular aberto (toggle não borbulha: captura)
+function aoAbrir(e: Event) {
+  const d = e.target;
+  if (!(d instanceof HTMLDetailsElement) || !d.open) return;
+  if (d.classList.contains('menu')) evento('menu', { pagina });
+  else if (d.closest('.faq')) evento('faq', { pagina, pergunta: (d.querySelector('summary')?.textContent ?? '').trim().slice(0, 150) });
+}
+
+// texto copiado à mão: só o tipo, nunca o texto
+const digitosTel = whatsapp.slice(-9);
+function aoCopiar() {
+  const t = String(window.getSelection() ?? '');
+  const tipo = t.replace(/\D/g, '').includes(digitosTel) ? 'telefone' : t.includes(endereco.cep) || t.includes(endereco.rua.split(',')[0]) ? 'endereco' : 'outro';
+  evento('copia', { pagina, tipo });
+}
+
+// leitura: 25, 50, 75 e 90% da página vistos (uma vez cada, só depois de rolar)
+const MARCOS = [25, 50, 75, 90];
+let lidos = 0;
+let medindo = false;
+function aoLer() {
+  if (medindo || lidos >= MARCOS.length) return;
+  medindo = true;
+  requestAnimationFrame(() => {
+    medindo = false;
+    const pct = ((topo() + window.innerHeight) / root.scrollHeight) * 100;
+    while (lidos < MARCOS.length && pct >= MARCOS[lidos]) evento('leitura', { pagina, pct: MARCOS[lidos++] });
+  });
+}
+
+// tempo com a aba visível: 30 s, 60 s e 180 s
+function tempoAtivo() {
+  let s = 0;
+  const relogio = window.setInterval(() => {
+    if (document.visibilityState !== 'visible') return;
+    s += 1;
+    if (s === 30 || s === 60 || s === 180) evento('tempo-ativo', { pagina, s });
+    if (s >= 180) clearInterval(relogio);
+  }, 1000);
+}
+
+// fotos do caso (antes e depois): metade do bloco na tela uma vez
+function fotosVistas() {
+  const blocos = document.querySelectorAll('[data-foto-caso]');
+  if (!blocos.length || !('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver(
+    (ents) => {
+      if (!ents.some((en) => en.isIntersecting)) return;
+      io.disconnect();
+      evento('foto-caso', { pagina, acao: 'viu' });
+    },
+    { threshold: 0.5 },
+  );
+  blocos.forEach((b) => io.observe(b));
+}
+
+// Web Vitals de visitas reais (biblioteca web-vitals, carregada depois da página): um evento por métrica
+function vitais() {
+  const dispositivo = mm('(max-width: 759.98px)').matches ? 'celular' : 'computador';
+  import('web-vitals')
+    .then(({ onLCP, onINP, onCLS, onFCP, onTTFB }) => {
+      const enviar = (m: { name: string; value: number; rating: string }) =>
+        evento('web-vitals', { pagina, metrica: m.name, valor: m.name === 'CLS' ? Math.round(m.value * 1000) / 1000 : Math.round(m.value), nota: m.rating, dispositivo });
+      [onLCP, onINP, onCLS, onFCP, onTTFB].forEach((on) => on(enviar));
+    })
+    .catch(() => {});
+}
+
+function metricas() {
+  if (document.body.dataset.pagina === '404') evento('404', { url: pagina + location.search, referencia: document.referrer });
+  document.addEventListener('click', aoClicar);
+  document.addEventListener('toggle', aoAbrir, true);
+  document.addEventListener('copy', aoCopiar);
+  window.addEventListener('scroll', aoLer, { passive: true });
+  tempoAtivo();
+  fotosVistas();
+  const depois = (window as unknown as { requestIdleCallback?: (f: () => void) => void }).requestIdleCallback ?? ((f: () => void) => setTimeout(f, 1));
+  if (document.readyState === 'complete') depois(vitais);
+  else window.addEventListener('load', () => depois(vitais));
+}
+
 reveals();
 odometro();
 menu();
+metricas();
 window.addEventListener('wheel', roda, { passive: false });
 window.addEventListener('scroll', aoRolar, { passive: true });
 document.addEventListener('click', ancora);

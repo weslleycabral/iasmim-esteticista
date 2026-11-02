@@ -21,21 +21,23 @@ const itens = [
   { nome: 'Localização', href: home ? '#localizacao' : '/contato/', pg: 'p. 30', ativo: atual === '/contato/' },
   { nome: 'Instagram', href: temBio ? '/bio/' : negocio.instagram, pg: negocio.instagramUsuario, ativo: atual === '/bio/' },
 ];
+// sem /bio/, o item Instagram sai do site: marca o evento (METRICAS.md 1.3)
+const ev = (href: string, posicao: string) => (href === negocio.instagram ? { 'data-evento': 'instagram', 'data-posicao': posicao } : {});
 const cur = (ativo: boolean) => (ativo ? 'page' : undefined);
 ---
 <header class="mast">
   <div class="wrap mast-in">
     <a class="disp brand" href={home ? '#topo' : '/'} aria-label={`${negocio.nome}, início`}>IASMIM</a>
     <nav class="nav-d" aria-label="Principal">
-      {itens.map((i) => <a href={i.href} aria-current={cur(i.ativo)}>{i.nome}</a>)}
+      {itens.map((i) => <a href={i.href} aria-current={cur(i.ativo)} {...ev(i.href, 'topo')}>{i.nome}</a>)}
     </nav>
     <span class="lab mast-ed">Edição Nº <Edicao /> · {negocio.avaliacoes.nota} no Google</span>
-    <a class="btn" href={waLink(mensagemWa)}>Agendar</a>
+    <a class="btn" href={waLink(mensagemWa)} data-evento="whatsapp" data-posicao="topo">Agendar</a>
     <details class="menu">
       <summary class="lab" aria-label="Abrir menu">Menu</summary>
       <nav aria-label="Principal, menu compacto">
         {itens.map((i) => (
-          <a href={i.href} aria-current={cur(i.ativo)}><span class="disp">{i.nome}</span><span class="lab gold">{i.pg}</span></a>
+          <a href={i.href} aria-current={cur(i.ativo)} {...ev(i.href, 'menu')}><span class="disp">{i.nome}</span><span class="lab gold">{i.pg}</span></a>
         ))}
       </nav>
     </details>

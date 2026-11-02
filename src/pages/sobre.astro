@@ -162,7 +162,7 @@ const msg = 'Olá, Iasmim! Quero agendar uma avaliação.';
         <div class="c5 rv col" style="gap: 20px">
           <h2 class="disp" id="t-cartas" style="font-size: clamp(28px, 2.8vw, 40px); line-height: 1.1"><Edicao /> clientes avaliaram no Google. A nota é {nota}.</h2>
           <div class="cta-row">
-            <a class="ul" href={negocio.googleAvaliacoes} style="font-size: 15px">Ler no Google</a>
+            <a class="ul" href={negocio.googleAvaliacoes} style="font-size: 15px" data-evento="google-perfil" data-posicao="meio">Ler no Google</a>
             <a class="ul" href="/depoimentos/" style="font-size: 15px">Cartas desta edição</a>
           </div>
         </div>
@@ -219,7 +219,7 @@ const msg = 'Olá, Iasmim! Quero agendar uma avaliação.';
         <p class="lede rv" style="max-width: 46ch">Mande uma mensagem contando o que incomoda: cravos, espinhas, manchas, cicatrizes, rugas, flacidez ou uma lesão na pele. A Iasmim indica o caminho.</p>
       </div>
       <div class="c5 rv col" style="gap: 16px; align-items: start">
-        <Botao href={waLink(msg)} icone="whatsapp">Agendar pelo WhatsApp</Botao>
+        <Botao href={waLink(msg)} icone="whatsapp" data-evento="whatsapp" data-posicao="fim">Agendar pelo WhatsApp</Botao>
         <span class="mute" style="font-size: 13px">{negocio.telefone} · {horarioCurto.charAt(0).toLowerCase() + horarioCurto.slice(1)}</span>
       </div>
     </div>

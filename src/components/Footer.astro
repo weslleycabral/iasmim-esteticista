@@ -19,14 +19,14 @@ const cargo = negocio.cargo.charAt(0).toLowerCase() + negocio.cargo.slice(1);
       <dt class="lab">Redação</dt><dd>{negocio.nome} · <span translate="no">{enderecoTexto}</span></dd>
       <dt class="lab">Circulação</dt><dd>{cidadesTexto}</dd>
       <dt class="lab">Horário</dt><dd>{horarioTexto}</dd>
-      <dt class="lab">Telefone</dt><dd><a href={telLink}>{negocio.telefone}</a></dd>
+      <dt class="lab">Telefone</dt><dd><a href={telLink} data-evento="ligar" data-posicao="rodape">{negocio.telefone}</a></dd>
       {atualizado && <><dt class="lab">Atualizado</dt><dd>Página revisada em <time datetime={dataISO(atualizado)}>{dataBR(atualizado)}</time></dd></>}
     </dl>
     <div class="c4 links rv">
-      <Botao href={waLink(mensagemWa)} icone="whatsapp">WhatsApp {negocio.telefone}</Botao>
-      <a class="ul" href={negocio.instagram} rel="me" style="font-size: 16px">{negocio.instagramUsuario}</a>
+      <Botao href={waLink(mensagemWa)} icone="whatsapp" data-evento="whatsapp" data-posicao="rodape">WhatsApp {negocio.telefone}</Botao>
+      <a class="ul" href={negocio.instagram} rel="me" style="font-size: 16px" data-evento="instagram" data-posicao="rodape">{negocio.instagramUsuario}</a>
       {temBio && <a class="ul" href="/bio/" style="font-size: 16px">Links da bio</a>}
-      <a class="ul" href={negocio.googleAvaliacoes} style="font-size: 16px">Avaliações no Google</a>
+      <a class="ul" href={negocio.googleAvaliacoes} style="font-size: 16px" data-evento="google-perfil" data-posicao="rodape">Avaliações no Google</a>
     </div>
     <div class="colophon"><span class="disp" style="font-size: 26px; letter-spacing: .04em" aria-hidden="true">IASMIM</span><span class="lab mute">Edição Nº <Edicao /> · {negocio.nome}</span></div>
   </div>

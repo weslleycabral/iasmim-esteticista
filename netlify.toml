@@ -17,6 +17,23 @@
   status = 301
   force = true
 
+# ---------------------------------------------------------------------------------------------
+# Métricas (METRICAS.md 1.2): o Umami Cloud servido pelo próprio domínio (regras 200 = proxy).
+# Os bloqueadores de anúncio não cortam e o CSP continua 'self'. O log de acessos (Edge Function
+# netlify/edge-functions/acessos/) não roda em /u/*.
+# ---------------------------------------------------------------------------------------------
+[[redirects]]
+  from = "/u/s.js"
+  to = "https://cloud.umami.is/script.js"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/u/api/send"
+  to = "https://cloud.umami.is/api/send"
+  status = 200
+  force = true
+
 # Endereço antigo citado no GMN.md (sem "com"): leva para a página certa
 [[redirects]]
   from = "/servicos/remocao-de-sinais-e-verrugas-jato-de-plasma/*"
@@ -43,8 +60,9 @@
     X-Frame-Options = "SAMEORIGIN"
     Permissions-Policy = "camera=(), microphone=(), geolocation=(), interest-cohort=()"
     Strict-Transport-Security = "max-age=31536000"
-    # Tudo é servido pelo próprio site (fontes, imagens, scripts). 'unsafe-inline' cobre o script curto
-    # do <head> (classe "js") e os estilos inline do Astro. WhatsApp, Instagram e Maps são só links.
+    # Tudo é servido pelo próprio site (fontes, imagens, scripts). 'unsafe-inline' cobre os scripts curtos
+    # do <head> (classe "js" e ?nao-contar) e os estilos inline do Astro. WhatsApp, Instagram e Maps são
+    # só links. O Umami passa pelo proxy /u/* acima: script e envio (connect-src) ficam em 'self'.
     Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
 
 # Arquivos com hash gerados pelo Astro (CSS, JS, fontes, imagens): cache de 1 ano

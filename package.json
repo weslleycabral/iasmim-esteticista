@@ -9,15 +9,19 @@
     "preview": "astro preview",
     "check:dist": "node scripts/check-dist.mjs",
     "verify": "astro build && node scripts/check-dist.mjs",
+    "acessos": "node scripts/acessos.mjs",
     "deploy:preview": "npx -y netlify-cli@27 deploy --build",
     "deploy": "npx -y netlify-cli@27 deploy --build --prod"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",
-    "astro": "7.4.4"
+    "@netlify/blobs": "11.1.4",
+    "astro": "7.4.4",
+    "web-vitals": "6.2.3"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.12",
+    "@netlify/edge-functions": "4.0.2",
     "typescript": "6.0.3"
   }
 }

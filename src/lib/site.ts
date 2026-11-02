@@ -19,7 +19,17 @@ export const waLink = (mensagem = 'Olá, Iasmim! Quero agendar um horário.') =>
 export const msgServico = (s: Servico) =>
   s.data.mensagemWhatsApp ?? `Olá, Iasmim! Quero agendar ${s.data.nome}.`;
 
-export const mapsRotaLink = `https://www.google.com/maps/dir/?api=1&destination=${negocio.geo.lat},${negocio.geo.lng}`;
+/** Nome curto do serviço no sufixo da mensagem do WhatsApp ("(ref. limpeza · google)") e na propriedade
+ *  "servico" dos eventos do Umami (METRICAS.md 1.3 e 1.4). Sem entrada aqui: o fim do id, com espaços
+ *  ("peeling/peeling-para-melasma" → "peeling para melasma"). */
+const REFS: Record<string, string> = {
+  'limpeza-de-pele': 'limpeza',
+  'herus-hifu': 'hifu',
+  'remocao-de-sinais-e-verrugas-com-jato-de-plasma': 'sinais e verrugas',
+};
+export const refServico = (id: string) => REFS[id] ?? (id.split('/').at(-1) ?? id).replace(/-/g, ' ');
+
+export const mapsRotaLink =`https://www.google.com/maps/dir/?api=1&destination=${negocio.geo.lat},${negocio.geo.lng}`;
 
 /** Todos os serviços em ordem; os peelings ficam agrupados */
 export async function todosServicos() {

@@ -117,7 +117,7 @@ const tituloTipos = servico.id === 'peeling' && filhos.length === 6 ? 'Seis fór
           <h1 class:list={['disp h1 title', { long: h1Longo, lw: palavraLonga }]}>{d.h1}</h1>
           <p class="dek ch">{d.resumo}</p>
           <div class="cta-row ch">
-            <Botao href={waLink(mensagem)} icone="whatsapp">Agendar pelo WhatsApp</Botao>
+            <Botao href={waLink(mensagem)} icone="whatsapp" data-evento="whatsapp" data-posicao="hero">Agendar pelo WhatsApp</Botao>
             <a class="ul" href="#ficha" style="font-size: 15px">Ficha técnica</a>
           </div>
           <p class="fine ch">Atualizado em <time datetime={dataISO(d.atualizado)}>{dataBR(d.atualizado)}</time>. Texto da {negocio.nome}, {negocio.endereco.cidade} ({negocio.endereco.uf}).</p>
@@ -160,7 +160,7 @@ const tituloTipos = servico.id === 'peeling' && filhos.length === 6 ? 'Seis fór
               ? `${preco.detalhe ? preco.detalhe.charAt(0).toUpperCase() + preco.detalhe.slice(1) + '. ' : ''}A avaliação custa ${avaliacao} e é descontada do procedimento.`
               : `Definido na avaliação, conforme o seu caso. A avaliação custa ${avaliacao} e é descontada do procedimento, no mesmo dia ou depois.`}
           </p>
-          <Botao href={waLink(mensagem)} icone="whatsapp">Agendar pelo WhatsApp</Botao>
+          <Botao href={waLink(mensagem)} icone="whatsapp" data-evento="whatsapp" data-posicao="preco">Agendar pelo WhatsApp</Botao>
         </div>
       </div>
     </section>
@@ -205,7 +205,7 @@ const tituloTipos = servico.id === 'peeling' && filhos.length === 6 ? 'Seis fór
           <div class="c2 folio rv"><span class="lab gold">p. 20</span><span class="lab">Resultado</span></div>
           <div class="s3 col" style="gap: clamp(28px, 3vw, 40px)">
             <h2 class="disp h2 mk" id="t-resultado" style="font-size: clamp(36px, 4.4vw, 64px)">Antes e depois</h2>
-            <div class="casos">
+            <div class="casos" data-foto-caso>
               {d.casos.map((c, i) => (
                 <figure class="caso rv">
                   <div class:list={['ba', { solo: !c.depois }]}>
@@ -231,7 +231,7 @@ const tituloTipos = servico.id === 'peeling' && filhos.length === 6 ? 'Seis fór
             <div class="c8 rv col" style="gap: 20px">
               <h2 class="disp" id="t-cartas" style="font-size: clamp(28px, 2.8vw, 40px); line-height: 1.1">Quem fez {nomeMin} com a Iasmim escreveu no Google.</h2>
               <div class="cta-row">
-                <a class="ul" href={negocio.googleAvaliacoes} style="font-size: 15px">Ler no Google</a>
+                <a class="ul" href={negocio.googleAvaliacoes} style="font-size: 15px" data-evento="google-perfil" data-posicao="cartas">Ler no Google</a>
                 <a class="ul" href="/depoimentos/" style="font-size: 15px">Cartas desta edição</a>
               </div>
             </div>
@@ -291,7 +291,7 @@ const tituloTipos = servico.id === 'peeling' && filhos.length === 6 ? 'Seis fór
         <p class="lede rv" style="max-width: 46ch">Mande uma mensagem dizendo que leu sobre {nomeMin} e conte o que incomoda. A avaliação custa {avaliacao} e é descontada do procedimento, no mesmo dia ou depois.</p>
       </div>
       <div class="c5 rv col" style="gap: 16px; align-items: start">
-        <Botao href={waLink(mensagem)} icone="whatsapp">Agendar pelo WhatsApp</Botao>
+        <Botao href={waLink(mensagem)} icone="whatsapp" data-evento="whatsapp" data-posicao="fim-servico">Agendar pelo WhatsApp</Botao>
         <span class="mute" style="font-size: 13px">{negocio.telefone} · {minusc(horarioCurto)}</span>
       </div>
     </div>

@@ -216,7 +216,7 @@ const atualizado = new Date(Math.max(...[...principais, ...listaPeelings].map((s
           <div class="step"><span class="disp n" aria-hidden="true">3</span><h3 class="disp h3" style="font-size: 22px">Pagamento</h3><p class="body">Pix, dinheiro ou cartão, com parcelamento sem juros conforme o valor.</p></div>
         </div>
         <div class="cta-row">
-          <Botao href={waLink('Olá, Iasmim! Quero agendar uma avaliação.')}>Agendar a avaliação</Botao>
+          <Botao href={waLink('Olá, Iasmim! Quero agendar uma avaliação.')} data-evento="whatsapp" data-posicao="avaliacao">Agendar a avaliação</Botao>
           <a class="ul" href="/perguntas-frequentes/" style="font-size: 15px">Perguntas antes de marcar</a>
         </div>
       </div>
@@ -231,7 +231,7 @@ const atualizado = new Date(Math.max(...[...principais, ...listaPeelings].map((s
         <p class="lede rv" style="max-width: 46ch">Cravos, espinhas, manchas, cicatrizes, rugas, flacidez ou uma lesão na pele. A Iasmim lê, pergunta o que falta e indica o caminho.</p>
       </div>
       <div class="c5 rv col" style="gap: 16px; align-items: start">
-        <Botao href={waLink('Olá, Iasmim! Quero agendar uma avaliação.')} icone="whatsapp">Agendar pelo WhatsApp</Botao>
+        <Botao href={waLink('Olá, Iasmim! Quero agendar uma avaliação.')} icone="whatsapp" data-evento="whatsapp" data-posicao="fim">Agendar pelo WhatsApp</Botao>
         <span class="mute" style="font-size: 13px">{negocio.telefone} · {minusc(horarioCurto)}</span>
       </div>
     </div>
