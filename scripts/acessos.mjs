@@ -1,6 +1,7 @@
 // Baixa o log de acessos do Netlify Blobs (store "acessos", gravado pela Edge Function
 // netlify/edge-functions/acessos/) para um JSONL por mês, um registro por linha, em ordem de data.
-// Uso: npm run acessos [-- AAAA-MM]   (padrão: mês atual, em UTC). Regrava o arquivo do mês inteiro.
+// Uso: npm run acessos [-- AAAA-MM]   (padrão: mês atual, em UTC). Incremental: lista as chaves do mês e
+// baixa só as que ainda não estão no arquivo (cada registro guarda a sua em "chave"); --tudo baixa o mês inteiro.
 // Destino: ~/www/iasmim/dados/acessos/AAAA-MM.jsonl (fora do repositório; mude com ACESSOS_DIR).
 // Acesso: NETLIFY_AUTH_TOKEN ou o token da CLI da Netlify (~/.config/netlify/config.json, "netlify login").
 // O token nunca é gravado em arquivo do repositório.
@@ -9,7 +10,9 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 
-const mes = process.argv[2] ?? new Date().toISOString().slice(0, 7);
+const args = process.argv.slice(2);
+const tudo = args.includes('--tudo');
+const mes = args.find((a) => !a.startsWith('--')) ?? new Date().toISOString().slice(0, 7);
 if (!/^\d{4}-\d{2}$/.test(mes)) {
   console.error(`Mês inválido: "${mes}" (use AAAA-MM)`);
   process.exit(1);
@@ -31,23 +34,34 @@ if (!tk) {
 }
 
 const store = getStore({ name: 'acessos', siteID, token: tk });
-const chaves = [];
-for await (const pag of store.list({ prefix: `${mes}-`, paginate: true })) chaves.push(...pag.blobs.map((b) => b.key));
+const arquivo = join(destino, `${mes}.jsonl`);
+const registros = !tudo && existsSync(arquivo)
+  ? readFileSync(arquivo, 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l))
+  : [];
+// registros de antes do campo "chave" não têm como ser casados: sem ela em todos, baixa o mês inteiro
+if (registros.some((r) => !r.chave)) registros.length = 0;
+const conhecidas = new Set(registros.map((r) => r.chave));
+
+const novas = [];
+for await (const pag of store.list({ prefix: `${mes}-`, paginate: true }))
+  novas.push(...pag.blobs.map((b) => b.key).filter((k) => !conhecidas.has(k)));
 
 // baixa de 20 em 20
-const registros = [];
-for (let i = 0; i < chaves.length; i += 20) {
-  const lote = await Promise.all(chaves.slice(i, i + 20).map((k) => store.get(k, { type: 'json' })));
+for (let i = 0; i < novas.length; i += 20) {
+  const lote = await Promise.all(novas.slice(i, i + 20).map(async (k) => {
+    const r = await store.get(k, { type: 'json' });
+    return r && { ...r, chave: k };
+  }));
   registros.push(...lote.filter(Boolean));
 }
 registros.sort((a, b) => a.ts.localeCompare(b.ts));
 
 mkdirSync(destino, { recursive: true });
-const arquivo = join(destino, `${mes}.jsonl`);
+// regrava mesmo sem novidade: o plugin usa a data do arquivo para parar de baixar meses fechados
 writeFileSync(arquivo, registros.map((r) => JSON.stringify(r)).join('\n') + (registros.length ? '\n' : ''));
 
 // resumo por classe
 const porClasse = {};
 for (const r of registros) porClasse[r.classe] = (porClasse[r.classe] ?? 0) + 1;
-console.log(`${registros.length} acesso(s) em ${mes} → ${arquivo}`);
+console.log(`${registros.length} acesso(s) em ${mes} (${novas.length} novo(s)) → ${arquivo}`);
 for (const [c, n] of Object.entries(porClasse).sort((a, b) => b[1] - a[1])) console.log(`  ${c}: ${n}`);
