@@ -50,8 +50,17 @@ function whatsapp(url: URL) {
 function umami(req: Request, destino: string) {
   const headers = new Headers(req.headers);
   headers.delete('cookie');
+  // O Umami Cloud lê IP e local primeiro de x-umami-client-* (src/lib/ip.ts e detect.ts do Umami); sem eles,
+  // país e cidade sairiam do servidor da Cloudflare, não da pessoa. Cidade e estado vão codificados: o Umami
+  // passa os dois por decodeURIComponent.
   const ip = req.headers.get('cf-connecting-ip');
-  if (ip) headers.set('x-forwarded-for', ip); // o Umami tira país e cidade do IP do visitante, não do Worker
+  const cf = req.cf ?? {};
+  if (ip) headers.set('x-umami-client-ip', ip);
+  if (cf.country) {
+    headers.set('x-umami-client-country', String(cf.country));
+    if (cf.regionCode) headers.set('x-umami-client-region', encodeURIComponent(String(cf.regionCode)));
+    if (cf.city) headers.set('x-umami-client-city', encodeURIComponent(String(cf.city)));
+  }
   return fetch(destino, { method: req.method, headers, body: req.body });
 }
 
