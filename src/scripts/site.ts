@@ -251,6 +251,7 @@ const fila: [string, Dados][] = [];
 function evento(nome: string, dados: Dados = {}) {
   const limpos = Object.fromEntries(Object.entries(dados).filter(([, v]) => v !== '')) as Dados;
   const umami = (window as unknown as { umami?: Umami }).umami;
+  (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag?.('event', nome, limpos); // GA4 (se não recusado)
   if (umami) umami.track(nome, limpos).catch(() => {});
   else if (fila.length < 20) fila.push([nome, limpos]); // o script do Umami ainda não rodou
 }

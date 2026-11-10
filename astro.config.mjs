@@ -25,8 +25,8 @@ function datasDasPaginas() {
 }
 const lastmod = datasDasPaginas();
 
-// Páginas fora do sitemap (noindex): 404 e /bio/ (página de links do Instagram, duplica a navegação)
-const FORA_DO_SITEMAP = ['/404', '/bio/'];
+// Páginas fora do sitemap (noindex): 404, /bio/ (página de links do Instagram, duplica a navegação) e /privacidade/ (página legal)
+const FORA_DO_SITEMAP = ['/404', '/bio/', '/privacidade/'];
 
 export default defineConfig({
   site: SITE,

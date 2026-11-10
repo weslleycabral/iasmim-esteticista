@@ -140,6 +140,10 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': graf
          equipe (localStorage umami.disabled + cookie iasmim-equipe, que marca o log da Edge); "?contar" desfaz. -->
     <script is:inline>(function(){try{var q=location.search,m;if(/[?&]nao-contar\b/.test(q)){localStorage.setItem('umami.disabled','1');document.cookie='iasmim-equipe=1;path=/;max-age=63072000;samesite=lax;secure';m='Pronto: as visitas deste navegador não entram mais nas métricas do site.'}else if(/[?&]contar\b/.test(q)){localStorage.removeItem('umami.disabled');document.cookie='iasmim-equipe=;path=/;max-age=0';m='As visitas deste navegador voltaram a ser contadas.'}else return;history.replaceState(null,'',location.pathname+location.hash);addEventListener('load',function(){alert(m)})}catch(e){}})()</script>
     <script is:inline defer src="/u/s.js" data-website-id="ec00859b-4390-41df-a98a-b83440f4b6ee" data-host-url="/u" data-domains="iasmimesteticista.com.br"></script>
+    <!-- GA4 (METRICAS.md): coleta máxima, sem banner (decisão do usuário, 2026-11-10; base declarada = legítimo
+         interesse, ver /privacidade/). Google Signals, personalização de anúncios e cookies de anúncio ligados.
+         O visitante recusa em /privacidade/ (localStorage ga.disabled); a equipe, com "?nao-contar". Só em produção. -->
+    <script is:inline>(function(){try{if(location.hostname!=='iasmimesteticista.com.br'||localStorage.getItem('ga.disabled')||localStorage.getItem('umami.disabled'))return;var id='G-15X2KXBTNB';window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('consent','default',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'});gtag('js',new Date());gtag('config',id);var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+id;document.head.appendChild(s)}catch(e){}})()</script>
   </head>
   <body id="topo" data-servico={servicoDaPagina} data-pagina={e404 ? '404' : undefined}>
     <a class="skip" href="#conteudo">Pular para o conteúdo</a>

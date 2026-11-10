@@ -471,7 +471,10 @@ for (const [de, para] of [['/u/s.js', 'https://cloud.umami.is/script.js'], ['/u/
 }
 const csp = netlify.match(/Content-Security-Policy = "([^"]*)"/)?.[1] ?? '';
 for (const d of ['script-src', 'connect-src']) {
-  if (!new RegExp(`${d} 'self'( 'unsafe-inline')?;`).test(csp)) erros.push(`netlify.toml: CSP ${d} deveria ser só 'self' (o Umami passa pelo proxy /u/)`);
+  // 'self' + (unsafe-inline) + só os domínios do GA4/Signals (googletagmanager, google-analytics, analytics.google.com, google.com[.br], stats.g.doubleclick.net)
+  const valor = csp.match(new RegExp(`${d} ([^;]*);`))?.[1] ?? '';
+  const fora = valor.split(' ').filter((t) => t && !/^('self'|'unsafe-inline'|https:\/\/(www\.googletagmanager\.com|analytics\.google\.com|www\.google\.com(\.br)?|stats\.g\.doubleclick\.net|\*\.(google-analytics|googletagmanager)\.com))$/.test(t));
+  if (!valor.includes("'self'") || fora.length) erros.push(`netlify.toml: CSP ${d} só pode ter 'self' e os domínios do GA4 (fora: ${fora.join(' ') || 'sem self'})`);
 }
 // Log de acessos (Edge Function): existe, grava depois da resposta e não roda nos arquivos do Astro nem no proxy
 const edge = join(RAIZ, 'netlify/edge-functions/acessos/index.ts');

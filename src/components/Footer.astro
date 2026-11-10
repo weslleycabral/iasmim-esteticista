@@ -26,6 +26,7 @@ const cargo = negocio.cargo.charAt(0).toLowerCase() + negocio.cargo.slice(1);
       <Botao href={waLink(mensagemWa)} icone="whatsapp" data-evento="whatsapp" data-posicao="rodape">WhatsApp {negocio.telefone}</Botao>
       <a class="ul" href={negocio.instagram} rel="me" style="font-size: 16px" data-evento="instagram" data-posicao="rodape">{negocio.instagramUsuario}</a>
       {temBio && <a class="ul" href="/bio/" style="font-size: 16px">Links da bio</a>}
+      <a class="ul" href="/privacidade/" style="font-size: 16px">Privacidade</a>
       <a class="ul" href={negocio.googleAvaliacoes} style="font-size: 16px" data-evento="google-perfil" data-posicao="rodape">Avaliações no Google</a>
     </div>
     <div class="colophon"><span class="disp" style="font-size: 26px; letter-spacing: .04em" aria-hidden="true">IASMIM</span><span class="lab mute">Edição Nº <Edicao /> · {negocio.nome}</span></div>

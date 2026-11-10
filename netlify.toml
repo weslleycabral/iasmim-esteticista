@@ -62,8 +62,10 @@
     Strict-Transport-Security = "max-age=31536000"
     # Tudo é servido pelo próprio site (fontes, imagens, scripts). 'unsafe-inline' cobre os scripts curtos
     # do <head> (classe "js" e ?nao-contar) e os estilos inline do Astro. WhatsApp, Instagram e Maps são
-    # só links. O Umami passa pelo proxy /u/* acima: script e envio (connect-src) ficam em 'self'.
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+    # só links. O Umami passa pelo proxy /u/* acima. O GA4 (gtag) vem direto do Google: só os domínios do Google Analytics/Signals (googletagmanager.com,
+    # google-analytics.com, analytics.google.com, google.com[.br], stats.g.doubleclick.net) entram no script-src,
+    # connect-src e img-src (nada mais).
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com https://www.google.com https://www.google.com.br https://stats.g.doubleclick.net; font-src 'self'; connect-src 'self' https://*.google-analytics.com https://analytics.google.com https://*.googletagmanager.com https://www.google.com https://www.google.com.br https://stats.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
 
 # Arquivos com hash gerados pelo Astro (CSS, JS, fontes, imagens): cache de 1 ano
 [[headers]]

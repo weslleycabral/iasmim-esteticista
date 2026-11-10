@@ -2,7 +2,7 @@
 // netlify/edge-functions/acessos/) para um JSONL por mês, um registro por linha, em ordem de data.
 // Uso: npm run acessos [-- AAAA-MM]   (padrão: mês atual, em UTC). Incremental: lista as chaves do mês e
 // baixa só as que ainda não estão no arquivo (cada registro guarda a sua em "chave"); --tudo baixa o mês inteiro.
-// Destino: ~/www/iasmim/dados/acessos/AAAA-MM.jsonl (fora do repositório; mude com ACESSOS_DIR).
+// Destino: $ACESSOS_DIR/AAAA-MM.jsonl (o plugin acessos passa a pasta dele; sem ela, ../../dados/acessos).
 // Acesso: NETLIFY_AUTH_TOKEN ou o token da CLI da Netlify (~/.config/netlify/config.json, "netlify login").
 // O token nunca é gravado em arquivo do repositório.
 import { getStore } from '@netlify/blobs';
