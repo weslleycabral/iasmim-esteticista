@@ -29,10 +29,13 @@
       "migrations_dir": "migrations"
     }
   ],
-  // Domínio: depois que a zona iasmimesteticista.com.br estiver na conta (README, "Domínio"), tirar o comentário.
-  // "routes": [
-  //   { "pattern": "iasmimesteticista.com.br", "custom_domain": true },
-  //   { "pattern": "www.iasmimesteticista.com.br", "custom_domain": true }
-  // ],
+  // Domínio (zona iasmimesteticista.com.br na mesma conta): a Cloudflare cria os registros DNS e o certificado
+  "routes": [
+    { "pattern": "iasmimesteticista.com.br", "custom_domain": true },
+    { "pattern": "www.iasmimesteticista.com.br", "custom_domain": true }
+  ],
+  // Sem *.workers.dev (duplicaria o site); as prévias de "npm run deploy:preview" continuam com URL própria
+  "workers_dev": false,
+  "preview_urls": true,
   "observability": { "enabled": true }
 }
