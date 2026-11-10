@@ -67,6 +67,13 @@ async function responder(req: Request, env: Env) {
   // endereço com barra é o definitivo
   const destino = res.headers.get('location');
   if (res.status === 307 && destino) return redirecionar(destino);
+  // No ar, o HTML sai como "text/html" sem charset (o wrangler dev manda com): o charset no cabeçalho
+  // garante UTF-8 antes de o navegador chegar no <meta charset>
+  if (res.headers.get('content-type') === 'text/html') {
+    const comCharset = new Response(res.body, res);
+    comCharset.headers.set('content-type', 'text/html; charset=utf-8');
+    return comCharset;
+  }
   return res;
 }
 

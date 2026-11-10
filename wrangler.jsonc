@@ -25,8 +25,7 @@
     {
       "binding": "ACESSOS",
       "database_name": "iasmim-acessos",
-      // trocar pelo id que "npx wrangler d1 create iasmim-acessos" devolver
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "cc09ef6d-b687-4ed1-a9b9-4386563715d5",
       "migrations_dir": "migrations"
     }
   ],
