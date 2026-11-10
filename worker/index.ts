@@ -135,7 +135,11 @@ export default {
     const { pathname } = new URL(req.url);
     const proxy = UMAMI[pathname];
     if (proxy) return umami(req, proxy);
-    const res = await responder(req, env);
+    // Se o Worker falhar, a página sai direto dos arquivos (como o onError: 'bypass' da Netlify)
+    const res = await responder(req, env).catch((e) => {
+      console.error('responder:', e);
+      return env.ASSETS.fetch(req);
+    });
     if (registrar(res)) ctx.waitUntil(gravar(req, res, env).catch((e) => console.error('acessos:', e)));
     return res;
   },
