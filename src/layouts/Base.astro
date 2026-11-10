@@ -135,7 +135,7 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': graf
     <script type="application/ld+json" set:html={jsonLd} />
 
     <!-- Métricas (METRICAS.md 1.2): Umami Cloud, sem cookies, servido pelo próprio domínio (proxy /u/* no
-         netlify.toml; CSP continua 'self'). Só conta em iasmimesteticista.com.br (ignora localhost e prévias).
+         worker/index.ts; CSP continua 'self'). Só conta em iasmimesteticista.com.br (ignora localhost e prévias).
          "?nao-contar" no fim de qualquer endereço do site tira deste navegador as visitas da Iasmim e da
          equipe (localStorage umami.disabled + cookie iasmim-equipe, que marca o log da Edge); "?contar" desfaz. -->
     <script is:inline>(function(){try{var q=location.search,m;if(/[?&]nao-contar\b/.test(q)){localStorage.setItem('umami.disabled','1');document.cookie='iasmim-equipe=1;path=/;max-age=63072000;samesite=lax;secure';m='Pronto: as visitas deste navegador não entram mais nas métricas do site.'}else if(/[?&]contar\b/.test(q)){localStorage.removeItem('umami.disabled');document.cookie='iasmim-equipe=;path=/;max-age=0';m='As visitas deste navegador voltaram a ser contadas.'}else return;history.replaceState(null,'',location.pathname+location.hash);addEventListener('load',function(){alert(m)})}catch(e){}})()</script>

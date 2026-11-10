@@ -1,4 +1,4 @@
-// Lista de robôs do log de acessos (METRICAS.md 1.1). Único lugar a editar quando surgir um robô novo.
+// Lista de robôs do log de acessos (METRICAS.md 1.1; usada por worker/index.ts). Único lugar a editar quando surgir um robô novo.
 // Cada nome é procurado como trecho do User-Agent, sem diferenciar maiúsculas. A ordem importa: a
 // primeira classe que bater vence (por isso "Applebot-Extended" vem antes de "Applebot").
 // Google-Extended não aparece como User-Agent: o Google coleta para o Gemini com o próprio Googlebot.

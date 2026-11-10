@@ -1,0 +1,6 @@
+# Redirecionamentos (301) entre caminhos do próprio site. Os que dependem do domínio (www → sem www,
+# http → https, workers.dev → domínio) e o proxy do Umami ficam em worker/index.ts: este arquivo só vê o caminho.
+
+# Endereço antigo citado no GMN.md (sem "com"): leva para a página certa
+/servicos/remocao-de-sinais-e-verrugas-jato-de-plasma /servicos/remocao-de-sinais-e-verrugas-com-jato-de-plasma/ 301
+/servicos/remocao-de-sinais-e-verrugas-jato-de-plasma/* /servicos/remocao-de-sinais-e-verrugas-com-jato-de-plasma/ 301

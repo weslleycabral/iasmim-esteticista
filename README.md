@@ -1,6 +1,6 @@
 # Site da Iasmim Esteticista
 
-Site estático em [Astro](https://astro.build) para https://iasmimesteticista.com.br, hospedado na Netlify.
+Site estático em [Astro](https://astro.build) para https://iasmimesteticista.com.br, hospedado na Cloudflare (Workers com static assets).
 
 ## Comandos
 
@@ -11,9 +11,10 @@ npm run build        # gera o site em dist/
 npm run check:dist   # confere dist/: H1, título, descrição, canonical, OG, JSON-LD (FAQ e migalha iguais às visíveis),
                      # links, NAP, preços, promessas proibidas, imagens, sitemap, robots.txt, llms.txt
 npm run verify       # build + conferência
+npm run dev:worker   # serve dist/ pelo Worker em http://localhost:8787 (redirecionamentos, cabeçalhos, /whatsapp, log no D1 local)
 ```
 
-Precisa de Node 22.23.4 ou mais novo (a Netlify usa Node 24; ver `netlify.toml`).
+Precisa de Node 22.23.4 ou mais novo.
 
 ## Onde fica cada coisa
 
@@ -29,7 +30,9 @@ Precisa de Node 22.23.4 ou mais novo (a Netlify usa Node 24; ver `netlify.toml`)
 | Ícones, logo e imagem de compartilhamento | `public/` (ver "Ícones e imagem de compartilhamento") |
 | Dados estruturados (JSON-LD) | `src/lib/schema.ts` (montado no `<head>` por `src/layouts/Base.astro`) |
 | `/llms.txt` e `/llms-full.txt` | `src/lib/llms.ts` (gerados dos .md e do `negocio.json`) |
-| Redirecionamentos e cabeçalhos | `netlify.toml` |
+| Cabeçalhos (CSP, cache, noindex) | `public/_headers` |
+| Redirecionamentos entre caminhos | `public/_redirects` |
+| www → domínio, http → https, `/whatsapp`, proxy do Umami, log de acessos | `worker/index.ts` (config em `wrangler.jsonc`) |
 
 O nome do arquivo vira o endereço: `src/content/servicos/botox.md` → `/servicos/botox/`.
 `/llms.txt`, `/llms-full.txt` e o sitemap são gerados sozinhos a partir dos .md.
@@ -123,23 +126,22 @@ A imagem de compartilhamento é gerada a partir de `../design/og/og.html` (foto 
 
 ## Publicar
 
-A Netlify roda `npm run build && node scripts/check-dist.mjs` e publica `dist/`. Se a conferência falhar, a publicação não acontece.
+`npm run deploy` roda o build e a conferência (`npm run verify`) e, se passarem, publica com `wrangler deploy`. Se a conferência falhar, a publicação não acontece. `npm run deploy:preview` sobe uma versão sem trocar a que está no ar e devolve uma URL de prévia.
 
 ### Primeira vez (uma só)
 
-1. `npx -y netlify-cli@27 login` (abre o navegador para entrar na conta Netlify).
-2. `npx -y netlify-cli@27 sites:create --name iasmimesteticista` (cria o site vazio e liga esta pasta a ele; fica gravado em `.netlify/`).
-3. `npm run deploy:preview`: publica numa URL de rascunho para conferir.
-4. `npm run deploy`: publica em produção.
+1. `npx wrangler login` (abre o navegador para entrar na conta Cloudflare).
+2. `npx wrangler d1 create iasmim-acessos --location enam` e trocar o `database_id` em `wrangler.jsonc` pelo id que ele devolver. (O D1 não tem região na América do Sul; `enam` = leste da América do Norte, a mais perto.)
+3. `npx wrangler d1 migrations apply iasmim-acessos --remote` (cria a tabela do log de acessos).
+4. `npx wrangler secret put ACESSOS_SAL` (o sal do hash de visitante; usar o mesmo valor que estava na Netlify para o hash do dia da troca bater).
+5. `npm run deploy`: publica em `iasmimesteticista.<conta>.workers.dev` para conferir.
 
 ### Domínio iasmimesteticista.com.br (Registro.br)
 
-1. Na Netlify: *Domain management → Add a domain* → `iasmimesteticista.com.br` (ela adiciona o `www` junto e redireciona para o domínio sem www).
-2. No Registro.br, em *DNS → Editar zona* (DNS do Registro.br):
-   - `A` em `iasmimesteticista.com.br` → `75.2.60.5`
-   - `CNAME` em `www` → `iasmimesteticista.netlify.app`
-3. Esperar o DNS propagar (minutos a algumas horas); a Netlify emite o HTTPS (Let's Encrypt) sozinha.
-4. Quando `https://iasmimesteticista.com.br/` abrir: tirar os `#` do redirecionamento de `iasmimesteticista.netlify.app` no `netlify.toml` e publicar de novo (evita o site em dois endereços). Conferir `http://www.iasmimesteticista.com.br/sobre` → `https://iasmimesteticista.com.br/sobre/` (301).
-5. Cadastrar o domínio no Google Search Console e no Bing Webmaster Tools (dá para importar do Search Console) e enviar `https://iasmimesteticista.com.br/sitemap-index.xml` nos dois. Testar a página inicial e uma de serviço no [Teste de pesquisa aprimorada](https://search.google.com/test/rich-results) e no [validador do schema.org](https://validator.schema.org/).
-
-Se o nome `iasmimesteticista` já estiver em uso na Netlify, use outro e troque no `CNAME`.
+1. Na Cloudflare: *Add a domain* → `iasmimesteticista.com.br`, plano Free. Ela importa os registros DNS atuais: conferir se vieram os TXT (verificação do Search Console etc.) e os MX, se houver e-mail no domínio.
+2. No Registro.br, trocar os servidores DNS pelos dois que a Cloudflare indicar. Esperar a Cloudflare marcar o domínio como ativo (minutos a algumas horas).
+3. No DNS da Cloudflare, apagar os dois registros importados da Netlify (`A` → `75.2.60.5` e `CNAME www` → `iasmimesteticista.netlify.app`). Em `wrangler.jsonc`, tirar o comentário de `routes` (domínio e www) e `npm run deploy`: a Cloudflare cria os registros do Worker e emite o HTTPS sozinha. Entre apagar e publicar o site fica fora do ar, então fazer os dois em seguida.
+4. Na Cloudflare: *SSL/TLS → Edge Certificates → Always Use HTTPS* ligado.
+5. Conferir `http://www.iasmimesteticista.com.br/sobre` → `https://iasmimesteticista.com.br/sobre/` (301) e o log (`npm run acessos`).
+6. Depois de uns dias no ar: `"workers_dev": false` em `wrangler.jsonc` (tira o endereço `*.workers.dev`, que duplica o site) e apagar o site na Netlify, depois de baixar o log de lá pela última vez.
+7. Search Console e Bing Webmaster Tools continuam valendo (a verificação é por DNS ou por arquivo, não pela hospedagem).

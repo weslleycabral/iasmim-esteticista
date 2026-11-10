@@ -1,7 +1,7 @@
 // Confere o site gerado em dist/: SEO técnico, JSON-LD, links internos, NAP, imagens, sitemap, robots.txt, llms.txt
 // e a marcação das métricas (Umami e data-evento/data-posicao nos links de contato).
 // Uso: npm run build && node scripts/check-dist.mjs [pasta]   (pasta padrão: dist/)
-// Qualquer erro faz a publicação na Netlify parar (ver netlify.toml).
+// Qualquer erro faz a publicação parar (npm run deploy roda esta conferência antes do wrangler deploy).
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
@@ -353,7 +353,7 @@ for (const arq of paginas) {
       erro(rel, `link relativo não suportado: ${href}`);
       continue;
     }
-    if (path.startsWith('/u/')) continue; // proxy do Umami (netlify.toml), não existe em dist/
+    if (path.startsWith('/u/')) continue; // proxy do Umami (worker/index.ts), não existe em dist/
     totalLinks++;
     if (!existe(path)) erro(rel, `link interno quebrado: ${href}`);
     const semHash = path.split('#')[0].split('?')[0];
@@ -460,30 +460,27 @@ if (existsSync(join(DIST, 'llms-full.txt'))) {
   for (const u of urlsSitemap) if (u !== `${SITE}/servicos/` && !t.includes(`URL: ${u}\n`)) erros.push(`llms-full.txt sem a página ${u}`);
 }
 
-// netlify.toml: www → domínio, noindex nos .txt para IAs
-const netlify = readFileSync(join(RAIZ, 'netlify.toml'), 'utf8');
-if (!/from = "https:\/\/www\.iasmimesteticista\.com\.br\/\*"\n\s*to = "https:\/\/iasmimesteticista\.com\.br\/:splat"\n\s*status = 301\n\s*force = true/.test(netlify))
-  erros.push('netlify.toml sem o redirecionamento 301 de www para o domínio');
-if (!/for = "\/llms\*\.txt"[\s\S]*?X-Robots-Tag = "noindex"/.test(netlify)) erros.push('netlify.toml sem X-Robots-Tag noindex nos llms*.txt');
-// Umami pelo próprio domínio (regras 200) e CSP sem domínio de fora em script-src e connect-src
+// Worker e public/_headers: www → domínio, noindex nos .txt para IAs, proxy do Umami, CSP e log de acessos
+const worker = readFileSync(join(RAIZ, 'worker/index.ts'), 'utf8');
+const headers = readFileSync(join(RAIZ, 'public/_headers'), 'utf8');
+if (!/url\.hostname === `www\.\$\{DOMINIO\}`\) return redirecionar\(`https:\/\/\$\{DOMINIO\}/.test(worker))
+  erros.push('worker/index.ts sem o redirecionamento 301 de www para o domínio');
+if (!/^\/llms\*\.txt\n(?:  .*\n)*?  X-Robots-Tag: noindex$/m.test(headers)) erros.push('public/_headers sem X-Robots-Tag noindex nos llms*.txt');
+// Umami pelo próprio domínio (proxy no Worker) e CSP sem domínio de fora em script-src e connect-src
 for (const [de, para] of [['/u/s.js', 'https://cloud.umami.is/script.js'], ['/u/api/send', 'https://cloud.umami.is/api/send']]) {
-  if (!new RegExp(`from = "${de}"\\n\\s*to = "${para}"\\n\\s*status = 200`).test(netlify)) erros.push(`netlify.toml sem o proxy ${de} → ${para} (status 200)`);
+  if (!worker.includes(`'${de}': '${para}'`)) erros.push(`worker/index.ts sem o proxy ${de} → ${para}`);
 }
-const csp = netlify.match(/Content-Security-Policy = "([^"]*)"/)?.[1] ?? '';
+const csp = headers.match(/^  Content-Security-Policy: (.*)$/m)?.[1] ?? '';
 for (const d of ['script-src', 'connect-src']) {
   // 'self' + (unsafe-inline) + só os domínios do GA4/Signals (googletagmanager, google-analytics, analytics.google.com, google.com[.br], stats.g.doubleclick.net)
   const valor = csp.match(new RegExp(`${d} ([^;]*);`))?.[1] ?? '';
   const fora = valor.split(' ').filter((t) => t && !/^('self'|'unsafe-inline'|https:\/\/(www\.googletagmanager\.com|analytics\.google\.com|www\.google\.com(\.br)?|stats\.g\.doubleclick\.net|\*\.(google-analytics|googletagmanager)\.com))$/.test(t));
-  if (!valor.includes("'self'") || fora.length) erros.push(`netlify.toml: CSP ${d} só pode ter 'self' e os domínios do GA4 (fora: ${fora.join(' ') || 'sem self'})`);
+  if (!valor.includes("'self'") || fora.length) erros.push(`public/_headers: CSP ${d} só pode ter 'self' e os domínios do GA4 (fora: ${fora.join(' ') || 'sem self'})`);
 }
-// Log de acessos (Edge Function): existe, grava depois da resposta e não roda nos arquivos do Astro nem no proxy
-const edge = join(RAIZ, 'netlify/edge-functions/acessos/index.ts');
-const edgeSrc = existsSync(edge) ? readFileSync(edge, 'utf8') : '';
-if (!edgeSrc) erros.push('falta netlify/edge-functions/acessos/index.ts (log de acessos)');
-else {
-  if (!edgeSrc.includes('context.waitUntil(')) erros.push('Edge Function de acessos sem context.waitUntil (atrasaria a resposta)');
-  for (const p of ['/_astro/*', '/u/*']) if (!edgeSrc.includes(`'${p}'`)) erros.push(`Edge Function de acessos sem excludedPath ${p}`);
-}
+// Log de acessos: grava depois da resposta e o Worker não roda nos arquivos do Astro
+if (!worker.includes('ctx.waitUntil(gravar(')) erros.push('worker/index.ts sem ctx.waitUntil no log de acessos (atrasaria a resposta)');
+const wrangler = readFileSync(join(RAIZ, 'wrangler.jsonc'), 'utf8');
+if (!wrangler.includes('"!/_astro/*"')) erros.push('wrangler.jsonc: run_worker_first sem a exclusão "!/_astro/*"');
 
 console.log(`Páginas HTML: ${paginas.length} (${noindex.size} noindex)`);
 console.log(`Blocos JSON-LD válidos verificados: ${totalLd}`);
