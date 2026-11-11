@@ -2,6 +2,7 @@
 // Só roda nos caminhos de "run_worker_first" (wrangler.jsonc); CSS, JS, fontes e imagens saem direto do CDN.
 // - www → sem www e http → https (301), no domínio oficial.
 // - /whatsapp: link curto do WhatsApp (abaixo).
+// - Quem pede "Accept: text/markdown" (agentes de IA) recebe a versão .md da página no mesmo endereço.
 // - Log de acessos (METRICAS.md 1.1): um registro por acesso no D1 "iasmim-acessos", tabela "acessos"
 //   (migrations/). É a única fonte que enxerga robôs (não rodam JavaScript) e quem bloqueia o GA4.
 //   Exportação: npm run acessos (scripts/acessos.mjs).
@@ -48,6 +49,17 @@ async function responder(req: Request, env: Env) {
   if (url.hostname === `www.${DOMINIO}`) return redirecionar(`https://${DOMINIO}${url.pathname}${url.search}`);
   if (url.hostname === DOMINIO && url.protocol === 'http:') return redirecionar(`https://${DOMINIO}${url.pathname}${url.search}`);
   if (url.pathname === '/whatsapp' || url.pathname === '/whatsapp/') return whatsapp(url);
+  // Versão .md (src/pages/[...pagina].md.ts) para quem pede Markdown: "/" → /index.md, "/sobre/" → /sobre.md.
+  // É o que o "Markdown for Agents" da Cloudflare faz, mas esse exige o plano Pro e converte o HTML inteiro.
+  const querMd = /\btext\/markdown\b/.test(req.headers.get('accept') ?? '');
+  if (querMd && url.pathname.endsWith('/')) {
+    const md = await env.ASSETS.fetch(new Request(new URL(url.pathname === '/' ? '/index.md' : `${url.pathname.slice(0, -1)}.md`, url), req));
+    if (md.ok) {
+      const comVary = new Response(md.body, md);
+      comVary.headers.set('Vary', 'Accept');
+      return comVary;
+    }
+  }
   const res = await env.ASSETS.fetch(req);
   // /sobre → /sobre/ e /sobre/index.html → /sobre/: os static assets respondem 307; 301 diz ao Google que o
   // endereço com barra é o definitivo
@@ -58,14 +70,15 @@ async function responder(req: Request, env: Env) {
   if (res.headers.get('content-type') === 'text/html') {
     const comCharset = new Response(res.body, res);
     comCharset.headers.set('content-type', 'text/html; charset=utf-8');
+    comCharset.headers.set('Vary', 'Accept'); // o mesmo endereço também responde em Markdown (acima)
     return comCharset;
   }
   return res;
 }
 
-// Resposta que vale registrar: tudo que não for arquivo comum (HTML, texto, XML) e qualquer 3xx/4xx/5xx
+// Resposta que vale registrar: tudo que não for arquivo comum (HTML, texto, Markdown, XML) e qualquer 3xx/4xx/5xx
 const registrar = (res: Response) =>
-  res.status >= 300 || /text\/html|text\/plain|xml/.test(res.headers.get('content-type') ?? '');
+  res.status >= 300 || /text\/html|text\/plain|text\/markdown|xml/.test(res.headers.get('content-type') ?? '');
 
 async function visitante(sal: string | undefined, ip: string, ua: string, dia: string) {
   if (!sal || !ip) return '';

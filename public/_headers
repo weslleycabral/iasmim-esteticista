@@ -38,6 +38,12 @@
 /robots.txt
   Content-Type: text/plain; charset=utf-8
 
+# Versão .md de cada página (src/pages/[...pagina].md.ts), também para IAs: mesmo tratamento dos llms*.txt
+/*.md
+  Content-Type: text/markdown; charset=utf-8
+  Cache-Control: public, max-age=3600
+  X-Robots-Tag: noindex
+
 # Página de links do Instagram: fora da busca (também tem <meta name="robots" content="noindex">)
 /bio/*
   X-Robots-Tag: noindex, follow

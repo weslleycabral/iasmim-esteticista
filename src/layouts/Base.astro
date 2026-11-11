@@ -1,4 +1,5 @@
 ---
+import { mdPath } from '../lib/llms';
 import '../styles/global.css';
 import { Font } from 'astro:assets';
 import Header from '../components/Header.astro';
@@ -98,6 +99,7 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': graf
     <title>{title}</title>
     <meta name="description" content={description} />
     {!noindex && <link rel="canonical" href={canonical} />}
+    {!noindex && !e404 && <link rel="alternate" type="text/markdown" href={mdPath(Astro.url.pathname)} />}
     <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large, max-snippet:-1'} />
     <meta name="theme-color" content="#efe9df" />
     <!-- estado oculto dos reveals só com JS; se o script do site não rodar em 4 s, mostra tudo -->

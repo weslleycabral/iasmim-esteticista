@@ -1,0 +1,138 @@
+headersOrigin = "config"
+redirectsOrigin = "config"
+plugins = []
+
+[build]
+edge_functions = "/home/weslleycabral/www/clientes/iasmim/site/netlify/edge-functions"
+publish = "/home/weslleycabral/www/clientes/iasmim/site/dist"
+publishOrigin = "config"
+commandOrigin = "config"
+command = "npm run build && node scripts/check-dist.mjs"
+
+[build.environment]
+NODE_VERSION = "24"
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[functions]
+
+[functions."*"]
+
+[[headers]]
+for = "/*"
+
+[headers.values]
+X-Content-Type-Options = "nosniff"
+Referrer-Policy = "strict-origin-when-cross-origin"
+X-Frame-Options = "SAMEORIGIN"
+Permissions-Policy = "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+Strict-Transport-Security = "max-age=31536000"
+Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.google-analytics.com https://*.googletagmanager.com https://www.google.com https://www.google.com.br https://stats.g.doubleclick.net; font-src 'self'; connect-src 'self' https://*.google-analytics.com https://analytics.google.com https://*.googletagmanager.com https://www.google.com https://www.google.com.br https://stats.g.doubleclick.net; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+
+[[headers]]
+for = "/_astro/*"
+
+[headers.values]
+Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/favicon.*"
+
+[headers.values]
+Cache-Control = "public, max-age=86400"
+
+[[headers]]
+for = "/apple-touch-icon.png"
+
+[headers.values]
+Cache-Control = "public, max-age=86400"
+
+[[headers]]
+for = "/logo-iasmim-esteticista.webp"
+
+[headers.values]
+Cache-Control = "public, max-age=86400"
+
+[[headers]]
+for = "/og-iasmim-esteticista.jpg"
+
+[headers.values]
+Cache-Control = "public, max-age=86400"
+
+[[headers]]
+for = "/llms*.txt"
+
+[headers.values]
+Content-Type = "text/plain; charset=utf-8"
+Cache-Control = "public, max-age=3600"
+X-Robots-Tag = "noindex"
+
+[[headers]]
+for = "/robots.txt"
+
+[headers.values]
+Content-Type = "text/plain; charset=utf-8"
+
+[[headers]]
+for = "/bio/*"
+
+[headers.values]
+X-Robots-Tag = "noindex, follow"
+
+[[redirects]]
+from = "https://www.iasmimesteticista.com.br/*"
+to = "https://iasmimesteticista.com.br/:splat"
+status = 301.0
+force = true
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/u/s.js"
+to = "https://cloud.umami.is/script.js"
+status = 200.0
+force = true
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/u/api/send"
+to = "https://cloud.umami.is/api/send"
+status = 200.0
+force = true
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]
+
+[[redirects]]
+from = "/servicos/remocao-de-sinais-e-verrugas-jato-de-plasma/*"
+to = "/servicos/remocao-de-sinais-e-verrugas-com-jato-de-plasma/"
+status = 301.0
+force = false
+
+[redirects.query]
+
+[redirects.conditions]
+
+[redirects.headers]

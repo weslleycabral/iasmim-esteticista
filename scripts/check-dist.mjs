@@ -458,12 +458,28 @@ if (existsSync(join(DIST, 'llms-full.txt'))) {
   for (const u of urlsSitemap) if (u !== `${SITE}/servicos/` && !t.includes(`URL: ${u}\n`)) erros.push(`llms-full.txt sem a página ${u}`);
 }
 
+// Versão .md de cada página do sitemap (src/pages/[...pagina].md.ts): existe, tem título e URL da página,
+// a página aponta para ela (<link rel="alternate" type="text/markdown">) e o llms.txt cita
+for (const u of urlsSitemap) {
+  const path = new URL(u).pathname;
+  const md = path === '/' ? '/index.md' : `${path.slice(0, -1)}.md`;
+  const arq = join(DIST, md);
+  if (!existsSync(arq)) { erros.push(`sem a versão Markdown de ${path} (${md})`); continue; }
+  const t = readFileSync(arq, 'utf8');
+  if (!t.startsWith('# ') || !t.includes(`URL: ${u}\n`)) erros.push(`${md}: sem "# título" ou sem "URL: ${u}"`);
+  if (/<[a-z][^>]*>/i.test(t.replace(/`[^`]*`/g, ''))) erros.push(`${md}: tem HTML`);
+  const html = readFileSync(join(DIST, path, 'index.html'), 'utf8');
+  if (!html.includes(`<link rel="alternate" type="text/markdown" href="${md}">`)) erros.push(`${path}: sem <link rel="alternate"> para ${md}`);
+  if (existsSync(join(DIST, 'llms.txt')) && !readFileSync(join(DIST, 'llms.txt'), 'utf8').includes(`${SITE}${md}`) && path !== '/') erros.push(`llms.txt sem ${md}`);
+}
+
 // Worker e public/_headers: www → domínio, noindex nos .txt para IAs, CSP e log de acessos
 const worker = readFileSync(join(RAIZ, 'worker/index.ts'), 'utf8');
 const headers = readFileSync(join(RAIZ, 'public/_headers'), 'utf8');
 if (!/url\.hostname === `www\.\$\{DOMINIO\}`\) return redirecionar\(`https:\/\/\$\{DOMINIO\}/.test(worker))
   erros.push('worker/index.ts sem o redirecionamento 301 de www para o domínio');
 if (!/^\/llms\*\.txt\n(?:  .*\n)*?  X-Robots-Tag: noindex$/m.test(headers)) erros.push('public/_headers sem X-Robots-Tag noindex nos llms*.txt');
+if (!/^\/\*\.md\n(?:  .*\n)*?  X-Robots-Tag: noindex$/m.test(headers)) erros.push('public/_headers sem text/markdown + noindex nos .md');
 // CSP sem domínio de fora em script-src e connect-src (além dos do Google)
 const csp = headers.match(/^  Content-Security-Policy: (.*)$/m)?.[1] ?? '';
 for (const d of ['script-src', 'connect-src']) {
