@@ -8,7 +8,7 @@ const casos = [
   '/nao-existe/', '/nao-existe', '/robots.txt', '/llms.txt', '/llms-full.txt', '/sitemap-index.xml', '/sitemap-0.xml',
   '/bio/', '/bio', '/privacidade/', '/whatsapp?msg=Oi%20tudo%20bem&ref=teste', '/whatsapp', '/whatsapp/',
   `/_astro/${ASTRO}`, '/favicon.svg', '/favicon.ico', '/apple-touch-icon.png', '/og-iasmim-esteticista.jpg', '/logo-iasmim-esteticista.webp',
-  '/u/s.js', '/index.html', '/sobre/index.html',
+  '/index.html', '/sobre/index.html',
 ];
 const H = ['content-type', 'cache-control', 'x-robots-tag', 'strict-transport-security', 'content-security-policy', 'x-frame-options', 'referrer-policy', 'permissions-policy', 'x-content-type-options'];
 const norm = (v, base) => v?.replace(base, '').replace(/^https:\/\/iasmimesteticista\.com\.br/, '');

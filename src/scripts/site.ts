@@ -4,7 +4,7 @@
 //  2. rolagem com inércia só para roda de mouse; âncoras (#secao) rolam suave
 //  3. odômetro do número da edição (Edicao.astro), guardado em localStorage "iasmim-edicao"
 //  4. menu <details> do celular fecha ao escolher um link, ao tocar fora e com Esc
-//  5. métricas (METRICAS.md 1.3, 1.4 e 1.6): eventos do Umami, origem da visita no WhatsApp e Web Vitals
+//  5. métricas (METRICAS.md 1.3, 1.4 e 1.6): eventos do GA4, origem da visita no WhatsApp e Web Vitals
 
 import { whatsapp, endereco } from '../data/negocio.json';
 
@@ -238,24 +238,19 @@ function menu() {
   });
 }
 
-/* 5. métricas. O Umami (/u/s.js, no <head> do Base.astro) só envia em iasmimesteticista.com.br e
-   respeita localStorage "umami.disabled" (?nao-contar). Os links marcam o evento no HTML:
+/* 5. métricas. Os eventos vão para o GA4 (gtag, no <head> do Base.astro), que só existe em
+   iasmimesteticista.com.br e some com ?nao-contar ou a recusa em /privacidade/. Os links marcam o evento no HTML:
    data-evento="whatsapp|ligar|rota|instagram|google-perfil|copia" e data-posicao="topo|hero|fim|…"
    (o scripts/check-dist.mjs confere); data-servico vem do link ou do <body>. Um único listener de
    clique, delegado, cuida de todos; os outros eventos vêm de rolagem, tempo, cópia e <details>. */
 type Dados = Record<string, string | number>;
-type Umami = { track: (nome: string, dados?: Dados) => Promise<unknown> };
 const pagina = location.pathname;
-const fila: [string, Dados][] = [];
 
 function evento(nome: string, dados: Dados = {}) {
   const limpos = Object.fromEntries(Object.entries(dados).filter(([, v]) => v !== '')) as Dados;
-  const umami = (window as unknown as { umami?: Umami }).umami;
-  (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag?.('event', nome, limpos); // GA4 (se não recusado)
-  if (umami) umami.track(nome, limpos).catch(() => {});
-  else if (fila.length < 20) fila.push([nome, limpos]); // o script do Umami ainda não rodou
+  // o gtag do <head> põe na fila (dataLayer) o que chegar antes de o script do Google carregar
+  (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag?.('event', nome, limpos);
 }
-window.addEventListener('load', () => fila.splice(0).forEach(([n, d]) => evento(n, d)));
 
 // Origem da visita (primeiro toque): UTM ou referência normalizada, guardada na sessão inteira.
 // Vai no sufixo da mensagem do WhatsApp para a Iasmim saber de onde a cliente veio sem perguntar.

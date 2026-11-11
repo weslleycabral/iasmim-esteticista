@@ -32,7 +32,7 @@ Precisa de Node 22.23.4 ou mais novo.
 | `/llms.txt` e `/llms-full.txt` | `src/lib/llms.ts` (gerados dos .md e do `negocio.json`) |
 | Cabeçalhos (CSP, cache, noindex) | `public/_headers` |
 | Redirecionamentos entre caminhos | `public/_redirects` |
-| www → domínio, http → https, `/whatsapp`, proxy do Umami, log de acessos | `worker/index.ts` (config em `wrangler.jsonc`) |
+| www → domínio, http → https, `/whatsapp`, log de acessos | `worker/index.ts` (config em `wrangler.jsonc`) |
 
 O nome do arquivo vira o endereço: `src/content/servicos/botox.md` → `/servicos/botox/`.
 `/llms.txt`, `/llms-full.txt` e o sitemap são gerados sozinhos a partir dos .md.

@@ -1,5 +1,5 @@
 // Confere o site gerado em dist/: SEO técnico, JSON-LD, links internos, NAP, imagens, sitemap, robots.txt, llms.txt
-// e a marcação das métricas (Umami e data-evento/data-posicao nos links de contato).
+// e a marcação das métricas (GA4 e data-evento/data-posicao nos links de contato).
 // Uso: npm run build && node scripts/check-dist.mjs [pasta]   (pasta padrão: dist/)
 // Qualquer erro faz a publicação parar (npm run deploy roda esta conferência antes do wrangler deploy).
 import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
@@ -42,9 +42,7 @@ const PROIBIDAS = [
   /Dysport/i,
 ];
 
-// Métricas (METRICAS.md 1.2 e 1.3): script do Umami servido pelo próprio domínio, uma vez em toda página,
-// e o evento esperado em cada tipo de link de contato (o listener de src/scripts/site.ts lê data-evento)
-const UMAMI = '<script defer src="/u/s.js" data-website-id="ec00859b-4390-41df-a98a-b83440f4b6ee" data-host-url="/u" data-domains="iasmimesteticista.com.br"></script>';
+// Métricas (METRICAS.md 1.3): o evento esperado em cada tipo de link de contato (o listener de src/scripts/site.ts lê data-evento)
 const EVENTOS = [
   [/^https:\/\/wa\.me\//, 'whatsapp'],
   [/^tel:/, 'ligar'],
@@ -327,11 +325,10 @@ for (const arq of paginas) {
   // CTA do WhatsApp
   if (!/href="https:\/\/wa\.me\/5588999890590\?text=/.test(html)) erro(rel, 'sem link de WhatsApp com mensagem');
 
-  // Métricas: Umami uma vez; todo link de contato com data-evento certo e data-posicao
-  const umamis = html.split('src="/u/s.js"').length - 1;
-  if (umamis !== 1) erro(rel, `script do Umami ${umamis} vezes (esperado 1)`);
-  else if (!html.includes(UMAMI)) erro(rel, 'script do Umami fora do formato (website-id, host-url="/u", domains)');
-  if (/cloud\.umami\.is|gateway\.umami\.is/.test(html)) erro(rel, 'Umami chamado direto (use o proxy /u/)');
+  // Métricas: GA4 uma vez (G-15X2KXBTNB); todo link de contato com data-evento certo e data-posicao
+  const gas = html.split("var id='G-15X2KXBTNB'").length - 1;
+  if (gas !== 1) erro(rel, `tag do GA4 ${gas} vezes (esperado 1)`);
+  if (/umami(?!\.disabled)/i.test(html)) erro(rel, 'resto do Umami no HTML (removido em 2026-11-11; só a marca antiga umami.disabled fica)');
   for (const [tag] of html.matchAll(/<a\b[^>]*>/g)) {
     const href = decode(tag.match(/\shref="([^"]*)"/)?.[1] ?? '');
     const esperado = EVENTOS.find(([re]) => re.test(href))?.[1];
@@ -353,7 +350,6 @@ for (const arq of paginas) {
       erro(rel, `link relativo não suportado: ${href}`);
       continue;
     }
-    if (path.startsWith('/u/')) continue; // proxy do Umami (worker/index.ts), não existe em dist/
     totalLinks++;
     if (!existe(path)) erro(rel, `link interno quebrado: ${href}`);
     const semHash = path.split('#')[0].split('?')[0];
@@ -460,16 +456,13 @@ if (existsSync(join(DIST, 'llms-full.txt'))) {
   for (const u of urlsSitemap) if (u !== `${SITE}/servicos/` && !t.includes(`URL: ${u}\n`)) erros.push(`llms-full.txt sem a página ${u}`);
 }
 
-// Worker e public/_headers: www → domínio, noindex nos .txt para IAs, proxy do Umami, CSP e log de acessos
+// Worker e public/_headers: www → domínio, noindex nos .txt para IAs, CSP e log de acessos
 const worker = readFileSync(join(RAIZ, 'worker/index.ts'), 'utf8');
 const headers = readFileSync(join(RAIZ, 'public/_headers'), 'utf8');
 if (!/url\.hostname === `www\.\$\{DOMINIO\}`\) return redirecionar\(`https:\/\/\$\{DOMINIO\}/.test(worker))
   erros.push('worker/index.ts sem o redirecionamento 301 de www para o domínio');
 if (!/^\/llms\*\.txt\n(?:  .*\n)*?  X-Robots-Tag: noindex$/m.test(headers)) erros.push('public/_headers sem X-Robots-Tag noindex nos llms*.txt');
-// Umami pelo próprio domínio (proxy no Worker) e CSP sem domínio de fora em script-src e connect-src
-for (const [de, para] of [['/u/s.js', 'https://cloud.umami.is/script.js'], ['/u/api/send', 'https://cloud.umami.is/api/send']]) {
-  if (!worker.includes(`'${de}': '${para}'`)) erros.push(`worker/index.ts sem o proxy ${de} → ${para}`);
-}
+// CSP sem domínio de fora em script-src e connect-src (além dos do Google)
 const csp = headers.match(/^  Content-Security-Policy: (.*)$/m)?.[1] ?? '';
 for (const d of ['script-src', 'connect-src']) {
   // 'self' + (unsafe-inline) + só os domínios do GA4/Signals (googletagmanager, google-analytics, analytics.google.com, google.com[.br], stats.g.doubleclick.net)

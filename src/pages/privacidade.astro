@@ -1,7 +1,7 @@
 ---
 // Política de privacidade — texto corrido, sem design próprio; usa as classes da linha 3C.
 // noindex: página legal, fora do sitemap e do llms.txt. Base legal das métricas: legítimo interesse (LGPD art. 7º, IX). O botão de recusa grava
-// localStorage "umami.disabled" e "ga.disabled" (lidos no <head> do Base.astro).
+// localStorage "ga.disabled" (lidos no <head> do Base.astro).
 import Base from '../layouts/Base.astro';
 import Edicao from '../components/Edicao.astro';
 import Migalhas from '../components/Migalhas.astro';
@@ -30,7 +30,6 @@ const atualizado = new Date('2026-11-10T12:00:00-03:00');
       <h2 class="disp">O que medimos e com quais ferramentas</h2>
       <ul class="body">
         <li><strong>Google Analytics 4:</strong> páginas visitadas, tempo de leitura, tipo de aparelho, cidade e de onde a pessoa veio (por exemplo, o Google ou o Instagram), e cliques em WhatsApp, telefone e rota. Usa cookies do Analytics (<code>_ga</code>). Os recursos de publicidade do Google estão ativos: se você estiver logada no Google, ele pode associar a visita a dados de interesse e idade do seu perfil e usar a visita para medir e personalizar anúncios, inclusive mostrar anúncios da Iasmim a quem visitou o site. Não identificamos você pelo nome. O Google não guarda o seu endereço de IP no Analytics 4.</li>
-        <li><strong>Umami:</strong> as mesmas contagens, sem cookies.</li>
         <li><strong>Registro de acessos do próprio site:</strong> data, página, origem da visita, país, estado e cidade aproximados e navegador. O endereço de IP não é guardado: ele vira um código que muda todo dia.</li>
       </ul>
 
@@ -38,13 +37,13 @@ const atualizado = new Date('2026-11-10T12:00:00-03:00');
       <p class="body">Usamos o <strong>legítimo interesse</strong> (LGPD, art. 7º, IX): é uma medição necessária para melhorar o site e a divulgação dos serviços, e você pode se opor a qualquer momento, como abaixo. Não coletamos dados de saúde nem o conteúdo das suas conversas: a conversa no WhatsApp acontece direto com a Iasmim e segue a política do WhatsApp.</p>
 
       <h2 class="disp">Por quanto tempo e para onde vão</h2>
-      <p class="body">O Google Analytics guarda os dados de cada visita por até 14 meses e mantém só relatórios agregados depois disso. O registro de acessos do site é guardado na Cloudflare. O Google, o Umami e a Cloudflare podem processar dados fora do Brasil (como nos Estados Unidos), com as garantias previstas na LGPD (art. 33).</p>
+      <p class="body">O Google Analytics guarda os dados de cada visita por até 14 meses e mantém só relatórios agregados depois disso. O registro de acessos do site é guardado na Cloudflare. O Google e a Cloudflare podem processar dados fora do Brasil (como nos Estados Unidos), com as garantias previstas na LGPD (art. 33).</p>
 
       <h2 class="disp">Seus direitos</h2>
       <p class="body">Você pode pedir acesso, correção ou eliminação dos seus dados, e se opor à medição (LGPD, art. 18). Fale com a Iasmim pelo WhatsApp {negocio.telefone}.</p>
 
       <h2 class="disp">Não quero ser medida</h2>
-      <p class="body">Um clique desliga a medição neste navegador (Google Analytics, Umami e a medição de anúncios). Vale até você limpar os dados do navegador.</p>
+      <p class="body">Um clique desliga a medição neste navegador (Google Analytics e a medição de anúncios). Vale até você limpar os dados do navegador.</p>
       <p class="body"><button type="button" class="ul" id="recusar-medicao" style="font-size: 16px">Desligar a medição neste navegador</button> <span id="recusar-status" role="status" class="lab"></span></p>
     </div>
   </section>
@@ -53,7 +52,7 @@ const atualizado = new Date('2026-11-10T12:00:00-03:00');
       var b = document.getElementById('recusar-medicao'), s = document.getElementById('recusar-status');
       if (!b) return;
       b.addEventListener('click', function () {
-        try { localStorage.setItem('ga.disabled', '1'); localStorage.setItem('umami.disabled', '1'); } catch (e) {}
+        try { localStorage.setItem('ga.disabled', '1'); } catch (e) {}
         s.textContent = 'Pronto: a medição está desligada neste navegador.';
       });
     })();

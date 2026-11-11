@@ -20,7 +20,7 @@ export const msgServico = (s: Servico) =>
   s.data.mensagemWhatsApp ?? `Olá, Iasmim! Quero agendar ${s.data.nome}.`;
 
 /** Nome curto do serviço no sufixo da mensagem do WhatsApp ("(ref. limpeza · google)") e na propriedade
- *  "servico" dos eventos do Umami (METRICAS.md 1.3 e 1.4). Sem entrada aqui: o fim do id, com espaços
+ *  "servico" dos eventos do GA4 (METRICAS.md 1.3 e 1.4). Sem entrada aqui: o fim do id, com espaços
  *  ("peeling/peeling-para-melasma" → "peeling para melasma"). */
 const REFS: Record<string, string> = {
   'limpeza-de-pele': 'limpeza',

@@ -2,10 +2,8 @@
 // Só roda nos caminhos de "run_worker_first" (wrangler.jsonc); CSS, JS, fontes e imagens saem direto do CDN.
 // - www → sem www e http → https (301), no domínio oficial.
 // - /whatsapp: link curto do WhatsApp (abaixo).
-// - /u/*: Umami Cloud servido pelo próprio domínio (METRICAS.md 1.2): os bloqueadores de anúncio não cortam e o
-//   CSP continua 'self'. Fica fora do log.
 // - Log de acessos (METRICAS.md 1.1): um registro por acesso no D1 "iasmim-acessos", tabela "acessos"
-//   (migrations/). É a única fonte que enxerga robôs (não rodam JavaScript) e quem bloqueia o Umami.
+//   (migrations/). É a única fonte que enxerga robôs (não rodam JavaScript) e quem bloqueia o GA4.
 //   Exportação: npm run acessos (scripts/acessos.mjs).
 //   - A resposta sai sem esperar: a gravação roda depois, com ctx.waitUntil. Se o log falhar, a página sai igual.
 //   - Registra páginas HTML, robots.txt, sitemap*.xml, llms*.txt, redirecionamentos e 404.
@@ -18,10 +16,6 @@ import { classificar } from './robos.ts';
 const DOMINIO = 'iasmimesteticista.com.br';
 // O public/_headers só vale para os arquivos de dist/; nas respostas criadas aqui, o HSTS entra à mão
 const HSTS = { 'Strict-Transport-Security': 'max-age=31536000' };
-const UMAMI: Record<string, string> = {
-  '/u/s.js': 'https://cloud.umami.is/script.js',
-  '/u/api/send': 'https://cloud.umami.is/api/send',
-};
 
 // Link curto e reutilizável do WhatsApp: /whatsapp?msg=<mensagem>&ref=<origem>
 // Serve onde o destino não aceita ?text= (ex.: campo de chat do Perfil da Empresa no Google) e em qualquer
@@ -45,23 +39,6 @@ function whatsapp(url: URL) {
       ...HSTS,
     },
   });
-}
-
-function umami(req: Request, destino: string) {
-  const headers = new Headers(req.headers);
-  headers.delete('cookie');
-  // O Umami Cloud lê IP e local primeiro de x-umami-client-* (src/lib/ip.ts e detect.ts do Umami); sem eles,
-  // país e cidade sairiam do servidor da Cloudflare, não da pessoa. Cidade e estado vão codificados: o Umami
-  // passa os dois por decodeURIComponent.
-  const ip = req.headers.get('cf-connecting-ip');
-  const cf = req.cf ?? {};
-  if (ip) headers.set('x-umami-client-ip', ip);
-  if (cf.country) {
-    headers.set('x-umami-client-country', String(cf.country));
-    if (cf.regionCode) headers.set('x-umami-client-region', encodeURIComponent(String(cf.regionCode)));
-    if (cf.city) headers.set('x-umami-client-city', encodeURIComponent(String(cf.city)));
-  }
-  return fetch(destino, { method: req.method, headers, body: req.body });
 }
 
 const redirecionar = (destino: string) => new Response(null, { status: 301, headers: { Location: destino, ...HSTS } });
@@ -132,9 +109,6 @@ async function gravar(req: Request, res: Response, env: Env) {
 
 export default {
   async fetch(req, env, ctx) {
-    const { pathname } = new URL(req.url);
-    const proxy = UMAMI[pathname];
-    if (proxy) return umami(req, proxy);
     // Se o Worker falhar, a página sai direto dos arquivos (como o onError: 'bypass' da Netlify)
     const res = await responder(req, env).catch((e) => {
       console.error('responder:', e);

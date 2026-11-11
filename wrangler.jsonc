@@ -10,7 +10,7 @@
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page",
-    // O Worker roda antes só onde precisa (páginas, textos, /whatsapp, /u/*). Arquivos estáticos saem direto
+    // O Worker roda antes só onde precisa (páginas, textos, /whatsapp). Arquivos estáticos saem direto
     // do CDN e não gastam a cota do plano grátis (100 mil requisições/dia).
     "run_worker_first": [
       "/*",
