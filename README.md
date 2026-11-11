@@ -120,7 +120,7 @@ A imagem de compartilhamento é gerada a partir de `../design/og/og.html` (foto 
 - `/bio/` (links do Instagram) tem `noindex`, fica fora do sitemap e do llms.txt: repete a página inicial e a navegação, com pouco texto próprio. As outras páginas continuam ligadas a ela normalmente.
 - Migalha visível = `BreadcrumbList` no JSON-LD. Página sem migalha visível (inicial, depoimentos, perguntas frequentes, bio) não tem `BreadcrumbList`.
 - Sem `AggregateRating`/`Review` e sem `Product` (sem preço publicado, o Google considera inválido): a Anna Pegova é um `Service` "Revenda Anna Pegova" com `brand`.
-- Sem versões `.md` de cada página: o Google diz que não precisa de arquivos especiais para IA; o `/llms.txt` e o `/llms-full.txt` cobrem os assistentes que leem esse formato. Os dois `.txt` têm `X-Robots-Tag: noindex` (não aparecem na busca, mas os robôs de IA leem).
+- Versão `.md` de cada página (`/servicos/botox.md`, `/index.md`), gerada de `src/lib/llms.ts` por `src/pages/[...pagina].md.ts`; o Worker também a entrega a quem pede `Accept: text/markdown`. Os `.md` e os `llms*.txt` têm `X-Robots-Tag: noindex` (não aparecem na busca, mas os robôs de IA leem).
 - O número de avaliações (`avaliacoes.total`) aparece no HTML como texto puro (o odômetro desenha os algarismos só com CSS). Ao atualizar o total, procure também "229" nos .md (alguns textos citam o número).
 - Pergunta nova em `perguntas-frequentes.md` só aparece na página `/perguntas-frequentes/` depois de entrar na lista `temas` de `src/pages/perguntas-frequentes.astro` (o check-dist confere que o FAQ visível e o JSON-LD batem).
 
