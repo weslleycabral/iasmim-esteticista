@@ -142,8 +142,11 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': graf
          interesse, ver /privacidade/). Google Signals, personalização de anúncios e cookies de anúncio ligados.
          O visitante recusa em /privacidade/ (localStorage ga.disabled); a equipe, com "?nao-contar". Só em produção.
          A tag sai de /fx9/ no próprio domínio (Google tag gateway da Cloudflare, ligado no painel em 2026-11-11:
-         Web tag management → Google Tag Gateway): bloqueadores que barram googletagmanager.com não cortam. -->
-    <script is:inline>(function(){try{if(location.hostname!=='iasmimesteticista.com.br'||localStorage.getItem('ga.disabled')||localStorage.getItem('nao-contar')||localStorage.getItem('umami.disabled'))return;var id='G-15X2KXBTNB';window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('consent','default',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'});gtag('js',new Date());gtag('config',id);var s=document.createElement('script');s.async=true;s.src='/fx9/?id='+id;document.head.appendChild(s)}catch(e){}})()</script>
+         Web tag management → Google Tag Gateway): bloqueadores que barram googletagmanager.com não cortam.
+         A Cloudflare também injeta no topo do HTML um carregador da tag (/fx9/), que envia sozinho, mesmo com
+         "Set up tag" desligado: a recusa e o ?nao-contar valem por window['ga-disable-G-15X2KXBTNB'], o
+         desligamento oficial do GA4, que o gtag confere na hora de cada envio. -->
+    <script is:inline>(function(){try{var id='G-15X2KXBTNB';if(localStorage.getItem('ga.disabled')||localStorage.getItem('nao-contar')||localStorage.getItem('umami.disabled')){window['ga-disable-'+id]=true;return}if(location.hostname!=='iasmimesteticista.com.br')return;window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};gtag('consent','default',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'});gtag('js',new Date());gtag('config',id);var s=document.createElement('script');s.async=true;s.src='/fx9/?id='+id;document.head.appendChild(s)}catch(e){}})()</script>
   </head>
   <body id="topo" data-servico={servicoDaPagina} data-pagina={e404 ? '404' : undefined}>
     <a class="skip" href="#conteudo">Pular para o conteúdo</a>

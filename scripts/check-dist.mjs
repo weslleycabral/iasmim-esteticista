@@ -329,6 +329,7 @@ for (const arq of paginas) {
   const gas = html.split("var id='G-15X2KXBTNB'").length - 1;
   if (gas !== 1) erro(rel, `tag do GA4 ${gas} vezes (esperado 1)`);
   if (!html.includes("s.src='/fx9/?id='")) erro(rel, 'GA4 fora do Google tag gateway (esperado /fx9/ no próprio domínio)');
+  if (!html.includes("window['ga-disable-'+id]=true")) erro(rel, 'GA4 sem ga-disable na recusa (a tag injetada pela Cloudflare enviaria mesmo assim)');
   if (/umami(?!\.disabled)/i.test(html)) erro(rel, 'resto do Umami no HTML (removido em 2026-11-11; só a marca antiga umami.disabled fica)');
   for (const [tag] of html.matchAll(/<a\b[^>]*>/g)) {
     const href = decode(tag.match(/\shref="([^"]*)"/)?.[1] ?? '');

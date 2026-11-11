@@ -52,6 +52,7 @@ const atualizado = new Date('2026-11-10T12:00:00-03:00');
       var b = document.getElementById('recusar-medicao'), s = document.getElementById('recusar-status');
       if (!b) return;
       b.addEventListener('click', function () {
+        window['ga-disable-G-15X2KXBTNB'] = true; // vale já nesta página (a tag injetada pela Cloudflare já está rodando)
         try { localStorage.setItem('ga.disabled', '1'); } catch (e) {}
         s.textContent = 'Pronto: a medição está desligada neste navegador.';
       });
