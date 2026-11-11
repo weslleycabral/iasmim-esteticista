@@ -3,7 +3,7 @@
 #
 # CSP: tudo é servido pelo próprio site (fontes, imagens, scripts). 'unsafe-inline' cobre os scripts curtos do
 # <head> (classe "js" e ?nao-contar) e os estilos inline do Astro. WhatsApp, Instagram e Maps são só links.
-# O GA4 (gtag) vem direto do Google: só os domínios do Google
+# O GA4 (gtag) sai de /fx9/ (Google tag gateway da Cloudflare, mesmo domínio); parte dos envios ainda vai direto ao Google: só os domínios do Google
 # Analytics/Signals (googletagmanager.com, google-analytics.com, analytics.google.com, google.com[.br],
 # stats.g.doubleclick.net) entram no script-src, connect-src e img-src (nada mais).
 /*
