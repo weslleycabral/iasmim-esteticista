@@ -78,12 +78,13 @@ async function gravar(req: Request, res: Response, env: Env) {
   const dia = agora.toISOString().slice(0, 10);
   const url = new URL(req.url);
   const ua = req.headers.get('user-agent') ?? '';
-  const { classe, robo } = classificar(ua);
   const cf = req.cf ?? {};
+  const rede = String(cf.asOrganization ?? '');
+  const { classe, robo } = classificar(ua, url.pathname, rede);
   const chave = `${dia}/${agora.getTime()}-${crypto.randomUUID().slice(0, 8)}`;
   await env.ACESSOS.prepare(
-    `INSERT INTO acessos (chave, ts, metodo, host, caminho, query, status, referer, ua, idioma, pais, estado, cidade, visitante, classe, robo, equipe)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO acessos (chave, ts, metodo, host, caminho, query, status, referer, ua, idioma, pais, estado, cidade, visitante, classe, robo, equipe, asn, rede)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   )
     .bind(
       chave,
@@ -103,6 +104,8 @@ async function gravar(req: Request, res: Response, env: Env) {
       classe,
       robo,
       /(?:^|;\s*)iasmim-equipe=1(?:;|$)/.test(req.headers.get('cookie') ?? '') ? 1 : 0,
+      Number(cf.asn ?? 0),
+      rede, // provedor (ex.: "Claro S.A.", "Amazon.com, Inc."): separa robô de datacenter de gente
     )
     .run();
 }

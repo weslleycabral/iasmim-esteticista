@@ -13,7 +13,8 @@
     "dev:worker": "wrangler dev",
     "types": "wrangler types worker/worker-configuration.d.ts && tsc -p worker",
     "deploy:preview": "npm run verify && wrangler versions upload",
-    "deploy": "npm run verify && wrangler deploy"
+    "deploy": "npm run verify && wrangler deploy",
+    "reclassificar": "node scripts/reclassificar.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",

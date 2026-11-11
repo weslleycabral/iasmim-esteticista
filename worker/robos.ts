@@ -20,8 +20,19 @@ export const ROBOS: [Classe, string[]][] = [
 // Qualquer outro robô: nome com bot/crawler/spider, ferramentas de linha de comando e navegadores sem tela
 const GENERICO = /[\w.-]*(?:bot|crawler|spider)[\w.-]*|\b(?:curl|wget|python[\w.-]*|headless\w*|go-http-client|okhttp|node-fetch|axios|java|libwww-perl|scrapy)\b/i;
 
-/** Classe e nome do robô a partir do User-Agent ("pessoa" e nome vazio quando não é robô) */
-export function classificar(ua: string): { classe: Classe; robo: string } {
+// Varredura atrás de falhas (WordPress, PHP, .env): o mesmo padrão do relatório (plugin acessos, VARREDURA)
+export const VARREDURA = /wp-|wordpress|xmlrpc|\.php|\.env|\.git|\/admin|\/cgi-bin|\.aspx?$|\.sql|\.bak|\/vendor\/|\/\.well-known\/(?!security)/i;
+
+// User-Agent de navegador falsificado com erro de digitação (scanners copiam uns dos outros)
+const FALSO = /Mozlila|Moblie|Bulid\/|Mozila\/|Mozzila/;
+
+// Redes de datacenter (request.cf.asOrganization): navegador "de verdade" vindo daqui é robô.
+// Fora de propósito: Cloudflare, Akamai e Fastly, que também levam gente de verdade (iCloud Private Relay, WARP).
+const DATACENTER = /amazon|aws|google cloud|google llc|microsoft|azure|digitalocean|ovh|hetzner|linode|oracle|alibaba|tencent|huawei cloud|vultr|choopa|contabo|leaseweb|m247|scaleway|hostinger|datacamp|zenlayer|psychz|hostroyale|kamatera|ionos|godaddy|servers\.com|colocrossing|clouvider|netcup|serverion|hostpapa|locaweb|uol diveo|magalu cloud/i;
+
+/** Classe e nome do robô a partir do User-Agent, do caminho pedido e da rede de origem ("pessoa" e nome vazio
+ *  quando não é robô). Caminho e rede são opcionais: sem eles, só o User-Agent conta (registros antigos). */
+export function classificar(ua: string, caminho = '', rede = ''): { classe: Classe; robo: string } {
   const minusculo = ua.toLowerCase();
   for (const [classe, nomes] of ROBOS) {
     const robo = nomes.find((n) => minusculo.includes(n.toLowerCase()));
@@ -29,5 +40,9 @@ export function classificar(ua: string): { classe: Classe; robo: string } {
   }
   if (!ua.trim()) return { classe: 'outro-robo', robo: '(sem User-Agent)' };
   const m = ua.match(GENERICO);
-  return m ? { classe: 'outro-robo', robo: m[0] } : { classe: 'pessoa', robo: '' };
+  if (m) return { classe: 'outro-robo', robo: m[0] };
+  if (FALSO.test(ua)) return { classe: 'outro-robo', robo: '(navegador falso)' };
+  if (VARREDURA.test(caminho)) return { classe: 'outro-robo', robo: '(varredura)' };
+  if (rede && DATACENTER.test(rede)) return { classe: 'outro-robo', robo: `(datacenter: ${rede})` };
+  return { classe: 'pessoa', robo: '' };
 }
